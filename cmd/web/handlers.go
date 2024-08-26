@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"text/template"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 
 	files := []string{
@@ -19,19 +18,19 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Print(err.Error())
+		app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
 		http.Error(w, "Internal Server Errror", http.StatusInternalServerError)
 		return
 	}
 
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		log.Print(err.Error())
+		app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
 		http.Error(w, "Internal Server Errror", http.StatusInternalServerError)
 	}
 }
 
-func taskView(w http.ResponseWriter, r *http.Request) {
+func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -41,10 +40,10 @@ func taskView(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Display a specific task with ID %d...", id)
 }
 
-func taskCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Display a form for creating a new task..."))
 }
-func taskCreatePost(w http.ResponseWriter, r *http.Request) {
+func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Save a new task..."))
 }
