@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/andres085/task_manager/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
 	logger *slog.Logger
+	tasks  *models.TaskModel
 }
 
 func main() {
@@ -32,6 +34,7 @@ func main() {
 
 	app := &application{
 		logger: logger,
+		tasks:  &models.TaskModel{DB: db},
 	}
 
 	logger.Info("starting server", "addr", *addr)
