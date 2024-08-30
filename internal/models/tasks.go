@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -11,7 +12,7 @@ type Task struct {
 	Content  string
 	Priority string
 	Created  time.Time
-	Finished time.Time
+	Finished *time.Time
 }
 
 type TaskModel struct {
@@ -35,7 +36,20 @@ func (m *TaskModel) Insert(title, content, priority string) (int, error) {
 }
 
 func (m *TaskModel) Get(id int) (Task, error) {
-	return Task{}, nil
+	stmt := `SELECT * FROM tasks WHERE id = ?`
+
+	var t Task
+
+	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Task{}, ErrNoRecord
+		} else {
+			return Task{}, err
+		}
+	}
+
+	return t, nil
 }
 
 func (m *TaskModel) GetAll() ([]Task, error) {
