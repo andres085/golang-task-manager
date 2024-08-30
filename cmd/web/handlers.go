@@ -41,7 +41,17 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Display a form for creating a new task..."))
 }
+
 func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Save a new task..."))
+	title := "Task from the backend"
+	content := "Task from the backend content test asd 123"
+	priority := "LOW"
+
+	id, err := app.tasks.Insert(title, content, priority)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)
 }

@@ -4,7 +4,7 @@ CREATE TABLE tasks (
     content TEXT NOT NULL,
     priority TEXT NOT NULL,
     created DATETIME NOT NULL,
-    finished DATETIME NOT NULL
+    finished DATETIME
 );
 
 CREATE INDEX idx_tasks_created ON tasks(created);

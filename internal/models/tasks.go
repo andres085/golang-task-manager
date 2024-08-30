@@ -18,8 +18,20 @@ type TaskModel struct {
 	DB *sql.DB
 }
 
-func (m *TaskModel) Insert(title, content, priority string, created int) (int, error) {
-	return 0, nil
+func (m *TaskModel) Insert(title, content, priority string) (int, error) {
+	stmt := `INSERT INTO tasks (title, content, priority, created)  VALUES (?, ?, ?, UTC_TIMESTAMP())`
+
+	result, err := m.DB.Exec(stmt, title, content, priority)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
 
 func (m *TaskModel) Get(id int) (Task, error) {
