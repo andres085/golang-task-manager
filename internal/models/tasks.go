@@ -53,7 +53,33 @@ func (m *TaskModel) Get(id int) (Task, error) {
 }
 
 func (m *TaskModel) GetAll() ([]Task, error) {
-	return nil, nil
+	stmt := `SELECT * FROM tasks`
+
+	rows, err := m.DB.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var tasks []Task
+
+	for rows.Next() {
+		var t Task
+
+		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished)
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, t)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
 }
 
 func (m *TaskModel) Update(id int) (Task, error) {

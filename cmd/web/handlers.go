@@ -51,6 +51,18 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%+v", task)
 }
 
+func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
+	tasks, err := app.tasks.GetAll()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	for _, task := range tasks {
+		fmt.Fprintf(w, "%+v\n", task)
+	}
+}
+
 func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Display a form for creating a new task..."))
 }
