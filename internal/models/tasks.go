@@ -12,7 +12,7 @@ type Task struct {
 	Content  string
 	Priority string
 	Created  time.Time
-	Finished *time.Time
+	Finished time.Time
 }
 
 type TaskModel struct {
@@ -20,7 +20,7 @@ type TaskModel struct {
 }
 
 func (m *TaskModel) Insert(title, content, priority string) (int, error) {
-	stmt := `INSERT INTO tasks (title, content, priority, created)  VALUES (?, ?, ?, UTC_TIMESTAMP())`
+	stmt := `INSERT INTO tasks (title, content, priority, created, finished)  VALUES (?, ?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK))`
 
 	result, err := m.DB.Exec(stmt, title, content, priority)
 	if err != nil {
