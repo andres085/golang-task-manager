@@ -1,0 +1,45 @@
+{{define "title"}}Task View{{end}}
+
+{{define "main"}}
+<div class="container mt-5">
+  <!-- Task Title -->
+  <h2>{{.Title}}</h2>
+
+  <!-- Row to Hold Main Content and Sidebar -->
+  <div class="row">
+    <!-- Main Content: Task Content -->
+    <div class="col-md-8 d-flex align-items-stretch">
+      <div class="card mb-3 flex-fill">
+        <div class="card-body">
+          <p class="card-text">{{.Content}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Priority, Dates, and Action Buttons -->
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Priority</h5>
+          {{if eq .Priority "LOW"}}
+          <p class="card-text text-success">
+            Low
+          </p>
+          {{end}}
+
+          <h5 class="card-title">Created</h5>
+          <p class="card-text">{{.Created}}</p>
+
+          <h5 class="card-title">Finished</h5>
+          <p class="card-text">{{.Finished}}</p>
+
+          <div class="d-grid gap-2">
+            <a href="#" class="btn btn-primary">Edit Task</a>
+            <a href="#" class="btn btn-danger">Delete Task</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

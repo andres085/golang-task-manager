@@ -48,18 +48,48 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", task)
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/task_view.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", task)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
 
 func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
+
 	tasks, err := app.tasks.GetAll()
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	for _, task := range tasks {
-		fmt.Fprintf(w, "%+v\n", task)
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/tasks_view.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", tasks)
+
+	if err != nil {
+		app.serverError(w, r, err)
 	}
 }
 
