@@ -22,8 +22,22 @@
         <div class="card-body">
           <h5 class="card-title">Priority</h5>
           {{if eq .Priority "LOW"}}
-          <p class="card-text text-success">
-            Low
+          <p class="card-text">
+            <span class="badge bg-success">
+              Low
+            </span>
+          </p>
+          {{else if eq .Priority "MEDIUM"}}
+          <p class="card-text">
+            <span class="badge bg-warning text-dark">
+              Medium
+            </span>
+          </p>
+          {{else}}
+          <p class="card-text">
+            <span class="badge bg-danger">
+              High
+            </span>
           </p>
           {{end}}
 
