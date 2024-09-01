@@ -35,8 +35,8 @@
           </span>
           {{end}}
         </td>
-        <td>{{.Created}}</td>
-        <td>{{.Finished}}</td>
+        <td>{{humanDate .Created}}</td>
+        <td>{{humanDate .Finished}}</td>
         <td>
           <a href="#" class="btn btn-sm btn-warning">Edit</a>
           <a href="#" class="btn btn-sm btn-danger">Delete</a>

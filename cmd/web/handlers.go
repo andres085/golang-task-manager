@@ -12,7 +12,9 @@ import (
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 
-	app.render(w, r, http.StatusOK, "home.html", templateData{})
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "home.html", data)
 }
 
 func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
@@ -32,9 +34,8 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templateData{
-		Task: task,
-	}
+	data := app.newTemplateData(r)
+	data.Task = task
 
 	app.render(w, r, http.StatusOK, "task_view.html", data)
 }
@@ -47,9 +48,8 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templateData{
-		Tasks: tasks,
-	}
+	data := app.newTemplateData(r)
+	data.Tasks = tasks
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }

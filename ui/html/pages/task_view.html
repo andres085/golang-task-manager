@@ -39,10 +39,10 @@
           {{end}}
 
           <h5 class="card-title">Created</h5>
-          <p class="card-text">{{.Created}}</p>
+          <p class="card-text">{{humanDate .Created}}</p>
 
           <h5 class="card-title">Finished</h5>
-          <p class="card-text">{{.Finished}}</p>
+          <p class="card-text">{{humanDate .Finished}}</p>
 
           <div class="d-grid gap-2">
             <a href="#" class="btn btn-primary">Edit Task</a>
