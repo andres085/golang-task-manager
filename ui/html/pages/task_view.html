@@ -1,9 +1,10 @@
 {{define "title"}}Task View{{end}}
 
 {{define "main"}}
+{{with .Task}}
 <div class="container mt-5">
   <!-- Task Title -->
-  <h2>{{.Task.Title}}</h2>
+  <h2>{{.Title}}</h2>
 
   <!-- Row to Hold Main Content and Sidebar -->
   <div class="row">
@@ -11,7 +12,7 @@
     <div class="col-md-8 d-flex align-items-stretch">
       <div class="card mb-3 flex-fill">
         <div class="card-body">
-          <p class="card-text">{{.Task.Content}}</p>
+          <p class="card-text">{{.Content}}</p>
         </div>
       </div>
     </div>
@@ -21,13 +22,13 @@
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title">Priority</h5>
-          {{if eq .Task.Priority "LOW"}}
+          {{if eq .Priority "LOW"}}
           <p class="card-text">
             <span class="badge bg-success">
               Low
             </span>
           </p>
-          {{else if eq .Task.Priority "MEDIUM"}}
+          {{else if eq .Priority "MEDIUM"}}
           <p class="card-text">
             <span class="badge bg-warning text-dark">
               Medium
@@ -42,10 +43,10 @@
           {{end}}
 
           <h5 class="card-title">Created</h5>
-          <p class="card-text">{{.Task.Created}}</p>
+          <p class="card-text">{{.Created}}</p>
 
           <h5 class="card-title">Finished</h5>
-          <p class="card-text">{{.Task.Finished}}</p>
+          <p class="card-text">{{.Finished}}</p>
 
           <div class="d-grid gap-2">
             <a href="#" class="btn btn-primary">Edit Task</a>
@@ -56,4 +57,5 @@
     </div>
   </div>
 </div>
+{{end}}
 {{end}}

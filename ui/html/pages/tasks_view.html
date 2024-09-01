@@ -3,6 +3,7 @@
 {{define "main"}}
 <div class="container mt-5 flex-grow-1">
   <h2 class="mb-4">Tasks View</h2>
+  {{if .Tasks}}
   <table class="table table-striped">
     <thead>
       <tr>
@@ -17,9 +18,23 @@
     <tbody>
       {{range .Tasks}}
       <tr>
-        <td>{{.Title}}</td>
+        <td><a href="/task/view/{{.ID}}">{{.Title}}</a></td>
         <td>{{.Content}}</td>
-        <td>{{.Priority}}</td>
+        <td>
+          {{if eq .Priority "LOW"}}
+          <span class="badge bg-success">
+            Low
+          </span>
+          {{else if eq .Priority "MEDIUM"}}
+          <span class="badge bg-warning text-dark">
+            Medium
+          </span>
+          {{else}}
+          <span class="badge bg-danger">
+            High
+          </span>
+          {{end}}
+        </td>
         <td>{{.Created}}</td>
         <td>{{.Finished}}</td>
         <td>
@@ -30,5 +45,8 @@
       {{end}}
     </tbody>
   </table>
+  {{else}}
+  <p>No tasks have been added...</p>
+  {{end}}
 </div>
 {{end}}
