@@ -55,7 +55,9 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display a form for creating a new task..."))
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "task_create.html", data)
 }
 
 func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
