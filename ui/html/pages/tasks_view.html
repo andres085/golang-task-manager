@@ -39,7 +39,9 @@
         <td>{{humanDate .Finished}}</td>
         <td>
           <a href="#" class="btn btn-sm btn-warning">Edit</a>
-          <a href="#" class="btn btn-sm btn-danger">Delete</a>
+          <form action="/task/delete/{{.ID}}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger">Delete Task</buttone>
+          </form>
         </td>
       </tr>
       {{end}}

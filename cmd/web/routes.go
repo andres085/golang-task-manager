@@ -13,6 +13,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("GET /task/view/{id}", app.taskView)
 	mux.HandleFunc("GET /task/create", app.taskCreate)
 	mux.HandleFunc("POST /task/create", app.taskCreatePost)
+	mux.HandleFunc("POST /task/delete/{id}", app.taskDelete)
 
 	return mux
 }

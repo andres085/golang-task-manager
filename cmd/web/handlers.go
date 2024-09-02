@@ -71,3 +71,24 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)
 }
+
+func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	row, err := app.tasks.Delete(id)
+	if err != nil || row < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	http.Redirect(w, r, "/task/view", http.StatusSeeOther)
+}

@@ -87,5 +87,18 @@ func (m *TaskModel) Update(id int) (Task, error) {
 }
 
 func (m *TaskModel) Delete(id int) (int, error) {
-	return 0, nil
+	stmt := `DELETE FROM tasks where id = ?`
+
+	result, err := m.DB.Exec(stmt, id)
+	if err != nil {
+		return 0, err
+	}
+
+	var r int64
+	r, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(r), nil
 }
