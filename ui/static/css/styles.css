@@ -1,0 +1,23 @@
+.table td,
+.table th {
+    vertical-align: middle; /* Align content vertically in the middle */
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.table-responsive {
+    max-height: 500px; /* Set maximum height for the table */
+    overflow-y: auto; /* Allow vertical scrolling */
+}
+
+tr {
+    height: 60px; /* Fixed row height */
+}
+
+.btn-group .btn {
+    width: auto; /* Ensure buttons take only necessary width */
+}

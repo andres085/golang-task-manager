@@ -1,6 +1,9 @@
 {{define "title"}}Task View{{end}}
 
 {{define "main"}}
+
+{{template "modal" .}}
+
 {{with .Task}}
 <div class="container mt-5">
   <h2>{{.Title}}</h2>
@@ -45,13 +48,19 @@
           <p class="card-text">{{humanDate .Finished}}</p>
 
           <div class="d-grid gap-2">
-            <a href="#" class="btn btn-primary">Edit Task</a>
-            <a href="#" class="btn btn-danger">Delete Task</a>
+            <a href="#" class="btn btn-primary w-100">Edit Task</a>
+            <form action="/task/delete/{{.ID}}" method="POST" class="delete-task-form">
+              <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal"
+                data-bs-target="#deleteTaskModal" onclick="confirmDelete(this)">
+                Delete Task
+              </button>
+            </form>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<script src="/static/js/modal.js"></script>
 {{end}}
 {{end}}
