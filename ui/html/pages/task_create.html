@@ -7,19 +7,19 @@
     <div class="mb-3">
       <label for="title" class="form-label">Task Title</label>
       {{with .Form.FieldErrors.title}}
-      <div class="text-danger form-text">{{.}}</div>
+      <div class="text-danger fw-bold">{{.}}</div>
       {{end}}
-      <input type="text" class="form-control" id="title" name="title" placeholder="Enter task title"
-        value="{{.Form.Title}}">
+      <input type="text" class="form-control {{if .Form.FieldErrors.title}} is-invalid {{end}}" id="title" name="title"
+        placeholder="Enter task title" value="{{.Form.Title}}">
     </div>
 
     <div class="mb-3">
       <label for="content" class="form-label">Content</label>
       {{with .Form.FieldErrors.content}}
-      <div class="text-danger form-text">{{.}}</div>
+      <div class="text-danger fw-bold">{{.}}</div>
       {{end}}
-      <textarea class="form-control" id="content" name="content" rows="4" placeholder="Enter task content"
-        value="{{.Form.Content}}"></textarea>
+      <textarea class="form-control {{if .Form.FieldErrors.content}} is-invalid {{end}}" id="content" name="content"
+        rows="4" placeholder="Enter task content" value="{{.Form.Content}}"></textarea>
     </div>
 
     <div class="mb-3">
@@ -34,4 +34,5 @@
     <button type="submit" class="btn btn-primary">Create Task</button>
   </form>
 </div>
+<script src="/static/js/validation_removal.js"></script>
 {{end}}
