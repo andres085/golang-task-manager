@@ -61,9 +61,15 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
-	title := "Task from the backend"
-	content := "Task from the backend content test asd 123"
-	priority := "LOW"
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	priority := r.PostForm.Get("priority")
 
 	id, err := app.tasks.Insert(title, content, priority)
 	if err != nil {
