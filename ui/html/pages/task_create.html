@@ -6,21 +6,28 @@
   <form method="POST" action="/task/create">
     <div class="mb-3">
       <label for="title" class="form-label">Task Title</label>
-      <input type="text" class="form-control" id="title" name="title" placeholder="Enter task title" required>
+      {{with .Form.FieldErrors.title}}
+      <div class="text-danger form-text">{{.}}</div>
+      {{end}}
+      <input type="text" class="form-control" id="title" name="title" placeholder="Enter task title"
+        value="{{.Form.Title}}">
     </div>
 
     <div class="mb-3">
       <label for="content" class="form-label">Content</label>
+      {{with .Form.FieldErrors.content}}
+      <div class="text-danger form-text">{{.}}</div>
+      {{end}}
       <textarea class="form-control" id="content" name="content" rows="4" placeholder="Enter task content"
-        required></textarea>
+        value="{{.Form.Content}}"></textarea>
     </div>
 
     <div class="mb-3">
       <label for="priority" class="form-label">Priority</label>
       <select class="form-select" id="priority" name="priority">
-        <option value="LOW" selected>Low</option>
-        <option value="MEDIUM">Medium</option>
-        <option value="HIGH">High</option>
+        <option value="LOW" {{if (eq .Form.Priority "LOW" )}} selected {{end}}>Low</option>
+        <option value="MEDIUM" {{if (eq .Form.Priority "MEDIUM" )}} selected {{end}}>Medium</option>
+        <option value="HIGH" {{if (eq .Form.Priority "HIGH" )}} selected {{end}}>High</option>
       </select>
     </div>
 

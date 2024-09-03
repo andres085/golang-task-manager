@@ -13,6 +13,7 @@ type templateData struct {
 	CurrentYear int
 	Task        models.Task
 	Tasks       []models.Task
+	Form        any
 }
 
 func humanDate(t time.Time) string {
