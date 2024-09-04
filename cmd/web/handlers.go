@@ -56,10 +56,10 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 }
 
 type taskCreateForm struct {
-	Title    string
-	Content  string
-	Priority string
-	validator.Validator
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Priority            string `form:"priority"`
+	validator.Validator `form:"-"`
 }
 
 func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
@@ -73,16 +73,12 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var form taskCreateForm
+
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	}
-
-	form := taskCreateForm{
-		Title:    r.PostForm.Get("title"),
-		Content:  r.PostForm.Get("content"),
-		Priority: r.PostForm.Get("priority"),
 	}
 
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")

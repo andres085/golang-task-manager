@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/andres085/task_manager/internal/models"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -16,6 +17,7 @@ type application struct {
 	logger        *slog.Logger
 	tasks         *models.TaskModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -40,10 +42,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	app := &application{
 		logger:        logger,
 		tasks:         &models.TaskModel{DB: db},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	logger.Info("starting server", "addr", *addr)
