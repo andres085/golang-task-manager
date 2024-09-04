@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
-	"unicode/utf8"
 
 	"github.com/andres085/task_manager/internal/models"
+	"github.com/andres085/task_manager/internal/validator"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -57,10 +56,10 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 }
 
 type taskCreateForm struct {
-	Title       string
-	Content     string
-	Priority    string
-	FieldErrors map[string]string
+	Title    string
+	Content  string
+	Priority string
+	validator.Validator
 }
 
 func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
@@ -81,23 +80,16 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := taskCreateForm{
-		Title:       r.PostForm.Get("title"),
-		Content:     r.PostForm.Get("content"),
-		Priority:    r.PostForm.Get("priority"),
-		FieldErrors: make(map[string]string),
+		Title:    r.PostForm.Get("title"),
+		Content:  r.PostForm.Get("content"),
+		Priority: r.PostForm.Get("priority"),
 	}
 
-	if strings.TrimSpace(form.Title) == "" {
-		form.FieldErrors["title"] = "This field cannot be blank"
-	} else if utf8.RuneCountInString(form.Title) > 100 {
-		form.FieldErrors["title"] = "This field cannot be more than 100 characters long"
-	}
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
 
-	if strings.TrimSpace(form.Content) == "" {
-		form.FieldErrors["content"] = "This field cannot be blank"
-	}
-
-	if len(form.FieldErrors) > 0 {
+	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "task_create.html", data)
