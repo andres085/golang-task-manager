@@ -1,0 +1,66 @@
+{{define "title"}}Task View{{end}}
+
+{{define "main"}}
+
+{{template "modal" .}}
+
+{{with .Task}}
+<div class="container mt-5">
+  <h2>{{.Title}}</h2>
+
+  <div class="row">
+    <div class="col-md-8 d-flex align-items-stretch">
+      <div class="card mb-3 flex-fill">
+        <div class="card-body">
+          <p class="card-text">{{.Content}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Priority</h5>
+          {{if eq .Priority "LOW"}}
+          <p class="card-text">
+            <span class="badge bg-success">
+              Low
+            </span>
+          </p>
+          {{else if eq .Priority "MEDIUM"}}
+          <p class="card-text">
+            <span class="badge bg-warning text-dark">
+              Medium
+            </span>
+          </p>
+          {{else}}
+          <p class="card-text">
+            <span class="badge bg-danger">
+              High
+            </span>
+          </p>
+          {{end}}
+
+          <h5 class="card-title">Created</h5>
+          <p class="card-text">{{humanDate .Created}}</p>
+
+          <h5 class="card-title">Finished</h5>
+          <p class="card-text">{{humanDate .Finished}}</p>
+
+          <div class="d-grid gap-2">
+            <a href="/task/update/{{.ID}}" class="btn btn-primary w-100">Edit Task</a>
+            <form action="/task/delete/{{.ID}}" method="POST" class="delete-task-form">
+              <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal"
+                data-bs-target="#deleteTaskModal" onclick="confirmDelete(this)">
+                Delete Task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/modal.js"></script>
+{{end}}
+{{end}}
