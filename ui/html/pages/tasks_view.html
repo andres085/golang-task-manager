@@ -46,7 +46,7 @@
           <td>{{humanDate .Created}}</td>
           <td>{{humanDate .Finished}}</td>
           <td>
-            <a href="#" class="btn btn-sm btn-warning">Edit</a>
+            <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
             <form action="/task/delete/{{.ID}}" method="POST" style="display:inline;" class="delete-task-form">
               <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
                 data-bs-target="#deleteTaskModal" onclick="confirmDelete(this)">

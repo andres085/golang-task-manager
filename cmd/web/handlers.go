@@ -56,6 +56,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 }
 
 type taskCreateForm struct {
+	ID                  *int
 	Title               string `form:"title"`
 	Content             string `form:"content"`
 	Priority            string `form:"priority"`
@@ -93,6 +94,72 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id, err := app.tasks.Insert(form.Title, form.Content, form.Priority)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)
+}
+
+func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	task, err := app.tasks.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+
+	data.Form = taskCreateForm{
+		ID:       &task.ID,
+		Title:    task.Title,
+		Content:  task.Content,
+		Priority: task.Priority,
+	}
+
+	app.render(w, r, http.StatusOK, "task_update.html", data)
+}
+
+func (app *application) taskUpdatePost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var form taskCreateForm
+
+	err = app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		form.ID = &id
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "task_update.html", data)
+		return
+	}
+
+	err = app.tasks.Update(id, form.Title, form.Content, form.Priority)
 	if err != nil {
 		app.serverError(w, r, err)
 		return

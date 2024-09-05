@@ -1,0 +1,38 @@
+{{define "title"}}Tasks Update{{end}}
+
+{{define "main"}}
+<div class="container mt-5">
+  <h2>Update Task</h2>
+  <form method="POST" action="/task/update/{{.Form.ID}}">
+    <div class="mb-3">
+      <label for="title" class="form-label">Task Title</label>
+      {{with .Form.FieldErrors.title}}
+      <div class="text-danger fw-bold">{{.}}</div>
+      {{end}}
+      <input type="text" class="form-control {{if .Form.FieldErrors.title}} is-invalid {{end}}" id="title" name="title"
+        placeholder="Enter task title" value="{{.Form.Title}}">
+    </div>
+
+    <div class="mb-3">
+      <label for="content" class="form-label">Content</label>
+      {{with .Form.FieldErrors.content}}
+      <div class="text-danger fw-bold">{{.}}</div>
+      {{end}}
+      <textarea class="form-control {{if .Form.FieldErrors.content}} is-invalid {{end}}" id="content" name="content"
+        rows="4" placeholder="Enter task content">{{.Form.Content}}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="priority" class="form-label">Priority</label>
+      <select class="form-select" id="priority" name="priority">
+        <option value="LOW" {{if (eq .Form.Priority "LOW" )}} selected {{end}}>Low</option>
+        <option value="MEDIUM" {{if (eq .Form.Priority "MEDIUM" )}} selected {{end}}>Medium</option>
+        <option value="HIGH" {{if (eq .Form.Priority "HIGH" )}} selected {{end}}>High</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Task</button>
+  </form>
+</div>
+<script src="/static/js/validation_removal.js"></script>
+{{end}}

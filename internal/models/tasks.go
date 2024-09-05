@@ -82,8 +82,15 @@ func (m *TaskModel) GetAll() ([]Task, error) {
 	return tasks, nil
 }
 
-func (m *TaskModel) Update(id int) (Task, error) {
-	return Task{}, nil
+func (m *TaskModel) Update(id int, title, content, priority string) error {
+	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ? where id = ?`
+
+	_, err := m.DB.Exec(stmt, title, content, priority, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *TaskModel) Delete(id int) (int, error) {
