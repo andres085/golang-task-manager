@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/andres085/task_manager/internal/assert"
@@ -124,4 +125,53 @@ func TestTaskCreate(t *testing.T) {
 
 	assert.Equal(t, code, http.StatusOK)
 	assert.StringContains(t, body, wantTitle)
+}
+
+func TestTaskCreatePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		title    string
+		content  string
+		priority string
+		wantCode int
+	}{
+		{
+			name:     "Valid Submission",
+			title:    "Test Task",
+			content:  "Test Content",
+			priority: "LOW",
+			wantCode: http.StatusSeeOther,
+		},
+		{
+			name:     "Invalid Submission without Title",
+			title:    "",
+			content:  "Test Content",
+			priority: "LOW",
+			wantCode: http.StatusUnprocessableEntity,
+		}, {
+			name:     "Invalid Submission without Content",
+			title:    "Test Task",
+			content:  "",
+			priority: "LOW",
+			wantCode: http.StatusUnprocessableEntity,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("title", tt.title)
+			form.Add("content", tt.content)
+			form.Add("priority", tt.priority)
+
+			code, _, _ := ts.postForm(t, "/task/create", form)
+
+			assert.Equal(t, code, tt.wantCode)
+		})
+	}
 }
