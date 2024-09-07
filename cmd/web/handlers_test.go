@@ -19,6 +19,19 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, string(body), "OK")
 }
 
+func TestHomeView(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/")
+	wantTitle := "Welcome to the Task Manager"
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, wantTitle)
+}
+
 func TestTaskView(t *testing.T) {
 	app := newTestApplication(t)
 
