@@ -39,31 +39,31 @@ func TestTaskView(t *testing.T) {
 			wantTitle:   "First Test Task",
 			wantContent: "First Test Task Content",
 		},
-		// {
-		// 	name:     "Non-existent ID",
-		// 	urlPath:  "/task/view/2",
-		// 	wantCode: http.StatusNotFound,
-		// },
-		// {
-		// 	name:     "Negative ID",
-		// 	urlPath:  "/task/view/-1",
-		// 	wantCode: http.StatusNotFound,
-		// },
-		// {
-		// 	name:     "Decimal ID",
-		// 	urlPath:  "/task/view/1.23",
-		// 	wantCode: http.StatusNotFound,
-		// },
-		// {
-		// 	name:     "String ID",
-		// 	urlPath:  "/task/view/foo",
-		// 	wantCode: http.StatusNotFound,
-		// },
-		// {
-		// 	name:     "Empty ID",
-		// 	urlPath:  "/task/view/",
-		// 	wantCode: http.StatusNotFound,
-		// },
+		{
+			name:     "Non-existent ID",
+			urlPath:  "/task/view/2",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Negative ID",
+			urlPath:  "/task/view/-1",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Decimal ID",
+			urlPath:  "/task/view/1.23",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "String ID",
+			urlPath:  "/task/view/foo",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Empty ID",
+			urlPath:  "/task/view/",
+			wantCode: http.StatusNotFound,
+		},
 	}
 
 	for _, tt := range tests {
