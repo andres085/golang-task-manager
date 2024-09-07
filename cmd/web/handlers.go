@@ -189,6 +189,6 @@ func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/task/view", http.StatusSeeOther)
 }
 
-func ping(w http.ResponseWriter, r *http.Request) {
+func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }

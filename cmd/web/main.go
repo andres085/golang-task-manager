@@ -15,7 +15,7 @@ import (
 
 type application struct {
 	logger        *slog.Logger
-	tasks         *models.TaskModel
+	tasks         models.TaskModelInterface
 	templateCache map[string]*template.Template
 	formDecoder   *form.Decoder
 }

@@ -15,6 +15,14 @@ type Task struct {
 	Finished time.Time
 }
 
+type TaskModelInterface interface {
+	Insert(title, content, priority string) (int, error)
+	Get(id int) (Task, error)
+	GetAll() ([]Task, error)
+	Update(id int, title, content, priority string) error
+	Delete(id int) (int, error)
+}
+
 type TaskModel struct {
 	DB *sql.DB
 }
