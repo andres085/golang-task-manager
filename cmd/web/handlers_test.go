@@ -112,3 +112,16 @@ func TestTaskView(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskCreate(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/task/create")
+	wantTitle := "Create New Task"
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, wantTitle)
+}
