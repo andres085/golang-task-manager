@@ -32,6 +32,23 @@ func TestHomeView(t *testing.T) {
 	assert.StringContains(t, body, wantTitle)
 }
 
+func TestTaskViewAll(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/task/view")
+	wantTitle := "Tasks View"
+	firstTestTaskTitle := "First Test Task"
+	secondTestTaskTitle := "Second Test Task"
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, wantTitle)
+	assert.StringContains(t, body, firstTestTaskTitle)
+	assert.StringContains(t, body, secondTestTaskTitle)
+}
+
 func TestTaskView(t *testing.T) {
 	app := newTestApplication(t)
 
