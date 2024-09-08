@@ -55,3 +55,14 @@ func TestUpdateMethod(t *testing.T) {
 
 	assert.Equal(t, updatedTask.Title, newTitle)
 }
+
+func TestDeleteMethod(t *testing.T) {
+	db := newTestDB(t)
+
+	m := TaskModel{db}
+
+	row, err := m.Delete(1)
+
+	assert.Equal(t, row, 1)
+	assert.NilError(t, err)
+}
