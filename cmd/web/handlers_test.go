@@ -240,3 +240,16 @@ func TestTaskUpdatePost(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskDeletePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	form := url.Values{}
+
+	code, _, _ := ts.postForm(t, "/task/delete/1", form)
+
+	assert.Equal(t, code, http.StatusSeeOther)
+}
