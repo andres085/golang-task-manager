@@ -40,3 +40,18 @@ func TestGetAllMethod(t *testing.T) {
 	assert.Equal(t, len(tasks), 3)
 	assert.NilError(t, err)
 }
+
+func TestUpdateMethod(t *testing.T) {
+	db := newTestDB(t)
+
+	m := TaskModel{db}
+
+	newTitle := "Updated Title"
+	err := m.Update(1, newTitle, "Test Task Body", "HIGH")
+
+	assert.NilError(t, err)
+
+	updatedTask, err := m.Get(1)
+
+	assert.Equal(t, updatedTask.Title, newTitle)
+}
