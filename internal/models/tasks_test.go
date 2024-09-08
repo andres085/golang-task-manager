@@ -29,3 +29,14 @@ func TestInsertMethod(t *testing.T) {
 	assert.Equal(t, id, 4)
 	assert.NilError(t, err)
 }
+
+func TestGetAllMethod(t *testing.T) {
+	db := newTestDB(t)
+
+	m := TaskModel{db}
+
+	tasks, err := m.GetAll()
+
+	assert.Equal(t, len(tasks), 3)
+	assert.NilError(t, err)
+}
