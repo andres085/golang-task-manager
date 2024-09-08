@@ -153,7 +153,8 @@ func TestTaskCreatePost(t *testing.T) {
 			content:  "Test Content",
 			priority: "LOW",
 			wantCode: http.StatusUnprocessableEntity,
-		}, {
+		},
+		{
 			name:     "Invalid Submission without Content",
 			title:    "Test Task",
 			content:  "",
@@ -170,6 +171,70 @@ func TestTaskCreatePost(t *testing.T) {
 			form.Add("priority", tt.priority)
 
 			code, _, _ := ts.postForm(t, "/task/create", form)
+
+			assert.Equal(t, code, tt.wantCode)
+		})
+	}
+}
+
+func TestTaskUpdate(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/task/update/1")
+	titleInput := `<input type="text" class="form-control " id="title" name="title"
+        placeholder="Enter task title" value="First Test Task">`
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, titleInput)
+}
+
+func TestTaskUpdatePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name     string
+		title    string
+		content  string
+		priority string
+		wantCode int
+	}{
+		{
+			name:     "Valid Submission",
+			title:    "Test Task",
+			content:  "Test Content",
+			priority: "LOW",
+			wantCode: http.StatusSeeOther,
+		},
+		{
+			name:     "Invalid Submission without Title",
+			title:    "",
+			content:  "Test Content",
+			priority: "LOW",
+			wantCode: http.StatusUnprocessableEntity,
+		},
+		{
+			name:     "Invalid Submission without Content",
+			title:    "Test Task",
+			content:  "",
+			priority: "LOW",
+			wantCode: http.StatusUnprocessableEntity,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("title", tt.title)
+			form.Add("content", tt.content)
+			form.Add("priority", tt.priority)
+
+			code, _, _ := ts.postForm(t, "/task/update/1", form)
 
 			assert.Equal(t, code, tt.wantCode)
 		})
