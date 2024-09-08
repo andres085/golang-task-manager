@@ -1,12 +1,17 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/andres085/task_manager/ui"
+)
 
 func (app *application) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
+
+	mux.HandleFunc("GET /ping", app.ping)
 
 	mux.HandleFunc("GET /{$}", app.home)
 	mux.HandleFunc("GET /task/view", app.taskViewAll)
