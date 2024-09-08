@@ -18,3 +18,14 @@ func TestGetMethod(t *testing.T) {
 	assert.Equal(t, task.ID, taskId)
 	assert.NilError(t, err)
 }
+
+func TestInsertMethod(t *testing.T) {
+	db := newTestDB(t)
+
+	m := TaskModel{db}
+
+	id, err := m.Insert("Test Task", "Test Task Body", "HIGH")
+
+	assert.Equal(t, id, 4)
+	assert.NilError(t, err)
+}
