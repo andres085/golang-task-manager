@@ -22,5 +22,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("POST /task/delete/{id}", app.taskDelete)
 	mux.HandleFunc("POST /task/update/{id}", app.taskUpdatePost)
 
+	mux.HandleFunc("GET /workspace/view", app.workspaceViewAll)
+
 	return mux
 }

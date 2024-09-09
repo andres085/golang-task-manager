@@ -192,3 +192,7 @@ func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
 func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
+
+func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("This is the workspace view all view"))
+}

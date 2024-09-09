@@ -32,3 +32,30 @@ INSERT INTO tasks (title, content, priority, created, finished) VALUES (
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP()
 );
+
+CREATE TABLE workspaces (
+    id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT(255) NOT NULL,
+    created DATETIME NOT NULL
+);
+
+CREATE INDEX idx_workspace_id ON workspaces(id);
+
+INSERT INTO workspaces (title, description, created) VALUES (
+    'First Workspace',
+    'This is the first workspace description',
+    UTC_TIMESTAMP()
+);
+
+INSERT INTO workspaces (title, description, created) VALUES (
+    'Second Workspace',
+    'This is the second workspace description',
+    UTC_TIMESTAMP()
+);
+
+INSERT INTO workspaces (title, description, created) VALUES (
+    'Third Workspace',
+    'This is the third workspace description',
+    UTC_TIMESTAMP()
+);
