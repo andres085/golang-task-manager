@@ -194,5 +194,14 @@ func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("This is the workspace view all view"))
+	workspaces, err := app.workspaces.GetAll()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Workspaces = workspaces
+
+	app.render(w, r, http.StatusOK, "workspaces_view.html", data)
 }

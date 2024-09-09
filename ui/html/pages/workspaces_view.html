@@ -1,0 +1,48 @@
+{{define "title"}}Workspaces View{{end}}
+
+{{define "main"}}
+
+{{template "modal" .}}
+<div class="container mt-5 flex-grow-1">
+  <div class="row mb-3 align-items-center">
+    <div class="col-md-8">
+      <h2>Workspaces View</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="/workspace/create" class="btn btn-primary">Create Workspace</a>
+    </div>
+    {{if .Workspaces}}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Workspace Name</th>
+          <th scope="col" style="width: 50%;">Description</th>
+          <th scope="col">Created Date</th>
+          <th scope="col" class="text-center" style="width: 150px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Workspaces}}
+        <tr style="height: 60px">
+          <td><a href="/workspace/view/{{.ID}}">{{.Title}}</a></td>
+          <td class="text-truncate" style="max-width: 300px;">{{.Description}}</td>
+          <td>{{humanDate .Created}}</td>
+          <td class="text-center" style="width: 150px;">
+            <div class="d-flex justify-content-between gap-0">
+              <a href="/workspace/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
+              <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-task-form">
+                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                  data-bs-target="#deleteTaskModal" onclick="confirmDelete(this)">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p>No workspaces have been added...</p>
+    {{end}}
+  </div>
+  <script src="/static/js/modal.js"></script>
+  {{end}}

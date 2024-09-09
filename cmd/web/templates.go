@@ -15,6 +15,7 @@ type templateData struct {
 	CurrentYear int
 	Task        models.Task
 	Tasks       []models.Task
+	Workspaces  []models.Workspace
 	Form        any
 }
 
