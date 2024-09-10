@@ -14,15 +14,15 @@
   </div>
 
   {{if .Workspaces}}
-  <div class="row g-3"> <!-- Bootstrap grid to create gaps between cards -->
+  <div class="row g-3">
     {{range .Workspaces}}
-    <div class="col-md-6"> <!-- Each workspace takes up half the row on medium screens -->
-      <div class="card h-100"> <!-- Card structure with full height -->
+    <div class="col-md-6">
+      <div class="card h-100">
         <div class="card-body">
-          <h5 class="card-title">{{.Title}}</h5> <!-- Workspace title -->
-          <p class="card-text">{{.Description}}</p> <!-- Workspace description -->
+          <h5 class="card-title"><a href="/workspace/view/{{.ID}}">{{.Title}}</a></h5>
+          <p class="card-text">{{.Description}}</p>
 
-          <div class="d-flex justify-content-end gap-2"> <!-- Buttons aligned to the right -->
+          <div class="d-flex justify-content-end gap-2">
             <a href="/workspace/{{.ID}}/tasks" class="btn btn-sm btn-success">View Tasks</a>
             <a href="/workspace/edit/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
             <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-workspace-form">

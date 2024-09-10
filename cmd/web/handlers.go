@@ -193,6 +193,29 @@ func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	workspace, err := app.workspaces.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Workspace = workspace
+
+	app.render(w, r, http.StatusOK, "workspace_view.html", data)
+}
+
 func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) {
 	workspaces, err := app.workspaces.GetAll()
 	if err != nil {

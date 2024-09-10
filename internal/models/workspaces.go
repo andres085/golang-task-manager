@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -13,11 +14,29 @@ type Workspace struct {
 }
 
 type WorkspaceModelInterface interface {
+	Get(id int) (Workspace, error)
 	GetAll() ([]Workspace, error)
 }
 
 type WorkspaceModel struct {
 	DB *sql.DB
+}
+
+func (m *WorkspaceModel) Get(id int) (Workspace, error) {
+	stmt := `SELECT * FROM workspaces WHERE id = ?`
+
+	var w Workspace
+
+	err := m.DB.QueryRow(stmt, id).Scan(&w.ID, &w.Title, &w.Description, &w.Created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Workspace{}, ErrNoRecord
+		} else {
+			return Workspace{}, err
+		}
+	}
+
+	return w, nil
 }
 
 func (m *WorkspaceModel) GetAll() ([]Workspace, error) {
