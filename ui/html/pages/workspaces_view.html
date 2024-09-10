@@ -4,45 +4,39 @@
 
 {{template "modal" .}}
 <div class="container mt-5 flex-grow-1">
-  <div class="row mb-3 align-items-center">
+  <div class="row mb-4 align-items-center">
     <div class="col-md-8">
       <h2>Workspaces View</h2>
     </div>
     <div class="col-md-4 text-end">
       <a href="/workspace/create" class="btn btn-primary">Create Workspace</a>
     </div>
-    {{if .Workspaces}}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th scope="col">Workspace Name</th>
-          <th scope="col" style="width: 50%;">Description</th>
-          <th scope="col">Created Date</th>
-          <th scope="col" class="text-center" style="width: 150px">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{range .Workspaces}}
-        <tr style="height: 60px">
-          <td><a href="/workspace/view/{{.ID}}">{{.Title}}</a></td>
-          <td class="text-truncate" style="max-width: 300px;">{{.Description}}</td>
-          <td>{{humanDate .Created}}</td>
-          <td class="text-center" style="width: 150px;">
-            <div class="d-flex justify-content-between gap-0">
-              <a href="/workspace/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-              <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-task-form">
-                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                  data-bs-target="#deleteTaskModal" onclick="confirmDelete(this)">Delete</button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
-    {{else}}
-    <p>No workspaces have been added...</p>
+  </div>
+
+  {{if .Workspaces}}
+  <div class="row g-3"> <!-- Bootstrap grid to create gaps between cards -->
+    {{range .Workspaces}}
+    <div class="col-md-6"> <!-- Each workspace takes up half the row on medium screens -->
+      <div class="card h-100"> <!-- Card structure with full height -->
+        <div class="card-body">
+          <h5 class="card-title">{{.Title}}</h5> <!-- Workspace title -->
+          <p class="card-text">{{.Description}}</p> <!-- Workspace description -->
+
+          <div class="d-flex justify-content-end gap-2"> <!-- Buttons aligned to the right -->
+            <a href="/workspace/{{.ID}}/tasks" class="btn btn-sm btn-success">View Tasks</a>
+            <a href="/workspace/edit/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
+            <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-workspace-form">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     {{end}}
   </div>
-  <script src="/static/js/modal.js"></script>
+  {{else}}
+  <p>No workspaces have been added...</p>
   {{end}}
+</div>
+<script src="/static/js/modal.js"></script>
+{{end}}
