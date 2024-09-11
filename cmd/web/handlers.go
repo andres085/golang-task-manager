@@ -103,7 +103,6 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) {
-
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -272,4 +271,69 @@ func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request)
 	data.Workspaces = workspaces
 
 	app.render(w, r, http.StatusOK, "workspaces_view.html", data)
+}
+
+func (app *application) workspaceUpdate(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	workspace, err := app.workspaces.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+
+	data.Form = workspaceCreateForm{
+		ID:          &workspace.ID,
+		Title:       workspace.Title,
+		Description: workspace.Description,
+	}
+
+	app.render(w, r, http.StatusOK, "workspace_update.html", data)
+}
+
+func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var form workspaceCreateForm
+
+	err = app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		form.ID = &id
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "workspace_update.html", data)
+		return
+	}
+
+	err = app.workspaces.Update(id, form.Title, form.Description)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
 }

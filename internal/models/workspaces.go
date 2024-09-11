@@ -17,6 +17,7 @@ type WorkspaceModelInterface interface {
 	Insert(title, description string) (int, error)
 	Get(id int) (Workspace, error)
 	GetAll() ([]Workspace, error)
+	Update(id int, title, description string) error
 }
 
 type WorkspaceModel struct {
@@ -84,4 +85,15 @@ func (m *WorkspaceModel) GetAll() ([]Workspace, error) {
 	}
 
 	return workspaces, nil
+}
+
+func (m *WorkspaceModel) Update(id int, title, description string) error {
+	stmt := `UPDATE workspaces SET title = ?, description = ? where id = ?`
+
+	_, err := m.DB.Exec(stmt, title, description, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
