@@ -18,6 +18,7 @@ type WorkspaceModelInterface interface {
 	Get(id int) (Workspace, error)
 	GetAll() ([]Workspace, error)
 	Update(id int, title, description string) error
+	Delete(id int) (int, error)
 }
 
 type WorkspaceModel struct {
@@ -96,4 +97,21 @@ func (m *WorkspaceModel) Update(id int, title, description string) error {
 	}
 
 	return nil
+}
+
+func (m *WorkspaceModel) Delete(id int) (int, error) {
+	stmt := `DELETE FROM workspaces where id = ?`
+
+	result, err := m.DB.Exec(stmt, id)
+	if err != nil {
+		return 0, err
+	}
+
+	var r int64
+	r, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(r), nil
 }

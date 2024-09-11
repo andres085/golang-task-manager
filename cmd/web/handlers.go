@@ -337,3 +337,24 @@ func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Reque
 
 	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
 }
+
+func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	row, err := app.workspaces.Delete(id)
+	if err != nil || row < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	http.Redirect(w, r, "/workspace/view", http.StatusSeeOther)
+}
