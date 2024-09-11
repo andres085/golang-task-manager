@@ -23,13 +23,10 @@
           <p class="card-text">{{.Description}}</p>
 
           <div class="d-flex justify-content-end gap-2">
-            <!-- View Tasks Button -->
             <a href="/workspace/{{.ID}}/tasks" class="btn btn-sm btn-success">View Tasks</a>
 
-            <!-- Edit Button -->
             <a href="/workspace/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
 
-            <!-- Delete Button Form -->
             <form action="/workspace/delete/{{.ID}}" method="POST" class="d-inline">
               <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
                 data-bs-target="#deleteTaskModal" onclick="confirmDelete(this)">
