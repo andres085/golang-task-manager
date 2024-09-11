@@ -14,12 +14,29 @@ type Workspace struct {
 }
 
 type WorkspaceModelInterface interface {
+	Insert(title, description string) (int, error)
 	Get(id int) (Workspace, error)
 	GetAll() ([]Workspace, error)
 }
 
 type WorkspaceModel struct {
 	DB *sql.DB
+}
+
+func (m *WorkspaceModel) Insert(title, description string) (int, error) {
+	stmt := `INSERT INTO workspaces (title, description,  created)  VALUES (?, ?, UTC_TIMESTAMP())`
+
+	result, err := m.DB.Exec(stmt, title, description)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
 
 func (m *WorkspaceModel) Get(id int) (Workspace, error) {

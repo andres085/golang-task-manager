@@ -24,6 +24,8 @@ func (app *application) routes() *http.ServeMux {
 
 	mux.HandleFunc("GET /workspace/view", app.workspaceViewAll)
 	mux.HandleFunc("GET /workspace/view/{id}", app.workspaceView)
+	mux.HandleFunc("GET /workspace/create", app.workspaceCreate)
+	mux.HandleFunc("POST /workspace/create", app.workspaceCreatePost)
 
 	return mux
 }

@@ -193,6 +193,51 @@ func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+type workspaceCreateForm struct {
+	ID                  *int
+	Title               string `form:"title"`
+	Description         string `form:"description"`
+	validator.Validator `form:"-"`
+}
+
+func (app *application) workspaceCreate(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	data.Form = workspaceCreateForm{}
+
+	app.render(w, r, http.StatusOK, "workspace_create.html", data)
+}
+
+func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Request) {
+	var form workspaceCreateForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "workspace_create.html", data)
+		return
+	}
+
+	id, err := app.workspaces.Insert(form.Title, form.Description)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
+}
+
 func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
