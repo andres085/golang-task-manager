@@ -7,18 +7,19 @@ import (
 )
 
 type Task struct {
-	ID       int
-	Title    string
-	Content  string
-	Priority string
-	Created  time.Time
-	Finished time.Time
+	ID          int
+	Title       string
+	Content     string
+	Priority    string
+	Created     time.Time
+	Finished    time.Time
+	WorkspaceId int
 }
 
 type TaskModelInterface interface {
 	Insert(title, content, priority string) (int, error)
 	Get(id int) (Task, error)
-	GetAll() ([]Task, error)
+	GetAll(workspaceId int) ([]Task, error)
 	Update(id int, title, content, priority string) error
 	Delete(id int) (int, error)
 }
@@ -48,7 +49,7 @@ func (m *TaskModel) Get(id int) (Task, error) {
 
 	var t Task
 
-	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished)
+	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Task{}, ErrNoRecord
@@ -60,10 +61,10 @@ func (m *TaskModel) Get(id int) (Task, error) {
 	return t, nil
 }
 
-func (m *TaskModel) GetAll() ([]Task, error) {
-	stmt := `SELECT * FROM tasks`
+func (m *TaskModel) GetAll(workspaceId int) ([]Task, error) {
+	stmt := `SELECT * FROM tasks where workspace_id = ?`
 
-	rows, err := m.DB.Query(stmt)
+	rows, err := m.DB.Query(stmt, workspaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func (m *TaskModel) GetAll() ([]Task, error) {
 	for rows.Next() {
 		var t Task
 
-		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished)
+		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId)
 		if err != nil {
 			return nil, err
 		}

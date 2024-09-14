@@ -42,8 +42,13 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
 
-	tasks, err := app.tasks.GetAll()
+	tasks, err := app.tasks.GetAll(workspaceId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
