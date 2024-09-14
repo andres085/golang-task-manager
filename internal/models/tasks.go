@@ -17,7 +17,7 @@ type Task struct {
 }
 
 type TaskModelInterface interface {
-	Insert(title, content, priority string) (int, error)
+	Insert(title, content, priority string, workspaceId int) (int, error)
 	Get(id int) (Task, error)
 	GetAll(workspaceId int) ([]Task, error)
 	Update(id int, title, content, priority string) error
@@ -28,10 +28,10 @@ type TaskModel struct {
 	DB *sql.DB
 }
 
-func (m *TaskModel) Insert(title, content, priority string) (int, error) {
-	stmt := `INSERT INTO tasks (title, content, priority, created, finished)  VALUES (?, ?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK))`
+func (m *TaskModel) Insert(title, content, priority string, workspaceId int) (int, error) {
+	stmt := `INSERT INTO tasks (title, content, priority, created, finished, workspace_id)  VALUES (?, ?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK), ?)`
 
-	result, err := m.DB.Exec(stmt, title, content, priority)
+	result, err := m.DB.Exec(stmt, title, content, priority, workspaceId)
 	if err != nil {
 		return 0, err
 	}

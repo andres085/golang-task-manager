@@ -15,7 +15,7 @@ func (app *application) routes() *http.ServeMux {
 
 	mux.HandleFunc("GET /{$}", app.home)
 	mux.HandleFunc("GET /task/view/{id}", app.taskView)
-	mux.HandleFunc("GET /task/create", app.taskCreate)
+	mux.HandleFunc("GET /workspace/{id}/task/create", app.taskCreate)
 	mux.HandleFunc("GET /task/update/{id}", app.taskUpdate)
 	mux.HandleFunc("POST /task/create", app.taskCreatePost)
 	mux.HandleFunc("POST /task/update/{id}", app.taskUpdatePost)

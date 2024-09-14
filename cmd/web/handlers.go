@@ -56,6 +56,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 
 	data := app.newTemplateData(r)
 	data.Tasks = tasks
+	data.Workspace.ID = workspaceId
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }
@@ -65,14 +66,22 @@ type taskCreateForm struct {
 	Title               string `form:"title"`
 	Content             string `form:"content"`
 	Priority            string `form:"priority"`
+	WorkspaceID         int    `form:"workspace_id"`
 	validator.Validator `form:"-"`
 }
 
 func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
 	data := app.newTemplateData(r)
 
 	data.Form = taskCreateForm{
-		Priority: "LOW",
+		Priority:    "LOW",
+		WorkspaceID: workspaceId,
 	}
 
 	app.render(w, r, http.StatusOK, "task_create.html", data)
@@ -98,7 +107,7 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := app.tasks.Insert(form.Title, form.Content, form.Priority)
+	id, err := app.tasks.Insert(form.Title, form.Content, form.Priority, form.WorkspaceID)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
