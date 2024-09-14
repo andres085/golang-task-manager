@@ -1,0 +1,47 @@
+{{define "title"}}Workspaces View{{end}}
+
+{{define "main"}}
+
+{{template "modal" .}}
+<div class="container mt-5 flex-grow-1">
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h2>Workspaces View</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="/workspace/create" class="btn btn-primary">Create Workspace</a>
+    </div>
+  </div>
+
+  {{if .Workspaces}}
+  <div class="row g-3">
+    {{range .Workspaces}}
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title"><a href="/workspace/view/{{.ID}}">{{.Title}}</a></h5>
+          <p class="card-text">{{.Description}}</p>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/workspace/{{.ID}}/tasks" class="btn btn-sm btn-success">View Tasks</a>
+
+            <a href="/workspace/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
+
+            <form action="/workspace/delete/{{.ID}}" method="POST" class="d-inline">
+              <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                data-bs-target="#deleteTaskModal" onclick="confirmDelete(this, 'Workspace')">
+                Delete Workspace
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{end}}
+  </div>
+  {{else}}
+  <p>No workspaces have been added...</p>
+  {{end}}
+</div>
+<script src="/static/js/modal.js"></script>
+{{end}}

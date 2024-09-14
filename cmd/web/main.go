@@ -16,6 +16,7 @@ import (
 type application struct {
 	logger        *slog.Logger
 	tasks         models.TaskModelInterface
+	workspaces    models.WorkspaceModelInterface
 	templateCache map[string]*template.Template
 	formDecoder   *form.Decoder
 }
@@ -47,6 +48,7 @@ func main() {
 	app := &application{
 		logger:        logger,
 		tasks:         &models.TaskModel{DB: db},
+		workspaces:    &models.WorkspaceModel{DB: db},
 		templateCache: templateCache,
 		formDecoder:   formDecoder,
 	}

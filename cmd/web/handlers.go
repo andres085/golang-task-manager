@@ -103,7 +103,6 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) {
-
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -191,4 +190,171 @@ func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
+}
+
+type workspaceCreateForm struct {
+	ID                  *int
+	Title               string `form:"title"`
+	Description         string `form:"description"`
+	validator.Validator `form:"-"`
+}
+
+func (app *application) workspaceCreate(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	data.Form = workspaceCreateForm{}
+
+	app.render(w, r, http.StatusOK, "workspace_create.html", data)
+}
+
+func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Request) {
+	var form workspaceCreateForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "workspace_create.html", data)
+		return
+	}
+
+	id, err := app.workspaces.Insert(form.Title, form.Description)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
+}
+
+func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	workspace, err := app.workspaces.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Workspace = workspace
+
+	app.render(w, r, http.StatusOK, "workspace_view.html", data)
+}
+
+func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) {
+	workspaces, err := app.workspaces.GetAll()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Workspaces = workspaces
+
+	app.render(w, r, http.StatusOK, "workspaces_view.html", data)
+}
+
+func (app *application) workspaceUpdate(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	workspace, err := app.workspaces.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+
+	data.Form = workspaceCreateForm{
+		ID:          &workspace.ID,
+		Title:       workspace.Title,
+		Description: workspace.Description,
+	}
+
+	app.render(w, r, http.StatusOK, "workspace_update.html", data)
+}
+
+func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var form workspaceCreateForm
+
+	err = app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		form.ID = &id
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "workspace_update.html", data)
+		return
+	}
+
+	err = app.workspaces.Update(id, form.Title, form.Description)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
+}
+
+func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	row, err := app.workspaces.Delete(id)
+	if err != nil || row < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	http.Redirect(w, r, "/workspace/view", http.StatusSeeOther)
 }

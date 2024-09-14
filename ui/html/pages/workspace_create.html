@@ -1,0 +1,29 @@
+{{define "title"}}Workspace Create{{end}}
+
+{{define "main"}}
+<div class="container mt-5">
+  <h2>Create New Workspace</h2>
+  <form method="POST" action="/workspace/create">
+    <div class="mb-3">
+      <label for="title" class="form-label">Workspace Title</label>
+      {{with .Form.FieldErrors.title}}
+      <div class="text-danger fw-bold">{{.}}</div>
+      {{end}}
+      <input type="text" class="form-control {{if .Form.FieldErrors.title}} is-invalid {{end}}" id="title" name="title"
+        placeholder="Enter workspace title" value="{{.Form.Title}}">
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      {{with .Form.FieldErrors.description}}
+      <div class="text-danger fw-bold">{{.}}</div>
+      {{end}}
+      <textarea class="form-control {{if .Form.FieldErrors.description}} is-invalid {{end}}" id="description"
+        name="description" rows="4" placeholder="Enter workspace description" value="{{.Form.Description}}"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Workspace</button>
+  </form>
+</div>
+<script src="/static/js/validation_removal.js"></script>
+{{end}}
