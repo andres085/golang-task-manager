@@ -26,7 +26,7 @@ var secondMockTask = models.Task{
 
 type TaskModel struct{}
 
-func (t *TaskModel) Insert(title, content, priority string) (int, error) {
+func (t *TaskModel) Insert(title, content, priority string, id int) (int, error) {
 	return 2, nil
 }
 
@@ -39,7 +39,7 @@ func (t *TaskModel) Get(id int) (models.Task, error) {
 	}
 }
 
-func (m *TaskModel) GetAll() ([]models.Task, error) {
+func (m *TaskModel) GetAll(id int) ([]models.Task, error) {
 	return []models.Task{firstMockTask, secondMockTask}, nil
 }
 

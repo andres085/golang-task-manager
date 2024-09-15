@@ -39,7 +39,7 @@ func TestTaskViewAll(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/task/view")
+	code, _, body := ts.get(t, "/workspace/view/1/tasks")
 	wantTitle := "Tasks View"
 	firstTestTaskTitle := "First Test Task"
 	secondTestTaskTitle := "Second Test Task"
@@ -120,7 +120,7 @@ func TestTaskCreate(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/task/create")
+	code, _, body := ts.get(t, "/workspace/1/task/create")
 	wantTitle := "Create New Task"
 
 	assert.Equal(t, code, http.StatusOK)
