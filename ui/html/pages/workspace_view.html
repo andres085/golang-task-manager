@@ -6,7 +6,14 @@
 
 {{with .Workspace}}
 <div class="container mt-5">
-  <h2>{{.Title}}</h2>
+  <div class="row mb-3">
+    <div class="col-md-8">
+      <h2>{{.Title}}</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="/workspace/view" class="btn btn-secondary">Back to Workspace View</a>
+    </div>
+  </div>
 
   <div class="row">
     <div class="col-md-8 d-flex align-items-stretch">
@@ -23,6 +30,7 @@
           <h5 class="card-title">Created</h5>
           <p class="card-text">{{humanDate .Created}}</p>
           <div class="d-grid gap-2">
+            <a href="/workspace/view/{{.ID}}/tasks" class="btn btn-success w-100">Add Tasks</a>
             <a href="/workspace/update/{{.ID}}" class="btn btn-primary w-100">Edit Workspace</a>
             <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-task-form">
               <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal"
