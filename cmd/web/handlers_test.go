@@ -253,3 +253,20 @@ func TestTaskDeletePost(t *testing.T) {
 
 	assert.Equal(t, code, http.StatusSeeOther)
 }
+
+func TestWorkspaceViewAll(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/workspace/view")
+	wantTitle := "Workspaces View"
+	firstTestTaskTitle := "First Workspace"
+	secondTestTaskTitle := "Second Workspace"
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, wantTitle)
+	assert.StringContains(t, body, firstTestTaskTitle)
+	assert.StringContains(t, body, secondTestTaskTitle)
+}
