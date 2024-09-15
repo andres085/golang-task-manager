@@ -348,3 +348,48 @@ func TestWorkspaceUpdate(t *testing.T) {
 	assert.Equal(t, code, http.StatusOK)
 	assert.StringContains(t, body, titleInput)
 }
+
+func TestWorkspaceUpdatePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name        string
+		title       string
+		description string
+		wantCode    int
+	}{
+		{
+			name:        "Valid Submission",
+			title:       "Test Workspace",
+			description: "Test workspace description",
+			wantCode:    http.StatusSeeOther,
+		},
+		{
+			name:        "Invalid Submission without Title",
+			title:       "",
+			description: "Test workspace description",
+			wantCode:    http.StatusUnprocessableEntity,
+		},
+		{
+			name:        "Invalid Submission without description",
+			title:       "Test Task",
+			description: "",
+			wantCode:    http.StatusUnprocessableEntity,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("title", tt.title)
+			form.Add("description", tt.description)
+
+			code, _, _ := ts.postForm(t, "/workspace/update/1", form)
+
+			assert.Equal(t, code, tt.wantCode)
+		})
+	}
+}
