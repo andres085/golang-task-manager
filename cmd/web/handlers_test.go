@@ -393,3 +393,16 @@ func TestWorkspaceUpdatePost(t *testing.T) {
 		})
 	}
 }
+
+func TestWorkspaceDeletePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	form := url.Values{}
+
+	code, _, _ := ts.postForm(t, "/workspace/delete/1", form)
+
+	assert.Equal(t, code, http.StatusSeeOther)
+}
