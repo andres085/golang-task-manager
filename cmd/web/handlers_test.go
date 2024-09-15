@@ -334,3 +334,17 @@ func TestWorkspaceView(t *testing.T) {
 		})
 	}
 }
+
+func TestWorkspaceUpdate(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/workspace/update/1")
+	titleInput := `<input type="text" class="form-control " id="title" name="title"
+        placeholder="Enter workspace title" value="First Workspace">`
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, titleInput)
+}
