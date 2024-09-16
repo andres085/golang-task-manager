@@ -5,8 +5,8 @@ CREATE TABLE tasks (
     priority TEXT NOT NULL,
     created DATETIME NOT NULL,
     finished DATETIME NOT NULL,
-    workspace_id INT,
-    FOREIGN KEY (workspace_id) REFERENCES workspaces(id)  
+    workspace_id INTEGER NOT NULL,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
 );
 
 CREATE INDEX idx_tasks_created ON tasks(created);
