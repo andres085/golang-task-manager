@@ -24,6 +24,7 @@ func newTestApplication(t *testing.T) *application {
 	return &application{
 		logger:        slog.New(slog.NewTextHandler(io.Discard, nil)),
 		tasks:         &mocks.TaskModel{},
+		workspaces:    &mocks.WorkspaceModel{},
 		templateCache: templateCache,
 		formDecoder:   formDecoder,
 	}

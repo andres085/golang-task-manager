@@ -24,7 +24,7 @@ func TestInsertMethod(t *testing.T) {
 
 	m := TaskModel{db}
 
-	id, err := m.Insert("Test Task", "Test Task Body", "HIGH")
+	id, err := m.Insert("Test Task", "Test Task Body", "HIGH", 1)
 
 	assert.Equal(t, id, 4)
 	assert.NilError(t, err)
@@ -34,8 +34,9 @@ func TestGetAllMethod(t *testing.T) {
 	db := newTestDB(t)
 
 	m := TaskModel{db}
+	id := 1
 
-	tasks, err := m.GetAll()
+	tasks, err := m.GetAll(id)
 
 	assert.Equal(t, len(tasks), 3)
 	assert.NilError(t, err)

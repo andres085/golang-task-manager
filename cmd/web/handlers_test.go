@@ -39,7 +39,7 @@ func TestTaskViewAll(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/task/view")
+	code, _, body := ts.get(t, "/workspace/view/1/tasks")
 	wantTitle := "Tasks View"
 	firstTestTaskTitle := "First Test Task"
 	secondTestTaskTitle := "Second Test Task"
@@ -120,7 +120,7 @@ func TestTaskCreate(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/task/create")
+	code, _, body := ts.get(t, "/workspace/1/task/create")
 	wantTitle := "Create New Task"
 
 	assert.Equal(t, code, http.StatusOK)
@@ -250,6 +250,159 @@ func TestTaskDeletePost(t *testing.T) {
 	form := url.Values{}
 
 	code, _, _ := ts.postForm(t, "/task/delete/1", form)
+
+	assert.Equal(t, code, http.StatusSeeOther)
+}
+
+func TestWorkspaceViewAll(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/workspace/view")
+	wantTitle := "Workspaces View"
+	firstTestTaskTitle := "First Workspace"
+	secondTestTaskTitle := "Second Workspace"
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, wantTitle)
+	assert.StringContains(t, body, firstTestTaskTitle)
+	assert.StringContains(t, body, secondTestTaskTitle)
+}
+
+func TestWorkspaceView(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name            string
+		urlPath         string
+		wantCode        int
+		wantTitle       string
+		wantDescription string
+	}{
+		{
+			name:            "Valid ID",
+			urlPath:         "/workspace/view/1",
+			wantCode:        http.StatusOK,
+			wantTitle:       "First Workspace",
+			wantDescription: "First workspace Description",
+		},
+		{
+			name:     "Non-existent ID",
+			urlPath:  "/workspace/view/3",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Negative ID",
+			urlPath:  "/workspace/view/-1",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Decimal ID",
+			urlPath:  "/workspace/view/1.23",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "String ID",
+			urlPath:  "/workspace/view/foo",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Empty ID",
+			urlPath:  "/workspace/view/",
+			wantCode: http.StatusNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			code, _, body := ts.get(t, tt.urlPath)
+
+			assert.Equal(t, code, tt.wantCode)
+
+			if tt.wantTitle != "" {
+				assert.StringContains(t, body, tt.wantTitle)
+			}
+
+			if tt.wantDescription != "" {
+				assert.StringContains(t, body, tt.wantDescription)
+			}
+		})
+	}
+}
+
+func TestWorkspaceUpdate(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/workspace/update/1")
+	titleInput := `<input type="text" class="form-control " id="title" name="title"
+        placeholder="Enter workspace title" value="First Workspace">`
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, titleInput)
+}
+
+func TestWorkspaceUpdatePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name        string
+		title       string
+		description string
+		wantCode    int
+	}{
+		{
+			name:        "Valid Submission",
+			title:       "Test Workspace",
+			description: "Test workspace description",
+			wantCode:    http.StatusSeeOther,
+		},
+		{
+			name:        "Invalid Submission without Title",
+			title:       "",
+			description: "Test workspace description",
+			wantCode:    http.StatusUnprocessableEntity,
+		},
+		{
+			name:        "Invalid Submission without description",
+			title:       "Test Task",
+			description: "",
+			wantCode:    http.StatusUnprocessableEntity,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("title", tt.title)
+			form.Add("description", tt.description)
+
+			code, _, _ := ts.postForm(t, "/workspace/update/1", form)
+
+			assert.Equal(t, code, tt.wantCode)
+		})
+	}
+}
+
+func TestWorkspaceDeletePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	form := url.Values{}
+
+	code, _, _ := ts.postForm(t, "/workspace/delete/1", form)
 
 	assert.Equal(t, code, http.StatusSeeOther)
 }
