@@ -33,10 +33,9 @@
             <a href="/workspace/view/{{.ID}}/tasks" class="btn btn-success w-100">Add Tasks</a>
             <a href="/workspace/update/{{.ID}}" class="btn btn-primary w-100">Edit Workspace</a>
             <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-task-form">
-              <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal"
-                data-bs-target="#deleteTaskModal" onclick="confirmDelete(this, 'Workspace')">
-                Delete Workspace
-              </button>
+
+              <button type="button" class="btn btn-danger w-100 delete-btn" data-bs-toggle="modal"
+                data-bs-target="#deleteModal" data-entity="Workspace">Delete Workspace</button>
             </form>
           </div>
         </div>

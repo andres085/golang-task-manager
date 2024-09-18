@@ -28,10 +28,8 @@
             <a href="/workspace/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
 
             <form action="/workspace/delete/{{.ID}}" method="POST" class="d-inline">
-              <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                data-bs-target="#deleteTaskModal" onclick="confirmDelete(this, 'Workspace')">
-                Delete Workspace
-              </button>
+              <button type="button" class="btn btn-danger w-100 delete-btn" data-bs-toggle="modal"
+                data-bs-target="#deleteModal" data-entity="Workspace">Delete Workspace</button>
             </form>
           </div>
         </div>

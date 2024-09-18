@@ -18,6 +18,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /task/view/{id}", dynamic.ThenFunc(app.taskView))
 	mux.Handle("GET /task/update/{id}", dynamic.ThenFunc(app.taskUpdate))
+	mux.Handle("GET /workspace/{id}/task/create", dynamic.ThenFunc(app.taskCreate))
 	mux.Handle("POST /task/create", dynamic.ThenFunc(app.taskCreatePost))
 	mux.Handle("POST /task/update/{id}", dynamic.ThenFunc(app.taskUpdatePost))
 	mux.Handle("POST /workspace/{workspaceId}/task/delete/{id}", dynamic.ThenFunc(app.taskDelete))
@@ -27,12 +28,11 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /workspace/view/{id}/tasks", dynamic.ThenFunc(app.taskViewAll))
 	mux.Handle("GET /workspace/create", dynamic.ThenFunc(app.workspaceCreate))
 	mux.Handle("GET /workspace/update/{id}", dynamic.ThenFunc(app.workspaceUpdate))
-	mux.Handle("GET /workspace/{id}/task/create", dynamic.ThenFunc(app.taskCreate))
 	mux.Handle("POST /workspace/create", dynamic.ThenFunc(app.workspaceCreatePost))
 	mux.Handle("POST /workspace/update/{id}", dynamic.ThenFunc(app.workspaceUpdatePost))
 	mux.Handle("POST /workspace/delete/{id}", dynamic.ThenFunc(app.workspaceDelete))
 
-	standard := alice.New(app.recoverPanic, app.logRequest)
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 
 	return standard.Then(mux)
 }
