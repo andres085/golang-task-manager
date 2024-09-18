@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/andres085/task_manager/ui"
+	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
@@ -30,5 +31,7 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("POST /workspace/update/{id}", app.workspaceUpdatePost)
 	mux.HandleFunc("POST /workspace/delete/{id}", app.workspaceDelete)
 
-	return app.recoverPanic(app.logRequest(commonHeaders(mux)))
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
+
+	return standard.Then(mux)
 }
