@@ -65,3 +65,11 @@ INSERT INTO tasks (title, content, priority, created, finished, workspace_id) VA
     UTC_TIMESTAMP()
     1
 );
+
+CREATE TABLE sessions (
+    token CHAR(43) PRIMARY KEY,
+    data BLOB NOT NULL,
+    expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions (expiry);

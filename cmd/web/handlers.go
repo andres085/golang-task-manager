@@ -33,8 +33,12 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	data := app.newTemplateData(r)
 	data.Task = task
+
+	data.Flash = flash
 
 	app.render(w, r, http.StatusOK, "task_view.html", data)
 }
@@ -110,6 +114,8 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Task successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)
 }
