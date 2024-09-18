@@ -48,7 +48,7 @@
           <td class="text-center" style="width: 150px;">
             <div class="d-flex justify-content-between gap-0">
               <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-              <form action="/task/delete/{{.ID}}" method="POST" class="delete-task-form">
+              <form action="/workspace/{{.WorkspaceId}}/task/delete/{{.ID}}" method="POST" class="delete-task-form">
                 <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
                   data-bs-target="#deleteTaskModal" onclick="confirmDelete(this, 'Task')">Delete</button>
               </form>
