@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/andres085/task_manager/ui"
+	"github.com/justinas/alice"
 )
 
-func (app *application) routes() *http.ServeMux {
+func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
@@ -30,5 +31,7 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("POST /workspace/update/{id}", app.workspaceUpdatePost)
 	mux.HandleFunc("POST /workspace/delete/{id}", app.workspaceDelete)
 
-	return mux
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
+
+	return standard.Then(mux)
 }
