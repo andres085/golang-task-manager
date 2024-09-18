@@ -30,5 +30,5 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("POST /workspace/update/{id}", app.workspaceUpdatePost)
 	mux.HandleFunc("POST /workspace/delete/{id}", app.workspaceDelete)
 
-	return commonHeaders(mux)
+	return app.logRequest(commonHeaders(mux))
 }
