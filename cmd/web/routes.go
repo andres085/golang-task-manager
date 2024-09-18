@@ -6,7 +6,7 @@ import (
 	"github.com/andres085/task_manager/ui"
 )
 
-func (app *application) routes() *http.ServeMux {
+func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
@@ -30,5 +30,5 @@ func (app *application) routes() *http.ServeMux {
 	mux.HandleFunc("POST /workspace/update/{id}", app.workspaceUpdatePost)
 	mux.HandleFunc("POST /workspace/delete/{id}", app.workspaceDelete)
 
-	return mux
+	return commonHeaders(mux)
 }
