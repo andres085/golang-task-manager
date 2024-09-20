@@ -8,7 +8,9 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/andres085/task_manager/internal/models/mocks"
 	"github.com/go-playground/form/v4"
 )
@@ -21,12 +23,16 @@ func newTestApplication(t *testing.T) *application {
 
 	formDecoder := form.NewDecoder()
 
+	sessionManager := scs.New()
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true
 	return &application{
-		logger:        slog.New(slog.NewTextHandler(io.Discard, nil)),
-		tasks:         &mocks.TaskModel{},
-		workspaces:    &mocks.WorkspaceModel{},
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		logger:         slog.New(slog.NewTextHandler(io.Discard, nil)),
+		tasks:          &mocks.TaskModel{},
+		workspaces:     &mocks.WorkspaceModel{},
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
 }
 
