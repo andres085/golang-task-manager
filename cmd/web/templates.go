@@ -18,6 +18,7 @@ type templateData struct {
 	Workspace   models.Workspace
 	Workspaces  []models.Workspace
 	Form        any
+	Flash       string
 }
 
 func humanDate(t time.Time) string {

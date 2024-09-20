@@ -33,8 +33,12 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	data := app.newTemplateData(r)
 	data.Task = task
+
+	data.Flash = flash
 
 	app.render(w, r, http.StatusOK, "task_view.html", data)
 }
@@ -111,6 +115,8 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	app.sessionManager.Put(r.Context(), "flash", "Task successfully created!")
+
 	http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)
 }
 
@@ -185,6 +191,12 @@ func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	workspaceId, err := strconv.Atoi(r.PathValue("workspaceId"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -197,7 +209,7 @@ func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/task/view", http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d/tasks", workspaceId), http.StatusSeeOther)
 }
 
 func (app *application) ping(w http.ResponseWriter, r *http.Request) {
@@ -246,6 +258,8 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	app.sessionManager.Put(r.Context(), "flash", "Workspace successfully created!")
+
 	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
 }
 
@@ -266,8 +280,11 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	data := app.newTemplateData(r)
 	data.Workspace = workspace
+	data.Flash = flash
 
 	app.render(w, r, http.StatusOK, "workspace_view.html", data)
 }

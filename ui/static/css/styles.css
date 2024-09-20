@@ -1,23 +1,40 @@
 .table td,
 .table th {
-    vertical-align: middle; /* Align content vertically in the middle */
+    vertical-align: middle;
 }
 
 .text-truncate {
+    max-width: 300px;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .table-responsive {
-    max-height: 500px; /* Set maximum height for the table */
-    overflow-y: auto; /* Allow vertical scrolling */
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 tr {
-    height: 60px; /* Fixed row height */
+    height: 60px;
 }
 
 .btn-group .btn {
-    width: auto; /* Ensure buttons take only necessary width */
+    width: auto;
 }
+
+.task-table-description {
+    width: 50%;
+}
+
+.task-table-actions {
+    text-align: center;
+    width: 150px;
+}
+
+.task-row {
+    height: 60px;
+}
+
+
+

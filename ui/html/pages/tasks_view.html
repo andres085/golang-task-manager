@@ -16,41 +16,35 @@
       <thead>
         <tr>
           <th scope="col">Task Name</th>
-          <th scope="col" style="width: 50%;">Description</th>
+          <th scope="col" class="task-table-description">Description</th>
           <th scope="col">Status</th>
           <th scope="col">Created Date</th>
           <th scope="col">Due Date</th>
-          <th scope="col" class="text-center" style="width: 150px">Actions</th>
+          <th scope="col" class="task-table-actions">Actions</th>
         </tr>
       </thead>
       <tbody>
         {{range .Tasks}}
-        <tr style="height: 60px">
+        <tr class="task-row">
           <td><a href="/task/view/{{.ID}}">{{.Title}}</a></td>
-          <td class="text-truncate" style="max-width: 300px;">{{.Content}}</td>
+          <td class="text-truncate">{{.Content}}</td>
           <td>
             {{if eq .Priority "LOW"}}
-            <span class="badge bg-success">
-              Low
-            </span>
+            <span class="badge bg-success">Low</span>
             {{else if eq .Priority "MEDIUM"}}
-            <span class="badge bg-warning text-dark">
-              Medium
-            </span>
+            <span class="badge bg-warning text-dark">Medium</span>
             {{else}}
-            <span class="badge bg-danger">
-              High
-            </span>
+            <span class="badge bg-danger">High</span>
             {{end}}
           </td>
           <td>{{humanDate .Created}}</td>
           <td>{{humanDate .Finished}}</td>
-          <td class="text-center" style="width: 150px;">
+          <td class="task-table-actions">
             <div class="d-flex justify-content-between gap-0">
               <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-              <form action="/task/delete/{{.ID}}" method="POST" class="delete-task-form">
-                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                  data-bs-target="#deleteTaskModal" onclick="confirmDelete(this, 'Task')">Delete</button>
+              <form action="/workspace/{{.WorkspaceId}}/task/delete/{{.ID}}" method="POST" class="delete-task-form">
+                <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal"
+                  data-bs-target="#deleteModal" data-entity="Task">Delete</button>
               </form>
             </div>
           </td>
@@ -63,4 +57,5 @@
     {{end}}
   </div>
   <script src="/static/js/modal.js"></script>
-  {{end}}
+</div>
+{{end}}

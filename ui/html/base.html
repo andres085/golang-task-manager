@@ -11,8 +11,23 @@
 
 <body class="d-flex flex-column min-vh-100">
   {{template "nav" .}}
-  <main>
-    {{template "main" .}}
+  <main class="flex-grow-1">
+    <div class="container mt-3">
+      {{with .Flash}}
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-success text-center" role="alert">
+            {{.}}
+          </div>
+        </div>
+      </div>
+      {{end}}
+      <div class="row">
+        <div class="col-12">
+          {{template "main" .}}
+        </div>
+      </div>
+    </div>
   </main>
   <footer class="bg-light text-center text-muted py-3 mt-auto">
     Powered by <a href="https://golang.org/">Go</a> in {{.CurrentYear}}
