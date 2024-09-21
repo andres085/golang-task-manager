@@ -14,7 +14,8 @@ func (app *application) routes() http.Handler {
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
-	mux.Handle("GET /ping", dynamic.ThenFunc(app.ping))
+	mux.HandleFunc("GET /ping", app.ping)
+
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /task/view/{id}", dynamic.ThenFunc(app.taskView))
 	mux.Handle("GET /task/update/{id}", dynamic.ThenFunc(app.taskUpdate))

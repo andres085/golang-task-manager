@@ -249,7 +249,7 @@ func TestTaskDeletePost(t *testing.T) {
 
 	form := url.Values{}
 
-	code, _, _ := ts.postForm(t, "/task/delete/1", form)
+	code, _, _ := ts.postForm(t, "/workspace/1/task/delete/1", form)
 
 	assert.Equal(t, code, http.StatusSeeOther)
 }
