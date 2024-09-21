@@ -33,6 +33,9 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /workspace/update/{id}", dynamic.ThenFunc(app.workspaceUpdatePost))
 	mux.Handle("POST /workspace/delete/{id}", dynamic.ThenFunc(app.workspaceDelete))
 
+	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.userSignUp))
+	mux.Handle("GET /user/signin", dynamic.ThenFunc(app.userSignIn))
+
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 
 	return standard.Then(mux)

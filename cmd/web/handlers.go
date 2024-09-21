@@ -387,3 +387,15 @@ func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) 
 
 	http.Redirect(w, r, "/workspace/view", http.StatusSeeOther)
 }
+
+func (app *application) userSignUp(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "signup.html", data)
+}
+
+func (app *application) userSignIn(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "signin.html", data)
+}
