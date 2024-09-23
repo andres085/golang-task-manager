@@ -3,7 +3,6 @@ package main
 import (
 	"html/template"
 	"io/fs"
-	"net/http"
 	"path/filepath"
 	"time"
 
@@ -12,14 +11,15 @@ import (
 )
 
 type templateData struct {
-	CurrentYear int
-	Task        models.Task
-	Tasks       []models.Task
-	Workspace   models.Workspace
-	Workspaces  []models.Workspace
-	User        models.User
-	Form        any
-	Flash       string
+	CurrentYear     int
+	Task            models.Task
+	Tasks           []models.Task
+	Workspace       models.Workspace
+	Workspaces      []models.Workspace
+	User            models.User
+	Form            any
+	Flash           string
+	IsAuthenticated bool
 }
 
 func humanDate(t time.Time) string {
@@ -61,10 +61,4 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
-}
-
-func (app *application) newTemplateData(r *http.Request) templateData {
-	return templateData{
-		CurrentYear: time.Now().Year(),
-	}
 }
