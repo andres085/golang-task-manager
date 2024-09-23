@@ -33,12 +33,8 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flash := app.sessionManager.PopString(r.Context(), "flash")
-
 	data := app.newTemplateData(r)
 	data.Task = task
-
-	data.Flash = flash
 
 	app.render(w, r, http.StatusOK, "task_view.html", data)
 }
@@ -280,11 +276,8 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flash := app.sessionManager.PopString(r.Context(), "flash")
-
 	data := app.newTemplateData(r)
 	data.Workspace = workspace
-	data.Flash = flash
 
 	app.render(w, r, http.StatusOK, "workspace_view.html", data)
 }
