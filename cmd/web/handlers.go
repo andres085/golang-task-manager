@@ -394,7 +394,7 @@ func (app *application) userSignUp(w http.ResponseWriter, r *http.Request) {
 
 	data.Form = userCreateForm{}
 
-	app.render(w, r, http.StatusOK, "signup.html", data)
+	app.render(w, r, http.StatusOK, "register.html", data)
 }
 
 func (app *application) userSignUpPost(w http.ResponseWriter, r *http.Request) {
@@ -418,7 +418,7 @@ func (app *application) userSignUpPost(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "signup.html", data)
+		app.render(w, r, http.StatusUnprocessableEntity, "register.html", data)
 		return
 	}
 
@@ -430,7 +430,7 @@ func (app *application) userSignUpPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "User registered successfully!")
 
-	http.Redirect(w, r, "/user/signin", http.StatusSeeOther)
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
 
 type userLoginForm struct {
@@ -443,7 +443,7 @@ func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Form = userLoginForm{}
 
-	app.render(w, r, http.StatusOK, "signin.html", data)
+	app.render(w, r, http.StatusOK, "login.html", data)
 }
 
 func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
@@ -462,7 +462,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "signin.html", data)
+		app.render(w, r, http.StatusUnprocessableEntity, "login.html", data)
 		return
 	}
 
@@ -473,7 +473,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 			data := app.newTemplateData(r)
 			data.Form = form
-			app.render(w, r, http.StatusUnprocessableEntity, "signin.html", data)
+			app.render(w, r, http.StatusUnprocessableEntity, "login.html", data)
 		} else {
 			app.serverError(w, r, err)
 		}

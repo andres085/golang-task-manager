@@ -39,15 +39,27 @@ func TestTaskViewAll(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/workspace/view/1/tasks")
-	wantTitle := "Tasks View"
-	firstTestTaskTitle := "First Test Task"
-	secondTestTaskTitle := "Second Test Task"
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, _ := ts.get(t, "/workspace/view/1/tasks")
 
-	assert.Equal(t, code, http.StatusOK)
-	assert.StringContains(t, body, wantTitle)
-	assert.StringContains(t, body, firstTestTaskTitle)
-	assert.StringContains(t, body, secondTestTaskTitle)
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	t.Run("Authenticated", func(t *testing.T) {
+		ts.loginUser(t)
+
+		code, _, body := ts.get(t, "/workspace/view/1/tasks")
+		wantTitle := "Tasks View"
+		firstTestTaskTitle := "First Test Task"
+		secondTestTaskTitle := "Second Test Task"
+
+		assert.Equal(t, code, http.StatusOK)
+		assert.StringContains(t, body, wantTitle)
+		assert.StringContains(t, body, firstTestTaskTitle)
+		assert.StringContains(t, body, secondTestTaskTitle)
+	})
+
 }
 
 func TestTaskView(t *testing.T) {
@@ -55,6 +67,15 @@ func TestTaskView(t *testing.T) {
 
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
+
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, _ := ts.get(t, "/task/view/1")
+
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	ts.loginUser(t)
 
 	tests := []struct {
 		name        string
@@ -120,11 +141,22 @@ func TestTaskCreate(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/workspace/1/task/create")
-	wantTitle := "Create New Task"
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, _ := ts.get(t, "/workspace/1/task/create")
 
-	assert.Equal(t, code, http.StatusOK)
-	assert.StringContains(t, body, wantTitle)
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	t.Run("Authenticated", func(t *testing.T) {
+		ts.loginUser(t)
+
+		code, _, body := ts.get(t, "/workspace/1/task/create")
+		wantTitle := "Create New Task"
+
+		assert.Equal(t, code, http.StatusOK)
+		assert.StringContains(t, body, wantTitle)
+	})
 }
 
 func TestTaskCreatePost(t *testing.T) {
@@ -132,6 +164,8 @@ func TestTaskCreatePost(t *testing.T) {
 
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
+
+	ts.loginUser(t)
 
 	tests := []struct {
 		name     string
@@ -183,12 +217,23 @@ func TestTaskUpdate(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	code, _, body := ts.get(t, "/task/update/1")
-	titleInput := `<input type="text" class="form-control " id="title" name="title"
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, _ := ts.get(t, "/task/update/1")
+
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	t.Run("Authenticated", func(t *testing.T) {
+		ts.loginUser(t)
+
+		code, _, body := ts.get(t, "/task/update/1")
+		titleInput := `<input type="text" class="form-control " id="title" name="title"
         placeholder="Enter task title" value="First Test Task">`
 
-	assert.Equal(t, code, http.StatusOK)
-	assert.StringContains(t, body, titleInput)
+		assert.Equal(t, code, http.StatusOK)
+		assert.StringContains(t, body, titleInput)
+	})
 }
 
 func TestTaskUpdatePost(t *testing.T) {
@@ -196,6 +241,8 @@ func TestTaskUpdatePost(t *testing.T) {
 
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
+
+	ts.loginUser(t)
 
 	tests := []struct {
 		name     string
@@ -247,6 +294,8 @@ func TestTaskDeletePost(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
+	ts.loginUser(t)
+
 	form := url.Values{}
 
 	code, _, _ := ts.postForm(t, "/workspace/1/task/delete/1", form)
@@ -259,6 +308,8 @@ func TestWorkspaceViewAll(t *testing.T) {
 
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
+
+	ts.loginUser(t)
 
 	code, _, body := ts.get(t, "/workspace/view")
 	wantTitle := "Workspaces View"
@@ -276,6 +327,15 @@ func TestWorkspaceView(t *testing.T) {
 
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
+
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, _ := ts.get(t, "/workspace/view/1")
+
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	ts.loginUser(t)
 
 	tests := []struct {
 		name            string
@@ -341,6 +401,8 @@ func TestWorkspaceUpdate(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
+	ts.loginUser(t)
+
 	code, _, body := ts.get(t, "/workspace/update/1")
 	titleInput := `<input type="text" class="form-control " id="title" name="title"
         placeholder="Enter workspace title" value="First Workspace">`
@@ -354,6 +416,8 @@ func TestWorkspaceUpdatePost(t *testing.T) {
 
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
+
+	ts.loginUser(t)
 
 	tests := []struct {
 		name        string
@@ -400,9 +464,23 @@ func TestWorkspaceDeletePost(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
-	form := url.Values{}
+	t.Run("Unauthenticated", func(t *testing.T) {
+		form := url.Values{}
 
-	code, _, _ := ts.postForm(t, "/workspace/delete/1", form)
+		code, headers, _ := ts.postForm(t, "/workspace/delete/1", form)
 
-	assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	t.Run("Authenticated", func(t *testing.T) {
+		ts.loginUser(t)
+
+		form := url.Values{}
+
+		code, _, _ := ts.postForm(t, "/workspace/delete/1", form)
+
+		assert.Equal(t, code, http.StatusSeeOther)
+	})
+
 }
