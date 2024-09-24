@@ -666,3 +666,15 @@ func TestUserLoginPost(t *testing.T) {
 	}
 
 }
+
+func TestUserLogoutPost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	form := url.Values{}
+	code, _, _ := ts.postForm(t, "/user/logout", form)
+
+	assert.Equal(t, code, http.StatusSeeOther)
+}
