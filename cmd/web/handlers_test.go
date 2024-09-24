@@ -484,3 +484,120 @@ func TestWorkspaceDeletePost(t *testing.T) {
 	})
 
 }
+
+func TestUserRegisterHandler(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	code, _, body := ts.get(t, "/user/register")
+	formTitle := `<h2 class="mb-4 text-center">Register</h2>`
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, formTitle)
+}
+
+func TestUserRegisterPost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	tests := []struct {
+		name      string
+		firstName string
+		lastName  string
+		email     string
+		password  string
+		wantCode  int
+	}{
+		{
+			name:      "Valid Submission",
+			firstName: "Test",
+			lastName:  "McTester",
+			email:     "test@mail.com",
+			password:  "pa$$word",
+			wantCode:  http.StatusSeeOther,
+		},
+		{
+			name:      "Invalid submission without Username",
+			firstName: "",
+			lastName:  "McTester",
+			email:     "test@mail.com",
+			password:  "pa$$word",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid Username",
+			firstName: "TestTestTestTestTestTest",
+			lastName:  "McTester",
+			email:     "test@mail.com",
+			password:  "pa$$word",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid Lastname",
+			firstName: "Test",
+			lastName:  "McTesterMcTesterMcTesterMcTesterMcTesterMcTester",
+			email:     "test@mail.com",
+			password:  "pa$$word",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid submission without LastName",
+			firstName: "TestTestTestTestTestTest",
+			lastName:  "",
+			email:     "test@mail.com",
+			password:  "pa$$word",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid Email",
+			firstName: "Test",
+			lastName:  "McTester",
+			email:     "testmail.com",
+			password:  "pa$$word",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid submission without Email",
+			firstName: "Test",
+			lastName:  "McTester",
+			email:     "",
+			password:  "pa$$word",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid Email",
+			firstName: "Test",
+			lastName:  "McTester",
+			email:     "test@mail.com",
+			password:  "pa$$",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+		{
+			name:      "Invalid submission without Password",
+			firstName: "Test",
+			lastName:  "McTester",
+			email:     "test@mail.com",
+			password:  "",
+			wantCode:  http.StatusUnprocessableEntity,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("firstName", tt.firstName)
+			form.Add("lastName", tt.lastName)
+			form.Add("email", tt.email)
+			form.Add("password", tt.password)
+
+			code, _, _ := ts.postForm(t, "/user/register", form)
+
+			assert.Equal(t, code, tt.wantCode)
+		})
+	}
+
+}
