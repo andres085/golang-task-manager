@@ -1,0 +1,45 @@
+{{define "title"}}User Sign Up{{end}}
+
+{{define "main"}}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h2 class="mb-4 text-center">Register</h2>
+      <form action="/user/register" method="POST">
+        <div class="mb-3">
+          <label for="firstName" class="form-label">First Name</label>
+          {{with .Form.FieldErrors.firstName}}
+          <div class="text-danger fw-bold">{{.}}</div>
+          {{end}}
+          <input type="text" class="form-control" id="firstName" name="firstName">
+        </div>
+        <div class="mb-3">
+          <label for="lastName" class="form-label">Last Name</label>
+          {{with .Form.FieldErrors.lastName}}
+          <div class="text-danger fw-bold">{{.}}</div>
+          {{end}}
+          <input type="text" class="form-control" id="lastName" name="lastName">
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          {{with .Form.FieldErrors.email}}
+          <div class="text-danger fw-bold">{{.}}</div>
+          {{end}}
+          <input type="text" class="form-control" id="email" name="email">
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          {{with .Form.FieldErrors.password}}
+          <div class="text-danger fw-bold">{{.}}</div>
+          {{end}}
+          <input type="password" class="form-control" id="password" name="password">
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{end}}

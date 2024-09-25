@@ -20,6 +20,7 @@ type application struct {
 	logger         *slog.Logger
 	tasks          models.TaskModelInterface
 	workspaces     models.WorkspaceModelInterface
+	users          models.UserModelInterface
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
@@ -57,6 +58,7 @@ func main() {
 		logger:         logger,
 		tasks:          &models.TaskModel{DB: db},
 		workspaces:     &models.WorkspaceModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
