@@ -32,6 +32,20 @@ CREATE TABLE workspaces (
 
 CREATE INDEX idx_workspace_id ON workspaces(id);
 
+CREATE TABLE users_workspaces (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	user_id INT NOT NULL,
+	workspace_id INT NOT NULL,
+	role TEXT NOT NULL,
+	created DATETIME NOT NULL,
+	UNIQUE(user_id, workspace_id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+)
+
+CREATE INDEX idx_user_id ON users_workspaces (user_id);
+CREATE INDEX idx_workspace_id ON users_workspaces (workspace_id);
+
 INSERT INTO workspaces (title, description, created) VALUES (
     'First Workspace',
     'This is the first workspace description',

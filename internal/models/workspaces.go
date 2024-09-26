@@ -14,7 +14,7 @@ type Workspace struct {
 }
 
 type WorkspaceModelInterface interface {
-	Insert(title, description string) (int, error)
+	Insert(title, description string, userId int) (int, error)
 	Get(id int) (Workspace, error)
 	GetAll() ([]Workspace, error)
 	Update(id int, title, description string) error
@@ -25,20 +25,26 @@ type WorkspaceModel struct {
 	DB *sql.DB
 }
 
-func (m *WorkspaceModel) Insert(title, description string) (int, error) {
-	stmt := `INSERT INTO workspaces (title, description,  created)  VALUES (?, ?, UTC_TIMESTAMP())`
+func (m *WorkspaceModel) Insert(title, description string, userId int) (int, error) {
+	stmt := `INSERT INTO workspaces (title, description, created)  VALUES (?, ?, UTC_TIMESTAMP())`
 
 	result, err := m.DB.Exec(stmt, title, description)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := result.LastInsertId()
+	workspaceId, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
 
-	return int(id), nil
+	stmt = `INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (?, ?, ?, UTC_TIMESTAMP)`
+	result, err = m.DB.Exec(stmt, userId, workspaceId, "ADMIN")
+	if err != nil {
+		return 0, err
+	}
+
+	return int(workspaceId), nil
 }
 
 func (m *WorkspaceModel) Get(id int) (Workspace, error) {

@@ -248,7 +248,9 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	id, err := app.workspaces.Insert(form.Title, form.Description)
+	userID := r.Context().Value(userIDContextKey).(int)
+
+	id, err := app.workspaces.Insert(form.Title, form.Description, userID)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
