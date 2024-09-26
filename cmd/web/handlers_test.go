@@ -40,6 +40,7 @@ func TestTaskViewAll(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("Unauthenticated", func(t *testing.T) {
+
 		code, headers, _ := ts.get(t, "/workspace/view/1/tasks")
 
 		assert.Equal(t, code, http.StatusSeeOther)
@@ -59,7 +60,6 @@ func TestTaskViewAll(t *testing.T) {
 		assert.StringContains(t, body, firstTestTaskTitle)
 		assert.StringContains(t, body, secondTestTaskTitle)
 	})
-
 }
 
 func TestTaskView(t *testing.T) {
@@ -167,33 +167,40 @@ func TestTaskCreatePost(t *testing.T) {
 
 	ts.loginUser(t)
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	tests := []struct {
-		name     string
-		title    string
-		content  string
-		priority string
-		wantCode int
+		name      string
+		title     string
+		content   string
+		priority  string
+		csrfToken string
+		wantCode  int
 	}{
 		{
-			name:     "Valid Submission",
-			title:    "Test Task",
-			content:  "Test Content",
-			priority: "LOW",
-			wantCode: http.StatusSeeOther,
+			name:      "Valid Submission",
+			title:     "Test Task",
+			content:   "Test Content",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusSeeOther,
 		},
 		{
-			name:     "Invalid Submission without Title",
-			title:    "",
-			content:  "Test Content",
-			priority: "LOW",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid Submission without Title",
+			title:     "",
+			content:   "Test Content",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
-			name:     "Invalid Submission without Content",
-			title:    "Test Task",
-			content:  "",
-			priority: "LOW",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid Submission without Content",
+			title:     "Test Task",
+			content:   "",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 	}
 
@@ -203,6 +210,7 @@ func TestTaskCreatePost(t *testing.T) {
 			form.Add("title", tt.title)
 			form.Add("content", tt.content)
 			form.Add("priority", tt.priority)
+			form.Add("csrf_token", tt.csrfToken)
 
 			code, _, _ := ts.postForm(t, "/task/create", form)
 
@@ -244,33 +252,40 @@ func TestTaskUpdatePost(t *testing.T) {
 
 	ts.loginUser(t)
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	tests := []struct {
-		name     string
-		title    string
-		content  string
-		priority string
-		wantCode int
+		name      string
+		title     string
+		content   string
+		priority  string
+		csrfToken string
+		wantCode  int
 	}{
 		{
-			name:     "Valid Submission",
-			title:    "Test Task",
-			content:  "Test Content",
-			priority: "LOW",
-			wantCode: http.StatusSeeOther,
+			name:      "Valid Submission",
+			title:     "Test Task",
+			content:   "Test Content",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusSeeOther,
 		},
 		{
-			name:     "Invalid Submission without Title",
-			title:    "",
-			content:  "Test Content",
-			priority: "LOW",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid Submission without Title",
+			title:     "",
+			content:   "Test Content",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
-			name:     "Invalid Submission without Content",
-			title:    "Test Task",
-			content:  "",
-			priority: "LOW",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid Submission without Content",
+			title:     "Test Task",
+			content:   "",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 	}
 
@@ -280,6 +295,7 @@ func TestTaskUpdatePost(t *testing.T) {
 			form.Add("title", tt.title)
 			form.Add("content", tt.content)
 			form.Add("priority", tt.priority)
+			form.Add("csrf_token", tt.csrfToken)
 
 			code, _, _ := ts.postForm(t, "/task/update/1", form)
 
@@ -296,7 +312,11 @@ func TestTaskDeletePost(t *testing.T) {
 
 	ts.loginUser(t)
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	form := url.Values{}
+	form.Add("csrf_token", validCSRFToken)
 
 	code, _, _ := ts.postForm(t, "/workspace/1/task/delete/1", form)
 
@@ -419,28 +439,35 @@ func TestWorkspaceUpdatePost(t *testing.T) {
 
 	ts.loginUser(t)
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	tests := []struct {
 		name        string
 		title       string
 		description string
+		csrfToken   string
 		wantCode    int
 	}{
 		{
 			name:        "Valid Submission",
 			title:       "Test Workspace",
 			description: "Test workspace description",
+			csrfToken:   validCSRFToken,
 			wantCode:    http.StatusSeeOther,
 		},
 		{
 			name:        "Invalid Submission without Title",
 			title:       "",
 			description: "Test workspace description",
+			csrfToken:   validCSRFToken,
 			wantCode:    http.StatusUnprocessableEntity,
 		},
 		{
 			name:        "Invalid Submission without description",
 			title:       "Test Task",
 			description: "",
+			csrfToken:   validCSRFToken,
 			wantCode:    http.StatusUnprocessableEntity,
 		},
 	}
@@ -450,6 +477,7 @@ func TestWorkspaceUpdatePost(t *testing.T) {
 			form := url.Values{}
 			form.Add("title", tt.title)
 			form.Add("description", tt.description)
+			form.Add("csrf_token", tt.csrfToken)
 
 			code, _, _ := ts.postForm(t, "/workspace/update/1", form)
 
@@ -465,7 +493,11 @@ func TestWorkspaceDeletePost(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("Unauthenticated", func(t *testing.T) {
+		_, _, body := ts.get(t, "/user/login")
+		validCSRFToken := extractCSRFToken(t, body)
+
 		form := url.Values{}
+		form.Add("csrf_token", validCSRFToken)
 
 		code, headers, _ := ts.postForm(t, "/workspace/delete/1", form)
 
@@ -476,7 +508,11 @@ func TestWorkspaceDeletePost(t *testing.T) {
 	t.Run("Authenticated", func(t *testing.T) {
 		ts.loginUser(t)
 
+		_, _, body := ts.get(t, "/user/login")
+		validCSRFToken := extractCSRFToken(t, body)
+
 		form := url.Values{}
+		form.Add("csrf_token", validCSRFToken)
 
 		code, _, _ := ts.postForm(t, "/workspace/delete/1", form)
 
@@ -504,12 +540,16 @@ func TestUserRegisterPost(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	tests := []struct {
 		name      string
 		firstName string
 		lastName  string
 		email     string
 		password  string
+		csrfToken string
 		wantCode  int
 	}{
 		{
@@ -518,6 +558,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "test@mail.com",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusSeeOther,
 		},
 		{
@@ -526,6 +567,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "test@mail.com",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -534,6 +576,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "test@mail.com",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -542,6 +585,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTesterMcTesterMcTesterMcTesterMcTesterMcTester",
 			email:     "test@mail.com",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -550,6 +594,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "",
 			email:     "test@mail.com",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -558,6 +603,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "testmail.com",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -566,6 +612,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "",
 			password:  "pa$$word",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -574,6 +621,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "test@mail.com",
 			password:  "pa$$",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
@@ -582,6 +630,7 @@ func TestUserRegisterPost(t *testing.T) {
 			lastName:  "McTester",
 			email:     "test@mail.com",
 			password:  "",
+			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
 	}
@@ -593,6 +642,7 @@ func TestUserRegisterPost(t *testing.T) {
 			form.Add("lastName", tt.lastName)
 			form.Add("email", tt.email)
 			form.Add("password", tt.password)
+			form.Add("csrf_token", tt.csrfToken)
 
 			code, _, _ := ts.postForm(t, "/user/register", form)
 
@@ -621,35 +671,43 @@ func TestUserLoginPost(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	tests := []struct {
-		name     string
-		email    string
-		password string
-		wantCode int
+		name      string
+		email     string
+		password  string
+		csrfToken string
+		wantCode  int
 	}{
 		{
-			name:     "Valid Submission",
-			email:    "alice@example.com",
-			password: "pa$$word",
-			wantCode: http.StatusSeeOther,
+			name:      "Valid Submission",
+			email:     "alice@example.com",
+			password:  "pa$$word",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusSeeOther,
 		},
 		{
-			name:     "Invalid Email",
-			email:    "testmail.com",
-			password: "pa$$word",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid Email",
+			email:     "testmail.com",
+			password:  "pa$$word",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
-			name:     "Invalid submission without Email",
-			email:    "",
-			password: "pa$$word",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid submission without Email",
+			email:     "",
+			password:  "pa$$word",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 		{
-			name:     "Invalid submission without Password",
-			email:    "test@mail.com",
-			password: "",
-			wantCode: http.StatusUnprocessableEntity,
+			name:      "Invalid submission without Password",
+			email:     "test@mail.com",
+			password:  "",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
 		},
 	}
 
@@ -658,6 +716,7 @@ func TestUserLoginPost(t *testing.T) {
 			form := url.Values{}
 			form.Add("email", tt.email)
 			form.Add("password", tt.password)
+			form.Add("csrf_token", tt.csrfToken)
 
 			code, _, _ := ts.postForm(t, "/user/login", form)
 
@@ -673,7 +732,12 @@ func TestUserLogoutPost(t *testing.T) {
 	ts := newTestServer(t, app.routes())
 	defer ts.Close()
 
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
 	form := url.Values{}
+	form.Add("csrf_token", validCSRFToken)
+
 	code, _, _ := ts.postForm(t, "/user/logout", form)
 
 	assert.Equal(t, code, http.StatusSeeOther)

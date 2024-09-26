@@ -4,6 +4,7 @@
 <div class="container mt-5">
   <h2>Create New Workspace</h2>
   <form method="POST" action="/workspace/create">
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
     <div class="mb-3">
       <label for="title" class="form-label">Workspace Title</label>
       {{with .Form.FieldErrors.title}}

@@ -4,6 +4,7 @@
 <div class="container mt-5">
   <h2>Create New Task</h2>
   <form method="POST" action="/task/create">
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
     <div class="mb-3">
       <label for="title" class="form-label">Task Title</label>
       {{with .Form.FieldErrors.title}}
