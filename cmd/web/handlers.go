@@ -285,7 +285,8 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) {
-	workspaces, err := app.workspaces.GetAll()
+	userId := r.Context().Value(userIDContextKey).(int)
+	workspaces, err := app.workspaces.GetAll(userId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return

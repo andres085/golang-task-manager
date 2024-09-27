@@ -16,7 +16,7 @@ type Workspace struct {
 type WorkspaceModelInterface interface {
 	Insert(title, description string, userId int) (int, error)
 	Get(id int) (Workspace, error)
-	GetAll() ([]Workspace, error)
+	GetAll(userId int) ([]Workspace, error)
 	Update(id int, title, description string) error
 	Delete(id int) (int, error)
 }
@@ -64,10 +64,10 @@ func (m *WorkspaceModel) Get(id int) (Workspace, error) {
 	return w, nil
 }
 
-func (m *WorkspaceModel) GetAll() ([]Workspace, error) {
-	stmt := `SELECT * FROM workspaces`
+func (m *WorkspaceModel) GetAll(userId int) ([]Workspace, error) {
+	stmt := `SELECT w.* FROM workspaces as w JOIN users_workspaces as uw ON w.id = uw.workspace_id WHERE uw.user_id = ?`
 
-	rows, err := m.DB.Query(stmt)
+	rows, err := m.DB.Query(stmt, userId)
 	if err != nil {
 		return nil, err
 	}
