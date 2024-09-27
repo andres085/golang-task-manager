@@ -26,6 +26,20 @@ CREATE TABLE workspaces (
 
 CREATE INDEX idx_workspace_id ON workspaces(id);
 
+CREATE TABLE users_workspaces (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	user_id INT NOT NULL,
+	workspace_id INT NOT NULL,
+	role TEXT NOT NULL,
+	created DATETIME NOT NULL,
+	UNIQUE(user_id, workspace_id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_user_id ON users_workspaces (user_id);
+CREATE INDEX idx_workspace_id ON users_workspaces (workspace_id);
+
 INSERT INTO workspaces (title, description, created) VALUES (
     'First Workspace',
     'This is the first workspace description',
@@ -40,8 +54,10 @@ CREATE TABLE tasks (
     created DATETIME NOT NULL,
     finished DATETIME NOT NULL,
     workspace_id INTEGER NOT NULL,
-    FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 );
+
+INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (1, 1, "ADMIN", UTC_TIMESTAMP());
 
 CREATE INDEX idx_tasks_created ON tasks(created);
 

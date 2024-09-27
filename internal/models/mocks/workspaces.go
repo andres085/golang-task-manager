@@ -18,7 +18,7 @@ var secondMockWorkspace = models.Workspace{
 
 type WorkspaceModel struct{}
 
-func (t *WorkspaceModel) Insert(title, description string) (int, error) {
+func (t *WorkspaceModel) Insert(title, description string, userId int) (int, error) {
 	return 2, nil
 }
 
