@@ -106,20 +106,6 @@ func (m *WorkspaceModel) Update(id int, title, description string) error {
 }
 
 func (m *WorkspaceModel) Delete(id int) (int, error) {
-
-	tasksStmt := `SELECT * FROM tasks WHERE workspace_id = ?`
-
-	rows, err := m.DB.Query(tasksStmt, id)
-	if err != nil {
-		return 0, err
-	}
-
-	defer rows.Close()
-
-	if rows.Next() {
-		return m.DeleteWithTransaction(id)
-	}
-
 	stmt := `DELETE FROM workspaces where id = ?`
 
 	result, err := m.DB.Exec(stmt, id)
@@ -134,39 +120,4 @@ func (m *WorkspaceModel) Delete(id int) (int, error) {
 	}
 
 	return int(r), nil
-}
-
-func (m *WorkspaceModel) DeleteWithTransaction(id int) (int, error) {
-	tx, err := m.DB.Begin()
-	if err != nil {
-		return 0, err
-	}
-
-	defer tx.Rollback()
-
-	tasksStmt := `DELETE FROM tasks WHERE workspace_id = ?`
-
-	_, err = tx.Exec(tasksStmt, id)
-	if err != nil {
-		return 0, err
-	}
-
-	stmt := `DELETE FROM workspaces WHERE id = ?`
-
-	result, err := tx.Exec(stmt, id)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(rowsAffected), nil
 }
