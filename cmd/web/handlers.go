@@ -248,9 +248,9 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	userID := r.Context().Value(userIDContextKey).(int)
+	userId := r.Context().Value(userIDContextKey).(int)
 
-	id, err := app.workspaces.Insert(form.Title, form.Description, userID)
+	id, err := app.workspaces.Insert(form.Title, form.Description, userId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -369,13 +369,30 @@ func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
 		http.NotFound(w, r)
 		return
 	}
 
-	row, err := app.workspaces.Delete(id)
+	userId, ok := r.Context().Value(userIDContextKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	exists, err := app.workspaces.ValidateOwnership(userId, workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	if !exists {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	row, err := app.workspaces.Delete(workspaceId)
 	if err != nil || row < 1 {
 		http.NotFound(w, r)
 		return

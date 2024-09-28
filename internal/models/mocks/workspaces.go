@@ -42,3 +42,7 @@ func (m *WorkspaceModel) Update(id int, title, description string) error {
 func (m *WorkspaceModel) Delete(id int) (int, error) {
 	return 1, nil
 }
+
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) {
+	return true, nil
+}
