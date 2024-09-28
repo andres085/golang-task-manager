@@ -4,6 +4,7 @@
 <div class="container mt-5">
   <h2>Update Task</h2>
   <form method="POST" action="/task/update/{{.Form.ID}}">
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
     <div class="mb-3">
       <label for="title" class="form-label">Task Title</label>
       {{with .Form.FieldErrors.title}}

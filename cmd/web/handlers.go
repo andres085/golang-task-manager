@@ -327,8 +327,14 @@ func (app *application) workspaceUpdate(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
+	userId, ok := r.Context().Value(userIDContextKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
 		http.NotFound(w, r)
 		return
 	}
@@ -348,19 +354,30 @@ func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Reque
 
 	if !form.Valid() {
 		data := app.newTemplateData(r)
-		form.ID = &id
+		form.ID = &workspaceId
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "workspace_update.html", data)
 		return
 	}
 
-	err = app.workspaces.Update(id, form.Title, form.Description)
+	isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)
+	if !isOwner {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	err = app.workspaces.Update(workspaceId, form.Title, form.Description)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)
 }
 
 func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) {
@@ -372,23 +389,6 @@ func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) 
 	workspaceId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || workspaceId < 1 {
 		http.NotFound(w, r)
-		return
-	}
-
-	userId, ok := r.Context().Value(userIDContextKey).(int)
-	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	exists, err := app.workspaces.ValidateOwnership(userId, workspaceId)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	if !exists {
-		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
