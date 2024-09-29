@@ -24,7 +24,7 @@ func TestWorkspacesInsertMethod(t *testing.T) {
 
 	m := WorkspaceModel{db}
 
-	id, err := m.Insert("Test Workspace", "Test Workspace Description")
+	id, err := m.Insert("Test Workspace", "Test Workspace Description", 1)
 
 	assert.Equal(t, id, 2)
 	assert.NilError(t, err)
@@ -35,7 +35,7 @@ func TestWorkspacesGetAllMethod(t *testing.T) {
 
 	m := WorkspaceModel{db}
 
-	workspaces, err := m.GetAll()
+	workspaces, err := m.GetAll(1)
 
 	assert.Equal(t, len(workspaces), 1)
 	assert.NilError(t, err)

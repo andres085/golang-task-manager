@@ -14,31 +14,38 @@ type Workspace struct {
 }
 
 type WorkspaceModelInterface interface {
-	Insert(title, description string) (int, error)
+	Insert(title, description string, userId int) (int, error)
 	Get(id int) (Workspace, error)
-	GetAll() ([]Workspace, error)
+	GetAll(userId int) ([]Workspace, error)
 	Update(id int, title, description string) error
 	Delete(id int) (int, error)
+	ValidateOwnership(userId, workspaceId int) (bool, error)
 }
 
 type WorkspaceModel struct {
 	DB *sql.DB
 }
 
-func (m *WorkspaceModel) Insert(title, description string) (int, error) {
-	stmt := `INSERT INTO workspaces (title, description,  created)  VALUES (?, ?, UTC_TIMESTAMP())`
+func (m *WorkspaceModel) Insert(title, description string, userId int) (int, error) {
+	stmt := `INSERT INTO workspaces (title, description, created)  VALUES (?, ?, UTC_TIMESTAMP())`
 
 	result, err := m.DB.Exec(stmt, title, description)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := result.LastInsertId()
+	workspaceId, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
 
-	return int(id), nil
+	stmt = `INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (?, ?, ?, UTC_TIMESTAMP)`
+	result, err = m.DB.Exec(stmt, userId, workspaceId, "ADMIN")
+	if err != nil {
+		return 0, err
+	}
+
+	return int(workspaceId), nil
 }
 
 func (m *WorkspaceModel) Get(id int) (Workspace, error) {
@@ -58,10 +65,10 @@ func (m *WorkspaceModel) Get(id int) (Workspace, error) {
 	return w, nil
 }
 
-func (m *WorkspaceModel) GetAll() ([]Workspace, error) {
-	stmt := `SELECT * FROM workspaces`
+func (m *WorkspaceModel) GetAll(userId int) ([]Workspace, error) {
+	stmt := `SELECT w.* FROM workspaces as w JOIN users_workspaces as uw ON w.id = uw.workspace_id WHERE uw.user_id = ?`
 
-	rows, err := m.DB.Query(stmt)
+	rows, err := m.DB.Query(stmt, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -100,20 +107,6 @@ func (m *WorkspaceModel) Update(id int, title, description string) error {
 }
 
 func (m *WorkspaceModel) Delete(id int) (int, error) {
-
-	tasksStmt := `SELECT * FROM tasks WHERE workspace_id = ?`
-
-	rows, err := m.DB.Query(tasksStmt, id)
-	if err != nil {
-		return 0, err
-	}
-
-	defer rows.Close()
-
-	if rows.Next() {
-		return m.DeleteWithTransaction(id)
-	}
-
 	stmt := `DELETE FROM workspaces where id = ?`
 
 	result, err := m.DB.Exec(stmt, id)
@@ -130,37 +123,11 @@ func (m *WorkspaceModel) Delete(id int) (int, error) {
 	return int(r), nil
 }
 
-func (m *WorkspaceModel) DeleteWithTransaction(id int) (int, error) {
-	tx, err := m.DB.Begin()
-	if err != nil {
-		return 0, err
-	}
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) {
+	var exists bool
 
-	defer tx.Rollback()
+	stmt := "SELECT EXISTS(SELECT true FROM users_workspaces WHERE user_id = ? AND workspace_id = ?)"
 
-	tasksStmt := `DELETE FROM tasks WHERE workspace_id = ?`
-
-	_, err = tx.Exec(tasksStmt, id)
-	if err != nil {
-		return 0, err
-	}
-
-	stmt := `DELETE FROM workspaces WHERE id = ?`
-
-	result, err := tx.Exec(stmt, id)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(rowsAffected), nil
+	err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&exists)
+	return exists, err
 }

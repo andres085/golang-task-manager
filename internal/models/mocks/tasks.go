@@ -50,3 +50,7 @@ func (m *TaskModel) Update(id int, title, content, priority string) error {
 func (m *TaskModel) Delete(id int) (int, error) {
 	return 1, nil
 }
+
+func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) {
+	return true, nil
+}

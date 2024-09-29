@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -22,6 +23,7 @@ type TaskModelInterface interface {
 	GetAll(workspaceId int) ([]Task, error)
 	Update(id int, title, content, priority string) error
 	Delete(id int) (int, error)
+	ValidateOwnership(userId, taskId int) (bool, error)
 }
 
 type TaskModel struct {
@@ -117,4 +119,14 @@ func (m *TaskModel) Delete(id int) (int, error) {
 	}
 
 	return int(r), nil
+}
+
+func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) {
+	var exists bool
+
+	stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ?)"
+
+	fmt.Print(exists)
+	err := m.DB.QueryRow(stmt, taskId, userId).Scan(&exists)
+	return exists, err
 }

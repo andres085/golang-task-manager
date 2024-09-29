@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/justinas/nosurf"
 )
@@ -96,6 +97,62 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			r = r.WithContext(ctx)
 		}
 
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) checkWorkspaceOwnership(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if userId == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		workspaceId, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil || workspaceId < 1 {
+			http.NotFound(w, r)
+			return
+		}
+
+		isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		if !isOwner {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) checkTaskOwnership(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if userId == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		taskId, err := strconv.Atoi(r.PathValue("id"))
+		if err != nil || taskId < 1 {
+			http.NotFound(w, r)
+			return
+		}
+
+		isOwner, err := app.tasks.ValidateOwnership(userId, taskId)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		if !isOwner {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }

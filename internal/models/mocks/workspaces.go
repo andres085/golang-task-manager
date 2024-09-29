@@ -18,7 +18,7 @@ var secondMockWorkspace = models.Workspace{
 
 type WorkspaceModel struct{}
 
-func (t *WorkspaceModel) Insert(title, description string) (int, error) {
+func (t *WorkspaceModel) Insert(title, description string, userId int) (int, error) {
 	return 2, nil
 }
 
@@ -31,7 +31,7 @@ func (t *WorkspaceModel) Get(id int) (models.Workspace, error) {
 	}
 }
 
-func (m *WorkspaceModel) GetAll() ([]models.Workspace, error) {
+func (m *WorkspaceModel) GetAll(userId int) ([]models.Workspace, error) {
 	return []models.Workspace{firstMockWorkspace, secondMockWorkspace}, nil
 }
 
@@ -41,4 +41,8 @@ func (m *WorkspaceModel) Update(id int, title, description string) error {
 
 func (m *WorkspaceModel) Delete(id int) (int, error) {
 	return 1, nil
+}
+
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) {
+	return true, nil
 }
