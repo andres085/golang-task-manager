@@ -5,11 +5,13 @@
 {{template "modal" .}}
 
 {{$csrf := .CSRFToken}}
-{{with .Workspace}}
+{{$workspace := .Workspace}}
+{{$user := .User}}
 <div class="container mt-5">
+  {{with $workspace}}
   <div class="row mb-3">
     <div class="col-md-8">
-      <h2>{{.Title}}</h2>
+      <h2>{{$workspace.Title}}</h2>
     </div>
     <div class="col-md-4 text-end">
       <a href="/workspace/view" class="btn btn-secondary">Back to Workspace View</a>
@@ -20,7 +22,7 @@
     <div class="col-md-8 d-flex align-items-stretch">
       <div class="card mb-3 flex-fill">
         <div class="card-body">
-          <p class="card-text">{{.Description}}</p>
+          <p class="card-text">{{$workspace.Description}}</p>
         </div>
       </div>
     </div>
@@ -29,11 +31,11 @@
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title">Created</h5>
-          <p class="card-text">{{humanDate .Created}}</p>
+          <p class="card-text">{{humanDate $workspace.Created}}</p>
           <div class="d-grid gap-2">
-            <a href="/workspace/view/{{.ID}}/tasks" class="btn btn-success w-100">Add Tasks</a>
-            <a href="/workspace/update/{{.ID}}" class="btn btn-primary w-100">Edit Workspace</a>
-            <form action="/workspace/delete/{{.ID}}" method="POST" class="delete-task-form">
+            <a href="/workspace/view/{{$workspace.ID}}/tasks" class="btn btn-success w-100">Add Tasks</a>
+            <a href="/workspace/update/{{$workspace.ID}}" class="btn btn-primary w-100">Edit Workspace</a>
+            <form action="/workspace/delete/{{$workspace.ID}}" method="POST" class="delete-task-form">
               <input type='hidden' name='csrf_token' value='{{$csrf}}'>
               <button type="button" class="btn btn-danger w-100 delete-btn" data-bs-toggle="modal"
                 data-bs-target="#deleteModal" data-entity="Workspace">Delete Workspace</button>
@@ -42,8 +44,34 @@
         </div>
       </div>
     </div>
+
   </div>
+  {{end}}
+  <div class="row mt-4 mb-4">
+    <div class="col-md-8">
+      <form action="/workspace/view/{{$workspace.ID}}" method="GET" class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search users by email" aria-label="Search"
+          name="email">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+
+  {{if $user}}
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{$user.FirstName}} {{$user.LastName}} - {{$user.Email}}</h5>
+          <form action="/workspace/{{$workspace.ID}}/user/add" method="POST">
+            <input type="hidden" name="userID" value="{{$user.ID}}">
+            <button type="submit" class="btn btn-success">Add to Workspace</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{end}}
 </div>
 <script src="/static/js/modal.js"></script>
-{{end}}
 {{end}}

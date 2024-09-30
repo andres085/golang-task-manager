@@ -16,7 +16,7 @@ type templateData struct {
 	Tasks           []models.Task
 	Workspace       models.Workspace
 	Workspaces      []models.Workspace
-	User            models.User
+	User            *models.User
 	Form            any
 	Flash           string
 	IsAuthenticated bool
