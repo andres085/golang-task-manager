@@ -17,6 +17,10 @@ func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 	return &models.User{}, nil
 }
 
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error {
+	return nil
+}
+
 func (m *UserModel) Authenticate(email, password string) (int, error) {
 	if email == "alice@example.com" && password == "pa$$word" {
 		return 1, nil

@@ -36,6 +36,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
 	mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
 	mux.Handle("POST /workspace/delete/{id}", workspaceOwnership.ThenFunc(app.workspaceDelete))
+	mux.Handle("POST /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUserPost))
 
 	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
 	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))

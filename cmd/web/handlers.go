@@ -396,6 +396,34 @@ func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Reque
 	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)
 }
 
+type addUserForm struct {
+	UserID int `form:"userID"`
+}
+
+func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Request) {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var form addUserForm
+
+	err = app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)
+}
+
 func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

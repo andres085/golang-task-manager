@@ -64,6 +64,7 @@
         <div class="card-body">
           <h5 class="card-title">{{$user.FirstName}} {{$user.LastName}} - {{$user.Email}}</h5>
           <form action="/workspace/{{$workspace.ID}}/user/add" method="POST">
+            <input type='hidden' name='csrf_token' value='{{$csrf}}'>
             <input type="hidden" name="userID" value="{{$user.ID}}">
             <button type="submit" class="btn btn-success">Add to Workspace</button>
           </form>

@@ -24,6 +24,7 @@ type UserModelInterface interface {
 	Authenticate(email, password string) (int, error)
 	Exists(id int) (bool, error)
 	GetByEmail(email string) (*User, error)
+	AddUserToWorkspace(userId, workspaceId int) error
 }
 
 type UserModel struct {
@@ -66,6 +67,17 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 	}
 
 	return &u, nil
+}
+
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error {
+	stmt := `INSERT INTO users_workspaces (user_id, workspace_id, role, created) VALUES (?, ?, "MEMBER", UTC_TIMESTAMP())`
+
+	_, err := m.DB.Exec(stmt, userId, workspaceId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *UserModel) Authenticate(email, password string) (int, error) {
