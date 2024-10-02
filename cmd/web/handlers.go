@@ -404,7 +404,8 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
 		if err != nil {
 			if errors.Is(err, models.ErrNoRecord) {
-				http.NotFound(w, r)
+				app.sessionManager.Put(r.Context(), "flash", "User not found")
+				http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
 			} else {
 				app.serverError(w, r, err)
 			}
