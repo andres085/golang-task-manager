@@ -3,6 +3,23 @@ package mocks
 import "github.com/andres085/task_manager/internal/models"
 
 type UserModel struct{}
+type UserWithRole struct{}
+
+var firstMockUser = models.UserWithRole{
+	ID:        1,
+	FirstName: "Test",
+	LastName:  "McTester",
+	Email:     "testmctesterson@mail.com",
+	Role:      "ADMIN",
+}
+
+var secondMockUser = models.UserWithRole{
+	ID:        2,
+	FirstName: "Pete",
+	LastName:  "Peterson",
+	Email:     "pete@mail.com",
+	Role:      "MEMBER",
+}
 
 func (m *UserModel) Insert(firstName, lastName, email, password string) error {
 	switch email {
@@ -19,6 +36,10 @@ func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 
 func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error {
 	return nil
+}
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]models.UserWithRole, error) {
+	return []models.UserWithRole{firstMockUser, secondMockUser}, nil
 }
 
 func (m *UserModel) Authenticate(email, password string) (int, error) {

@@ -278,24 +278,8 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := r.URL.Query().Get("email")
-	var foundUser *models.User
-
-	if email != "" {
-		foundUser, err = app.users.GetByEmail(email)
-		if err != nil {
-			if errors.Is(err, models.ErrNoRecord) {
-				http.NotFound(w, r)
-			} else {
-				app.serverError(w, r, err)
-			}
-			return
-		}
-	}
-
 	data := app.newTemplateData(r)
 	data.Workspace = workspace
-	data.User = foundUser
 
 	app.render(w, r, http.StatusOK, "workspace_view.html", data)
 }
@@ -394,6 +378,52 @@ func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Reque
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)
+}
+
+func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	workspace, err := app.workspaces.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	email := r.URL.Query().Get("email")
+	var foundUser *models.User
+
+	if email != "" {
+		foundUser, err = app.users.GetByEmail(email)
+		if err != nil {
+			if errors.Is(err, models.ErrNoRecord) {
+				http.NotFound(w, r)
+			} else {
+				app.serverError(w, r, err)
+			}
+			return
+		}
+	}
+
+	workspaceUsers, err := app.users.GetWorkspaceUsers(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Workspace = workspace
+	data.User = foundUser
+	data.WorkspaceUsers = workspaceUsers
+
+	app.render(w, r, http.StatusOK, "workspace_users.html", data)
 }
 
 type addUserForm struct {

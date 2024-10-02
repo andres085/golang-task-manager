@@ -25,6 +25,7 @@ type UserModelInterface interface {
 	Exists(id int) (bool, error)
 	GetByEmail(email string) (*User, error)
 	AddUserToWorkspace(userId, workspaceId int) error
+	GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
 }
 
 type UserModel struct {
@@ -67,6 +68,45 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 	}
 
 	return &u, nil
+}
+
+type UserWithRole struct {
+	ID        int
+	FirstName string
+	LastName  string
+	Email     string
+	Role      string
+}
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error) {
+	stmt := "SELECT u.id, u.firstName, u.lastName, u.email, uw.`role` FROM users u JOIN users_workspaces uw ON u.id = uw.user_id WHERE uw.workspace_id = ?"
+
+	rows, err := m.DB.Query(stmt, workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var users []UserWithRole
+
+	for rows.Next() {
+		var u UserWithRole
+
+		err = rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Role)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+
 }
 
 func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error {
