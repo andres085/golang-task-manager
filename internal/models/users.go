@@ -23,7 +23,7 @@ type UserModelInterface interface {
 	Insert(firstName, lastName, email, password string) error
 	Authenticate(email, password string) (int, error)
 	Exists(id int) (bool, error)
-	GetByEmail(email string) (*User, error)
+	GetUserToInvite(email string, workspaceId int) (*User, error)
 	AddUserToWorkspace(userId, workspaceId int) error
 	GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
 }
@@ -53,12 +53,12 @@ func (m *UserModel) Insert(firstName, lastName, email, password string) error {
 	return nil
 }
 
-func (m *UserModel) GetByEmail(email string) (*User, error) {
-	stmt := "SELECT * FROM users WHERE email = ?"
+func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*User, error) {
+	stmt := "SELECT u.* FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id AND uw.workspace_id = ? WHERE u.email = ? AND uw.workspace_id IS NULL"
 
 	var u User
 
-	err := m.DB.QueryRow(stmt, email).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.HashedPassword, &u.Created)
+	err := m.DB.QueryRow(stmt, workspaceId, email).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.HashedPassword, &u.Created)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &User{}, ErrNoRecord

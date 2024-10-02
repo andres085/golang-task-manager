@@ -401,7 +401,7 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 	var foundUser *models.User
 
 	if email != "" {
-		foundUser, err = app.users.GetByEmail(email)
+		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
 		if err != nil {
 			if errors.Is(err, models.ErrNoRecord) {
 				http.NotFound(w, r)
@@ -445,13 +445,19 @@ func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	userId := r.Context().Value(userIDContextKey).(int)
+	if userId == form.UserID {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
 	err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)
 }
 
 func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) {

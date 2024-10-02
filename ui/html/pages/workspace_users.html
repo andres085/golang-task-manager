@@ -30,7 +30,7 @@
   {{end}}
   <div class="row mt-4 mb-4">
     <div class="col-md-8">
-      <form action="/workspace/view/{{$workspace.ID}}" method="GET" class="d-flex">
+      <form action="/workspace/{{$workspace.ID}}/user/add" method="GET" class="d-flex">
         <input class="form-control me-2" type="search" placeholder="Search users by email" aria-label="Search"
           name="email">
         <button class="btn btn-primary" type="submit">Search</button>
