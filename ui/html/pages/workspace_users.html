@@ -75,10 +75,12 @@
             <td>{{.Email}}</td>
             <td>{{.Role}}</td>
             <td class="text-end">
-              <form action="/workspace/{{$workspace.ID}}/remove-user" method="POST">
-                <input type="hidden" name="userID" value="{{.ID}}">
+              {{if ne .Role "ADMIN"}}
+              <form action="/workspace/{{$workspace.ID}}/user/remove/{{.ID}}" method="POST">
+                <input type='hidden' name='csrf_token' value='{{$csrf}}'>
                 <button type="submit" class="btn btn-danger btn-sm">Remove</button>
               </form>
+              {{end}}
             </td>
           </tr>
           {{end}}

@@ -26,6 +26,7 @@ type UserModelInterface interface {
 	GetUserToInvite(email string, workspaceId int) (*User, error)
 	AddUserToWorkspace(userId, workspaceId int) error
 	GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
+	RemoveUserFromWorkspace(workspaceId, userId int) (int, error)
 }
 
 type UserModel struct {
@@ -79,7 +80,7 @@ type UserWithRole struct {
 }
 
 func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error) {
-	stmt := "SELECT u.id, u.firstName, u.lastName, u.email, uw.`role` FROM users u JOIN users_workspaces uw ON u.id = uw.user_id WHERE uw.workspace_id = ?"
+	stmt := "SELECT u.id, u.firstName, u.lastName, u.email, uw.`role` FROM users u JOIN users_workspaces uw ON u.id = uw.user_id WHERE uw.workspace_id = ? ORDER BY role;"
 
 	rows, err := m.DB.Query(stmt, workspaceId)
 	if err != nil {
@@ -153,4 +154,22 @@ func (m *UserModel) Exists(id int) (bool, error) {
 
 	err := m.DB.QueryRow(stmt, id).Scan(&exists)
 	return exists, err
+}
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) {
+
+	stmt := "DELETE FROM users_workspaces WHERE workspace_id = ? AND user_id = ? AND `role` != 'ADMIN';"
+
+	result, err := m.DB.Exec(stmt, workspaceId, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	var r int64
+	r, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(r), nil
 }

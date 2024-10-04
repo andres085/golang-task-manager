@@ -58,3 +58,7 @@ func (m *UserModel) Exists(id int) (bool, error) {
 		return false, nil
 	}
 }
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) {
+	return 1, nil
+}

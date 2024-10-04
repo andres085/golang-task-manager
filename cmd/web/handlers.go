@@ -404,7 +404,7 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
 		if err != nil {
 			if errors.Is(err, models.ErrNoRecord) {
-				app.sessionManager.Put(r.Context(), "flash", "User not found")
+				app.sessionManager.Put(r.Context(), "flash", "User not found or already added")
 				http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
 			} else {
 				app.serverError(w, r, err)
@@ -455,6 +455,28 @@ func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Requ
 	err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)
+}
+
+func (app *application) workspaceRemoveUserPost(w http.ResponseWriter, r *http.Request) {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	userId, err := strconv.Atoi(r.PathValue("userId"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	row, err := app.users.RemoveUserFromWorkspace(workspaceId, userId)
+	if err != nil || row < 1 {
+		http.NotFound(w, r)
 		return
 	}
 
