@@ -66,21 +66,44 @@ func TestLogRequest(t *testing.T) {
 		logger: logger,
 	}
 
-	ts := newTestServer(t, app.routes())
-	defer ts.Close()
+	rr := httptest.NewRecorder()
 
-	ts.get(t, "/")
-
-	if !spyLogger.Called {
-		t.Fatal("Expected logger to be called")
+	r, err := http.NewRequest(http.MethodGet, "/", nil)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if len(spyLogger.Entries) == 0 {
-		t.Fatal("Expected log entry to be recorded")
-	}
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
 
+	app.logRequest(next).ServeHTTP(rr, r)
+
+	expectedValue := "received request"
 	logEntry := spyLogger.Entries[0]
-	if logEntry.Message != "received request" {
-		t.Errorf("Expected log message to be 'received request', got %s", logEntry.Message)
+
+	assert.Equal(t, spyLogger.Called, true)
+	assert.Equal(t, len(spyLogger.Entries), 1)
+	assert.Equal(t, logEntry.Message, expectedValue)
+}
+
+func panicHandler(w http.ResponseWriter, r *http.Request) {
+	panic("test panic")
+}
+
+func TestRecoverPanic(t *testing.T) {
+	app := newTestApplication(t)
+
+	handler := app.recoverPanic(http.HandlerFunc(panicHandler))
+	req, err := http.NewRequest(http.MethodGet, "/panic", nil)
+	if err != nil {
+		t.Fatal(err)
 	}
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	expectedValue := "close"
+	assert.Equal(t, rr.Header().Get("Connection"), expectedValue)
+	assert.Equal(t, rr.Code, http.StatusInternalServerError)
 }
