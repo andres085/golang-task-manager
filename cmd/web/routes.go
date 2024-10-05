@@ -33,9 +33,12 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /workspace/view/{id}/tasks", workspaceOwnership.ThenFunc(app.taskViewAll))
 	mux.Handle("GET /workspace/create", protected.ThenFunc(app.workspaceCreate))
 	mux.Handle("GET /workspace/update/{id}", workspaceOwnership.ThenFunc(app.workspaceUpdate))
+	mux.Handle("GET /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUser))
 	mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
 	mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
 	mux.Handle("POST /workspace/delete/{id}", workspaceOwnership.ThenFunc(app.workspaceDelete))
+	mux.Handle("POST /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUserPost))
+	mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceOwnership.ThenFunc(app.workspaceRemoveUserPost))
 
 	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
 	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))

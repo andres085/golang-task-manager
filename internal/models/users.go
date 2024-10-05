@@ -23,6 +23,10 @@ type UserModelInterface interface {
 	Insert(firstName, lastName, email, password string) error
 	Authenticate(email, password string) (int, error)
 	Exists(id int) (bool, error)
+	GetUserToInvite(email string, workspaceId int) (*User, error)
+	AddUserToWorkspace(userId, workspaceId int) error
+	GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
+	RemoveUserFromWorkspace(workspaceId, userId int) (int, error)
 }
 
 type UserModel struct {
@@ -47,6 +51,73 @@ func (m *UserModel) Insert(firstName, lastName, email, password string) error {
 		}
 		return err
 	}
+	return nil
+}
+
+func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*User, error) {
+	stmt := "SELECT u.* FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id AND uw.workspace_id = ? WHERE u.email = ? AND uw.workspace_id IS NULL"
+
+	var u User
+
+	err := m.DB.QueryRow(stmt, workspaceId, email).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.HashedPassword, &u.Created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &User{}, ErrNoRecord
+		} else {
+			return &User{}, err
+		}
+	}
+
+	return &u, nil
+}
+
+type UserWithRole struct {
+	ID        int
+	FirstName string
+	LastName  string
+	Email     string
+	Role      string
+}
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error) {
+	stmt := "SELECT u.id, u.firstName, u.lastName, u.email, uw.`role` FROM users u JOIN users_workspaces uw ON u.id = uw.user_id WHERE uw.workspace_id = ? ORDER BY role;"
+
+	rows, err := m.DB.Query(stmt, workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var users []UserWithRole
+
+	for rows.Next() {
+		var u UserWithRole
+
+		err = rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.Role)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+
+}
+
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error {
+	stmt := `INSERT INTO users_workspaces (user_id, workspace_id, role, created) VALUES (?, ?, "MEMBER", UTC_TIMESTAMP())`
+
+	_, err := m.DB.Exec(stmt, userId, workspaceId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -83,4 +154,22 @@ func (m *UserModel) Exists(id int) (bool, error) {
 
 	err := m.DB.QueryRow(stmt, id).Scan(&exists)
 	return exists, err
+}
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) {
+
+	stmt := "DELETE FROM users_workspaces WHERE workspace_id = ? AND user_id = ? AND `role` != 'ADMIN';"
+
+	result, err := m.DB.Exec(stmt, workspaceId, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	var r int64
+	r, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(r), nil
 }

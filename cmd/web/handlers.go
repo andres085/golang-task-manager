@@ -380,6 +380,109 @@ func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Reque
 	http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)
 }
 
+func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	workspace, err := app.workspaces.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	email := r.URL.Query().Get("email")
+	var foundUser *models.User
+
+	if email != "" {
+		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
+		if err != nil {
+			if errors.Is(err, models.ErrNoRecord) {
+				app.sessionManager.Put(r.Context(), "flash", "User not found or already added")
+				http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
+			} else {
+				app.serverError(w, r, err)
+			}
+			return
+		}
+	}
+
+	workspaceUsers, err := app.users.GetWorkspaceUsers(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Workspace = workspace
+	data.User = foundUser
+	data.WorkspaceUsers = workspaceUsers
+
+	app.render(w, r, http.StatusOK, "workspace_users.html", data)
+}
+
+type addUserForm struct {
+	UserID int `form:"userID"`
+}
+
+func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Request) {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var form addUserForm
+
+	err = app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	userId := r.Context().Value(userIDContextKey).(int)
+	if userId == form.UserID {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)
+}
+
+func (app *application) workspaceRemoveUserPost(w http.ResponseWriter, r *http.Request) {
+	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	userId, err := strconv.Atoi(r.PathValue("userId"))
+	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	row, err := app.users.RemoveUserFromWorkspace(workspaceId, userId)
+	if err != nil || row < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)
+}
+
 func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

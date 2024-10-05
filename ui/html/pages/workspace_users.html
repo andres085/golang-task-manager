@@ -1,0 +1,96 @@
+{{define "title"}}Workspace View{{end}}
+
+{{define "main"}}
+
+{{template "modal" .}}
+
+{{$csrf := .CSRFToken}}
+{{$workspace := .Workspace}}
+{{$user := .User}}
+<div class="container mt-5">
+  {{with $workspace}}
+  <div class="row mb-3">
+    <div class="col-md-8">
+      <h2>{{$workspace.Title}}</h2>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="/workspace/view" class="btn btn-secondary">Back to Workspace View</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8 d-flex align-items-stretch">
+      <div class="card mb-3 flex-fill">
+        <div class="card-body">
+          <p class="card-text">{{$workspace.Description}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{end}}
+  <div class="row mt-4 mb-4">
+    <div class="col-md-8">
+      <form action="/workspace/{{$workspace.ID}}/user/add" method="GET" class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search users by email" aria-label="Search"
+          name="email">
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+
+  {{if $user}}
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{$user.FirstName}} {{$user.LastName}} - {{$user.Email}}</h5>
+          <form action="/workspace/{{$workspace.ID}}/user/add" method="POST">
+            <input type='hidden' name='csrf_token' value='{{$csrf}}'>
+            <input type="hidden" name="userID" value="{{$user.ID}}">
+            <button type="submit" class="btn btn-success">Add to Workspace</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{end}}
+
+  <div class="row">
+    <div class="col-md-8">
+      <h4>Users in this Workspace</h4>
+      {{if .WorkspaceUsers}}
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Full Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col" class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .WorkspaceUsers}}
+          <tr>
+            <td>{{.FirstName}} {{.LastName}}</td>
+            <td>{{.Email}}</td>
+            <td>{{.Role}}</td>
+            <td class="text-end">
+              {{if ne .Role "ADMIN"}}
+              <form action="/workspace/{{$workspace.ID}}/user/remove/{{.ID}}" method="POST">
+                <input type='hidden' name='csrf_token' value='{{$csrf}}'>
+                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+              </form>
+              {{end}}
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+      {{else}}
+      <p>No users in this workspace yet.</p>
+      {{end}}
+    </div>
+  </div>
+</div>
+<script src="/static/js/modal.js"></script>
+{{end}}
