@@ -42,7 +42,7 @@ func newTestApplication(t *testing.T) *application {
 	sessionManager.Cookie.Secure = true
 
 	return &application{
-		logger:         slog.New(slog.NewTextHandler(io.Discard, nil)),
+		logger:         slog.New(&mocks.SpyLogger{}),
 		tasks:          &mocks.TaskModel{},
 		workspaces:     &mocks.WorkspaceModel{},
 		users:          &mocks.UserModel{},

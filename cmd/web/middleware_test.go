@@ -3,11 +3,13 @@ package main
 import (
 	"bytes"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/andres085/task_manager/internal/assert"
+	"github.com/andres085/task_manager/internal/models/mocks"
 )
 
 func TestCommonHeaders(t *testing.T) {
@@ -54,4 +56,31 @@ func TestCommonHeaders(t *testing.T) {
 	body = bytes.TrimSpace(body)
 
 	assert.Equal(t, string(body), "OK")
+}
+
+func TestLogRequest(t *testing.T) {
+	spyLogger := &mocks.SpyLogger{}
+	logger := slog.New(spyLogger)
+
+	app := &application{
+		logger: logger,
+	}
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	ts.get(t, "/")
+
+	if !spyLogger.Called {
+		t.Fatal("Expected logger to be called")
+	}
+
+	if len(spyLogger.Entries) == 0 {
+		t.Fatal("Expected log entry to be recorded")
+	}
+
+	logEntry := spyLogger.Entries[0]
+	if logEntry.Message != "received request" {
+		t.Errorf("Expected log message to be 'received request', got %s", logEntry.Message)
+	}
 }
