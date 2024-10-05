@@ -521,6 +521,73 @@ func TestWorkspaceDeletePost(t *testing.T) {
 
 }
 
+func TestWorkspaceAddUserView(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	t.Run("Unauthenticated", func(t *testing.T) {
+		code, headers, _ := ts.get(t, "/workspace/1/user/add")
+
+		assert.Equal(t, code, http.StatusSeeOther)
+		assert.Equal(t, headers.Get("Location"), "/user/login")
+	})
+
+	ts.loginUser(t)
+
+	tests := []struct {
+		name      string
+		urlPath   string
+		wantCode  int
+		wantTitle string
+	}{
+		{
+			name:      "Valid ID",
+			urlPath:   "/workspace/1/user/add",
+			wantCode:  http.StatusOK,
+			wantTitle: "Users in this Workspace",
+		},
+		{
+			name:     "Non-existent ID",
+			urlPath:  "/workspace/5/user/add",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Negative ID",
+			urlPath:  "/workspace/-1/user/add",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Decimal ID",
+			urlPath:  "/workspace/1.23/user/add",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "String ID",
+			urlPath:  "/workspace/a/user/add",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Empty ID",
+			urlPath:  "/workspace/user/add",
+			wantCode: http.StatusNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			code, _, body := ts.get(t, tt.urlPath)
+
+			assert.Equal(t, code, tt.wantCode)
+
+			if tt.wantTitle != "" {
+				assert.StringContains(t, body, tt.wantTitle)
+			}
+		})
+	}
+}
+
 func TestUserRegisterHandler(t *testing.T) {
 	app := newTestApplication(t)
 
