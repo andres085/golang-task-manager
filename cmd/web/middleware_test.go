@@ -128,3 +128,20 @@ func TestRequireAuthentication(t *testing.T) {
 	assert.Equal(t, rr.Result().StatusCode, http.StatusSeeOther)
 	assert.Equal(t, rr.Header().Get("Location"), expectedValue)
 }
+
+func TestNosurf(t *testing.T) {
+	rr := httptest.NewRecorder()
+
+	r, err := http.NewRequest(http.MethodPost, "/workspace/create", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
+
+	noSurf(next).ServeHTTP(rr, r)
+
+	assert.Equal(t, rr.Result().StatusCode, http.StatusBadRequest)
+}
