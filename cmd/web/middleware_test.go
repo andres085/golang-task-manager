@@ -107,3 +107,24 @@ func TestRecoverPanic(t *testing.T) {
 	assert.Equal(t, rr.Header().Get("Connection"), expectedValue)
 	assert.Equal(t, rr.Code, http.StatusInternalServerError)
 }
+
+func TestRequireAuthentication(t *testing.T) {
+	app := newTestApplication(t)
+	rr := httptest.NewRecorder()
+
+	r, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
+
+	app.requireAuthentication(next).ServeHTTP(rr, r)
+
+	expectedValue := "/user/login"
+
+	assert.Equal(t, rr.Result().StatusCode, http.StatusSeeOther)
+	assert.Equal(t, rr.Header().Get("Location"), expectedValue)
+}
