@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
@@ -109,24 +110,50 @@ func TestRecoverPanic(t *testing.T) {
 }
 
 func TestRequireAuthentication(t *testing.T) {
-	app := newTestApplication(t)
-	rr := httptest.NewRecorder()
+	t.Run("Unauthenthicated", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
 
-	r, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+		r, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("OK"))
+		})
+
+		app.requireAuthentication(next).ServeHTTP(rr, r)
+
+		expectedValue := "/user/login"
+
+		assert.Equal(t, rr.Result().StatusCode, http.StatusSeeOther)
+		assert.Equal(t, rr.Header().Get("Location"), expectedValue)
 	})
 
-	app.requireAuthentication(next).ServeHTTP(rr, r)
+	t.Run("Authenthicated", func(t *testing.T) {
+		app := newTestApplication(t)
 
-	expectedValue := "/user/login"
+		authenticatedRequest, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	assert.Equal(t, rr.Result().StatusCode, http.StatusSeeOther)
-	assert.Equal(t, rr.Header().Get("Location"), expectedValue)
+		ctx := context.WithValue(authenticatedRequest.Context(), isAuthenticatedContextKey, true)
+		authenticatedRequest = authenticatedRequest.WithContext(ctx)
+
+		rr := httptest.NewRecorder()
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Authenticated"))
+		})
+
+		app.requireAuthentication(next).ServeHTTP(rr, authenticatedRequest)
+
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+		assert.Equal(t, rr.Body.String(), "Authenticated")
+		assert.Equal(t, rr.Header().Get("Cache-Control"), "no-store")
+	})
 }
 
 func TestNosurf(t *testing.T) {
