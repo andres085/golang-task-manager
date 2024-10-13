@@ -172,3 +172,87 @@ func TestNosurf(t *testing.T) {
 
 	assert.Equal(t, rr.Result().StatusCode, http.StatusBadRequest)
 }
+
+func TestAuthenticate(t *testing.T) {
+	t.Run("No session id", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("OK"))
+		})
+
+		app.authenticate(next).ServeHTTP(rr, req)
+
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+
+	t.Run("Authenticated User exists", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 1)
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			isAuthenticated := r.Context().Value(isAuthenticatedContextKey).(bool)
+			userId := r.Context().Value(userIDContextKey).(int)
+
+			assert.Equal(t, isAuthenticated, true)
+			assert.Equal(t, userId, 1)
+			w.Write([]byte("Authenticated"))
+		})
+
+		app.authenticate(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+
+	t.Run("Authenticated User doesn't exists", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 9)
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Authenticated"))
+		})
+
+		app.authenticate(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+}
