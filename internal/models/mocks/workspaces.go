@@ -44,5 +44,8 @@ func (m *WorkspaceModel) Delete(id int) (int, error) {
 }
 
 func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) {
-	return true, nil
+	if userId == 1 && workspaceId == 1 {
+		return true, nil
+	}
+	return false, nil
 }
