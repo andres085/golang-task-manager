@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -126,7 +125,6 @@ func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) {
 
 	stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ?)"
 
-	fmt.Print(exists)
 	err := m.DB.QueryRow(stmt, taskId, userId).Scan(&exists)
 	return exists, err
 }
