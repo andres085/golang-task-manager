@@ -150,7 +150,7 @@ func (app *application) checkTaskOwnership(next http.Handler) http.Handler {
 		}
 
 		if !isOwner {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			http.NotFound(w, r)
 			return
 		}
 		next.ServeHTTP(w, r)

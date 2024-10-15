@@ -67,3 +67,14 @@ func TestDeleteMethod(t *testing.T) {
 	assert.Equal(t, row, 1)
 	assert.NilError(t, err)
 }
+
+func TestValidateTaskOwnership(t *testing.T) {
+	db := newTestDB(t)
+
+	m := TaskModel{db}
+
+	isOwner, err := m.ValidateOwnership(1, 1)
+
+	assert.Equal(t, isOwner, true)
+	assert.NilError(t, err)
+}

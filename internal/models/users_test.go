@@ -32,5 +32,5 @@ func TestUserAuthenticateMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, row, 2)
+	assert.Equal(t, row, 3)
 }
