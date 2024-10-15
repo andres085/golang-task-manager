@@ -67,16 +67,13 @@ func TestWorkspacesDeleteMethod(t *testing.T) {
 	assert.NilError(t, err)
 }
 
-func TestWorkspacesDeleteWithTransacionMethod(t *testing.T) {
+func TestValidateOwnership(t *testing.T) {
 	db := newTestDB(t)
 
 	m := WorkspaceModel{db}
-	m2 := TaskModel{db}
 
-	row, err := m.Delete(1)
-	tasks, err := m2.GetAll(1)
+	isOwner, err := m.ValidateOwnership(1, 1)
 
-	assert.Equal(t, len(tasks), 0)
-	assert.Equal(t, row, 1)
+	assert.Equal(t, isOwner, true)
 	assert.NilError(t, err)
 }

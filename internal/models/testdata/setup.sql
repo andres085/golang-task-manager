@@ -17,6 +17,14 @@ INSERT INTO users (firstName, lastName, email, hashed_password, created) VALUES 
     '2022-01-01 09:18:24'
 );
 
+INSERT INTO users (firstName, lastName, email, hashed_password, created) VALUES (
+    'Member',
+    'Memberino',
+    'member@example.com',
+    '$2a$12$NuTjWXm3KKntReFwyBVHyuf/to.HEwTy.eS206TNfkGfr6HzGJSWG',
+    '2022-01-01 09:18:24'
+);
+
 CREATE TABLE workspaces (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL UNIQUE,
@@ -46,6 +54,7 @@ INSERT INTO workspaces (title, description, created) VALUES (
     UTC_TIMESTAMP()
 );
 
+
 CREATE TABLE tasks (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL UNIQUE,
@@ -58,6 +67,7 @@ CREATE TABLE tasks (
 );
 
 INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (1, 1, "ADMIN", UTC_TIMESTAMP());
+INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (2, 1, "MEMBER", UTC_TIMESTAMP());
 
 CREATE INDEX idx_tasks_created ON tasks(created);
 
