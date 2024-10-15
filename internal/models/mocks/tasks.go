@@ -52,5 +52,8 @@ func (m *TaskModel) Delete(id int) (int, error) {
 }
 
 func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) {
-	return true, nil
+	if userId == 1 && taskId == 1 {
+		return true, nil
+	}
+	return false, nil
 }
