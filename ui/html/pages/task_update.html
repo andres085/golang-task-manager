@@ -32,6 +32,16 @@
       </select>
     </div>
 
+    <div class="mb-3">
+      <label for="priority" class="form-label">User</label>
+      <select class="form-select" id="user_id" name="user_id">
+        <option value="{{.Form.DefaultUser.ID}}" selected>{{.Form.DefaultUser.Email}}</option>
+        {{range .Form.WorkspaceUsers}}
+        <option value="{{.ID}}">{{.Email}}</option>
+        {{end}}
+      </select>
+    </div>
+
     <button type="submit" class="btn btn-primary">Update Task</button>
   </form>
 </div>

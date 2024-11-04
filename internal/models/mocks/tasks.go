@@ -43,7 +43,7 @@ func (m *TaskModel) GetAll(id int) ([]models.Task, error) {
 	return []models.Task{firstMockTask, secondMockTask}, nil
 }
 
-func (m *TaskModel) Update(id int, title, content, priority string) error {
+func (m *TaskModel) Update(id int, title, content, priority string, userId int) error {
 	return nil
 }
 

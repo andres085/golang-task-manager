@@ -154,13 +154,31 @@ func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	workspaceUsers, err := app.users.GetWorkspaceUsers(task.WorkspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	var assignedUser models.UserWithRole
+	otherUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
+
+	for i, user := range workspaceUsers {
+		if user.ID == task.UserId {
+			assignedUser = user
+			otherUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
+		}
+	}
+
 	data := app.newTemplateData(r)
 
 	data.Form = taskCreateForm{
-		ID:       &task.ID,
-		Title:    task.Title,
-		Content:  task.Content,
-		Priority: task.Priority,
+		ID:             &task.ID,
+		Title:          task.Title,
+		Content:        task.Content,
+		Priority:       task.Priority,
+		DefaultUser:    assignedUser,
+		WorkspaceUsers: otherUsers,
 	}
 
 	app.render(w, r, http.StatusOK, "task_update.html", data)
@@ -193,7 +211,7 @@ func (app *application) taskUpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.tasks.Update(id, form.Title, form.Content, form.Priority)
+	err = app.tasks.Update(id, form.Title, form.Content, form.Priority, form.UserID)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
