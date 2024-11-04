@@ -61,10 +61,13 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 
 type taskCreateForm struct {
 	ID                  *int
-	Title               string `form:"title"`
-	Content             string `form:"content"`
-	Priority            string `form:"priority"`
-	WorkspaceID         int    `form:"workspace_id"`
+	Title               string                `form:"title"`
+	Content             string                `form:"content"`
+	Priority            string                `form:"priority"`
+	WorkspaceID         int                   `form:"workspace_id"`
+	UserID              int                   `form:"user_id"`
+	DefaultUser         models.UserWithRole   `form:"-"`
+	WorkspaceUsers      []models.UserWithRole `form:"-"`
 	validator.Validator `form:"-"`
 }
 
@@ -77,9 +80,27 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 
 	data := app.newTemplateData(r)
 
+	workspaceUsers, err := app.users.GetWorkspaceUsers(workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	var adminUser models.UserWithRole
+	regularUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
+
+	for i, user := range workspaceUsers {
+		if user.Role == "ADMIN" {
+			adminUser = user
+			regularUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
+		}
+	}
+
 	data.Form = taskCreateForm{
-		Priority:    "LOW",
-		WorkspaceID: workspaceId,
+		Priority:       "LOW",
+		WorkspaceID:    workspaceId,
+		DefaultUser:    adminUser,
+		WorkspaceUsers: regularUsers,
 	}
 
 	app.render(w, r, http.StatusOK, "task_create.html", data)
@@ -105,7 +126,7 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := app.tasks.Insert(form.Title, form.Content, form.Priority, form.WorkspaceID)
+	id, err := app.tasks.Insert(form.Title, form.Content, form.Priority, form.WorkspaceID, form.UserID)
 	if err != nil {
 		app.serverError(w, r, err)
 		return

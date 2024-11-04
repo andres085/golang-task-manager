@@ -14,10 +14,11 @@ type Task struct {
 	Created     time.Time
 	Finished    time.Time
 	WorkspaceId int
+	UserId      int
 }
 
 type TaskModelInterface interface {
-	Insert(title, content, priority string, workspaceId int) (int, error)
+	Insert(title, content, priority string, workspaceId, userId int) (int, error)
 	Get(id int) (Task, error)
 	GetAll(workspaceId int) ([]Task, error)
 	Update(id int, title, content, priority string) error
@@ -29,10 +30,10 @@ type TaskModel struct {
 	DB *sql.DB
 }
 
-func (m *TaskModel) Insert(title, content, priority string, workspaceId int) (int, error) {
-	stmt := `INSERT INTO tasks (title, content, priority, created, finished, workspace_id)  VALUES (?, ?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK), ?)`
+func (m *TaskModel) Insert(title, content, priority string, workspaceId, userId int) (int, error) {
+	stmt := `INSERT INTO tasks (title, content, priority, created, finished, workspace_id, user_id)  VALUES (?, ?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK), ?, ?)`
 
-	result, err := m.DB.Exec(stmt, title, content, priority, workspaceId)
+	result, err := m.DB.Exec(stmt, title, content, priority, workspaceId, userId)
 	if err != nil {
 		return 0, err
 	}
@@ -50,7 +51,7 @@ func (m *TaskModel) Get(id int) (Task, error) {
 
 	var t Task
 
-	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId)
+	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Task{}, ErrNoRecord
@@ -77,7 +78,7 @@ func (m *TaskModel) GetAll(workspaceId int) ([]Task, error) {
 	for rows.Next() {
 		var t Task
 
-		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId)
+		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId)
 		if err != nil {
 			return nil, err
 		}

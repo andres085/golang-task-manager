@@ -41,7 +41,7 @@ CREATE TABLE users_workspaces (
 	role TEXT NOT NULL,
 	created DATETIME NOT NULL,
 	UNIQUE(user_id, workspace_id),
-	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 	FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 );
 
@@ -63,7 +63,9 @@ CREATE TABLE tasks (
     created DATETIME NOT NULL,
     finished DATETIME NOT NULL,
     workspace_id INTEGER NOT NULL,
-    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (1, 1, "ADMIN", UTC_TIMESTAMP());
@@ -71,29 +73,32 @@ INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (2, 1,
 
 CREATE INDEX idx_tasks_created ON tasks(created);
 
-INSERT INTO tasks (title, content, priority, created, finished, workspace_id) VALUES (
+INSERT INTO tasks (title, content, priority, created, finished, workspace_id, user_id) VALUES (
     'First Task',
     'This is the content of the first task',
     'LOW',
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP(),
+    1,
     1
 );
 
-INSERT INTO tasks (title, content, priority, created, finished, workspace_id) VALUES (
+INSERT INTO tasks (title, content, priority, created, finished, workspace_id, user_id) VALUES (
     'Second Task',
     'This is the content of the second task',
     'MEDIUM',
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP(),
+    1,
     1
 );
 
-INSERT INTO tasks (title, content, priority, created, finished, workspace_id) VALUES (
+INSERT INTO tasks (title, content, priority, created, finished, workspace_id, user_id) VALUES (
     'Third Task',
     'This is the content of the third task',
     'HIGH',
     UTC_TIMESTAMP(),
     UTC_TIMESTAMP(),
+    1,
     1
 );
