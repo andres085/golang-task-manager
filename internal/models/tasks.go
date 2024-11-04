@@ -20,7 +20,7 @@ type Task struct {
 type TaskModelInterface interface {
 	Insert(title, content, priority string, workspaceId, userId int) (int, error)
 	Get(id int) (Task, error)
-	GetAll(workspaceId int) ([]Task, error)
+	GetAll(workspaceId, limit, offset int) ([]Task, error)
 	Update(id int, title, content, priority string, userId int) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
@@ -63,10 +63,10 @@ func (m *TaskModel) Get(id int) (Task, error) {
 	return t, nil
 }
 
-func (m *TaskModel) GetAll(workspaceId int) ([]Task, error) {
-	stmt := `SELECT * FROM tasks where workspace_id = ?`
+func (m *TaskModel) GetAll(workspaceId, limit, offset int) ([]Task, error) {
+	stmt := `SELECT * FROM tasks where workspace_id = ? LIMIT ? OFFSET ?`
 
-	rows, err := m.DB.Query(stmt, workspaceId)
+	rows, err := m.DB.Query(stmt, workspaceId, limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -46,7 +46,17 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := app.tasks.GetAll(workspaceId)
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	tasks, err := app.tasks.GetAll(workspaceId, limit, offset)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
