@@ -17,7 +17,9 @@ CREATE TABLE tasks (
     created DATETIME NOT NULL,
     finished DATETIME NOT NULL,
     workspace_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE INDEX idx_tasks_created ON tasks(created);
@@ -39,8 +41,8 @@ CREATE TABLE users_workspaces (
 	role TEXT NOT NULL,
 	created DATETIME NOT NULL,
 	UNIQUE(user_id, workspace_id),
-	FOREIGN KEY (user_id) REFERENCES users(id),
-	FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+	FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 )
 
 CREATE INDEX idx_user_id ON users_workspaces (user_id);
