@@ -22,6 +22,8 @@ type templateData struct {
 	Flash           string
 	IsAuthenticated bool
 	CSRFToken       string
+	Limit           int
+	Total           int
 }
 
 func humanDate(t time.Time) string {

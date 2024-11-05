@@ -65,6 +65,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Tasks = tasks
 	data.Workspace.ID = workspaceId
+	data.Limit = limit
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }
