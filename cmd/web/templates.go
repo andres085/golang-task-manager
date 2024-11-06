@@ -3,7 +3,9 @@ package main
 import (
 	"html/template"
 	"io/fs"
+	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/andres085/task_manager/internal/models"
@@ -85,4 +87,20 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
+}
+
+func getPaginationParams(r *http.Request, defaultLimit int) (int, int, int) {
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil || limit <= 0 {
+		limit = defaultLimit
+	}
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+
+	return limit, page, offset
 }

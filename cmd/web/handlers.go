@@ -47,17 +47,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil || limit <= 0 {
-		limit = 10
-	}
-
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-
-	offset := (page - 1) * limit
+	limit, page, offset := getPaginationParams(r, 10)
 
 	tasks, err := app.tasks.GetAll(workspaceId, limit, offset)
 	if err != nil {
@@ -70,6 +60,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+
 	totalPages := int(math.Ceil(float64(totalTasks) / float64(limit)))
 
 	data := app.newTemplateData(r)
