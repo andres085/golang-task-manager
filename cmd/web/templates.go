@@ -13,20 +13,21 @@ import (
 )
 
 type templateData struct {
-	CurrentYear     int
-	Task            models.Task
-	Tasks           []models.Task
-	Workspace       models.Workspace
-	Workspaces      []models.Workspace
-	User            *models.User
-	WorkspaceUsers  []models.UserWithRole
-	Form            any
-	Flash           string
-	IsAuthenticated bool
-	CSRFToken       string
-	Limit           int
-	CurrentPage     int
-	TotalPages      int
+	CurrentYear       int
+	Task              models.Task
+	Tasks             []models.Task
+	Workspace         models.Workspace
+	OwnedWorkspaces   []models.Workspace
+	InvitedWorkspaces []models.Workspace
+	User              *models.User
+	WorkspaceUsers    []models.UserWithRole
+	Form              any
+	Flash             string
+	IsAuthenticated   bool
+	CSRFToken         string
+	Limit             int
+	CurrentPage       int
+	TotalPages        int
 }
 
 func humanDate(t time.Time) string {

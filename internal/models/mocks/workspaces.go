@@ -31,7 +31,7 @@ func (t *WorkspaceModel) Get(id int) (models.Workspace, error) {
 	}
 }
 
-func (m *WorkspaceModel) GetAll(userId int) ([]models.Workspace, error) {
+func (m *WorkspaceModel) GetAll(userId int, role string) ([]models.Workspace, error) {
 	return []models.Workspace{firstMockWorkspace, secondMockWorkspace}, nil
 }
 
