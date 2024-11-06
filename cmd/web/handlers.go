@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -51,10 +52,12 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		limit = 10
 	}
 
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
-	if err != nil || offset < 0 {
-		offset = 0
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
 	}
+
+	offset := (page - 1) * limit
 
 	tasks, err := app.tasks.GetAll(workspaceId, limit, offset)
 	if err != nil {
@@ -62,10 +65,19 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	totalTasks, err := app.tasks.GetTotalTasks(workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	totalPages := int(math.Ceil(float64(totalTasks) / float64(limit)))
+
 	data := app.newTemplateData(r)
 	data.Tasks = tasks
 	data.Workspace.ID = workspaceId
 	data.Limit = limit
+	data.CurrentPage = page
+	data.TotalPages = totalPages
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }

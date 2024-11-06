@@ -21,6 +21,7 @@ type TaskModelInterface interface {
 	Insert(title, content, priority string, workspaceId, userId int) (int, error)
 	Get(id int) (Task, error)
 	GetAll(workspaceId, limit, offset int) ([]Task, error)
+	GetTotalTasks(workspaceId int) (int, error)
 	Update(id int, title, content, priority string, userId int) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
@@ -64,6 +65,7 @@ func (m *TaskModel) Get(id int) (Task, error) {
 }
 
 func (m *TaskModel) GetAll(workspaceId, limit, offset int) ([]Task, error) {
+
 	stmt := `SELECT * FROM tasks where workspace_id = ? LIMIT ? OFFSET ?`
 
 	rows, err := m.DB.Query(stmt, workspaceId, limit, offset)
@@ -91,6 +93,18 @@ func (m *TaskModel) GetAll(workspaceId, limit, offset int) ([]Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
+	var totalTasks int
+
+	countStmt := `SELECT COUNT(*) FROM tasks WHERE workspace_id = ?`
+	err := m.DB.QueryRow(countStmt, workspaceId).Scan(&totalTasks)
+	if err != nil {
+		return 0, err
+	}
+
+	return totalTasks, nil
 }
 
 func (m *TaskModel) Update(id int, title, content, priority string, userId int) error {

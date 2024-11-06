@@ -43,6 +43,10 @@ func (m *TaskModel) GetAll(id, limit, offset int) ([]models.Task, error) {
 	return []models.Task{firstMockTask, secondMockTask}, nil
 }
 
+func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
+	return 0, nil
+}
+
 func (m *TaskModel) Update(id int, title, content, priority string, userId int) error {
 	return nil
 }

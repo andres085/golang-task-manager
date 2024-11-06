@@ -33,7 +33,7 @@
           <h5 class="card-title">Created</h5>
           <p class="card-text">{{humanDate $workspace.Created}}</p>
           <div class="d-grid gap-2">
-            <a href="/workspace/view/{{$workspace.ID}}/tasks?limit=10&offset=0" class="btn btn-success w-100">Add
+            <a href="/workspace/view/{{$workspace.ID}}/tasks?limit=10&page=1" class="btn btn-success w-100">Add
               Tasks</a>
             <a href="/workspace/{{$workspace.ID}}/user/add" class="btn btn-success w-100">Add Users</a>
             <a href="/workspace/update/{{$workspace.ID}}" class="btn btn-primary w-100">Edit Workspace</a>

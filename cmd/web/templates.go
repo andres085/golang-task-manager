@@ -23,7 +23,8 @@ type templateData struct {
 	IsAuthenticated bool
 	CSRFToken       string
 	Limit           int
-	Total           int
+	CurrentPage     int
+	TotalPages      int
 }
 
 func humanDate(t time.Time) string {
@@ -34,8 +35,27 @@ func humanDate(t time.Time) string {
 	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
 
+func iterPages(total int) []int {
+	var pages []int
+	for i := 1; i <= total; i++ {
+		pages = append(pages, i)
+	}
+	return pages
+}
+
+func add(a, b int) int {
+	return a + b
+}
+
+func sub(a, b int) int {
+	return a - b
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
+	"iterPages": iterPages,
+	"add":       add,
+	"sub":       sub,
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
