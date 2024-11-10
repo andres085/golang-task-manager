@@ -345,6 +345,8 @@ func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	canCreateWorkspaces := len(ownWorkspaces) < 6
+
 	invitedWorkspaces, err := app.workspaces.GetAll(userId, "MEMBER")
 	if err != nil {
 		app.serverError(w, r, err)
@@ -354,6 +356,7 @@ func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request)
 	data := app.newTemplateData(r)
 	data.OwnedWorkspaces = ownWorkspaces
 	data.InvitedWorkspaces = invitedWorkspaces
+	data.WorkspaceLimit = canCreateWorkspaces
 
 	app.render(w, r, http.StatusOK, "workspaces_view.html", data)
 }
