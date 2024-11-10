@@ -63,10 +63,12 @@
           </div>
         </div>
         {{end}}
-        {{else}}
-        <p>No workspaces have been added...</p>
-        {{end}}
       </div>
+      {{else}}
+      <div class="col-md-6 mx-auto mt-5 text-center">
+        <p class="text-muted">No workspaces have been added...</p>
+      </div>
+      {{end}}
     </div>
     <div class="tab-pane fade" id="invited" role="tabpanel" aria-labelledby="invited-tab">
       <div class="tab-pane fade show active" id="owned" role="tabpanel" aria-labelledby="owned-tab">
@@ -96,7 +98,9 @@
           {{end}}
         </div>
         {{else}}
-        <p>No workspaces have been added...</p>
+        <div class="col-md-6 mx-auto mt-5 text-center">
+          <p class="text-muted">No workspaces have been added...</p>
+        </div>
         {{end}}
       </div>
     </div>
