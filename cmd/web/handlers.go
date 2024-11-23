@@ -465,6 +465,14 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 
 	if email != "" {
 		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
+		totalWorkspaces, err := app.users.GetWorkspacesAsMemberCount(email)
+		canCreateWorkspaces := totalWorkspaces > 6
+
+		if !canCreateWorkspaces {
+			app.sessionManager.Put(r.Context(), "flash", "User exceeds workspace limit")
+			http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
+		}
+
 		if err != nil {
 			if errors.Is(err, models.ErrNoRecord) {
 				app.sessionManager.Put(r.Context(), "flash", "User not found or already added")

@@ -26,6 +26,7 @@ type UserModelInterface interface {
 	GetUserToInvite(email string, workspaceId int) (*User, error)
 	AddUserToWorkspace(userId, workspaceId int) error
 	GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
+	GetWorkspacesAsMemberCount(email string) (int, error)
 	RemoveUserFromWorkspace(workspaceId, userId int) (int, error)
 }
 
@@ -69,6 +70,19 @@ func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*User, error
 	}
 
 	return &u, nil
+}
+
+func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) {
+	var totalWorkspaces int
+
+	countStmt := "SELECT COUNT(*) FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id WHERE u.email = ? AND uw.`role` = 'MEMBER';"
+
+	err := m.DB.QueryRow(countStmt, email).Scan(&totalWorkspaces)
+	if err != nil {
+		return 0, err
+	}
+
+	return totalWorkspaces, nil
 }
 
 type UserWithRole struct {
