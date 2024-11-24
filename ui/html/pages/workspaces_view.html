@@ -83,14 +83,6 @@
 
                 <div class="d-flex justify-content-end gap-2">
                   <a href="/workspace/view/{{.ID}}/tasks?limit=10&page=1" class="btn btn-sm btn-success">View Tasks</a>
-
-                  <a href="/workspace/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-
-                  <form action="/workspace/delete/{{.ID}}" method="POST" class="d-inline">
-                    <input type='hidden' name='csrf_token' value='{{ $csrf }}'>
-                    <button type="button" class="btn btn-sm btn-danger w-100 delete-btn" data-bs-toggle="modal"
-                      data-bs-target="#deleteModal" data-entity="Workspace">Delete Workspace</button>
-                  </form>
                 </div>
               </div>
             </div>
