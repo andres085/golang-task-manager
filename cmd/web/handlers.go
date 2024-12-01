@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -46,15 +47,28 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := app.tasks.GetAll(workspaceId)
+	limit, page, offset := getPaginationParams(r, 10)
+
+	tasks, err := app.tasks.GetAll(workspaceId, limit, offset)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
+	totalTasks, err := app.tasks.GetTotalTasks(workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	totalPages := int(math.Ceil(float64(totalTasks) / float64(limit)))
+
 	data := app.newTemplateData(r)
 	data.Tasks = tasks
 	data.Workspace.ID = workspaceId
+	data.Limit = limit
+	data.CurrentPage = page
+	data.TotalPages = totalPages
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }
@@ -325,14 +339,24 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(userIDContextKey).(int)
-	workspaces, err := app.workspaces.GetAll(userId)
+	ownWorkspaces, err := app.workspaces.GetAll(userId, "ADMIN")
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	canCreateWorkspaces := len(ownWorkspaces) < 6
+
+	invitedWorkspaces, err := app.workspaces.GetAll(userId, "MEMBER")
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
 	data := app.newTemplateData(r)
-	data.Workspaces = workspaces
+	data.OwnedWorkspaces = ownWorkspaces
+	data.InvitedWorkspaces = invitedWorkspaces
+	data.WorkspaceLimit = canCreateWorkspaces
 
 	app.render(w, r, http.StatusOK, "workspaces_view.html", data)
 }
@@ -441,6 +465,14 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 
 	if email != "" {
 		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
+		totalWorkspaces, err := app.users.GetWorkspacesAsMemberCount(email)
+		canCreateWorkspaces := totalWorkspaces > 6
+
+		if !canCreateWorkspaces {
+			app.sessionManager.Put(r.Context(), "flash", "User exceeds workspace limit")
+			http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
+		}
+
 		if err != nil {
 			if errors.Is(err, models.ErrNoRecord) {
 				app.sessionManager.Put(r.Context(), "flash", "User not found or already added")

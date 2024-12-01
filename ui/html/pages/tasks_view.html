@@ -4,6 +4,9 @@
 
 {{template "modal" .}}
 {{$csrf := .CSRFToken}}
+{{$limit := .Limit}}
+{{ $currentPage := .CurrentPage }}
+{{ $totalPages := .TotalPages }}
 <div class="container mt-5 flex-grow-1">
   <div class="row mb-3 align-items-center">
     <div class="col-md-8">
@@ -12,7 +15,35 @@
     <div class="col-md-4 text-end">
       <a href="/workspace/{{.Workspace.ID}}/task/create" class="btn btn-primary">Create Task</a>
     </div>
+
+    <!-- Tasks table -->
     {{if .Tasks}}
+
+    <div class="row mb-3 align-items-center">
+      <!-- Search Input and Tasks per Page Selector -->
+      <div class="col-md-8 d-flex align-items-center">
+        <!-- Search Input -->
+        <!-- <form action="/tasks_view" method="GET" class="d-flex flex-grow-1 me-3"> -->
+        <!--   <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value="" -->
+        <!--     aria-label="Search tasks"> -->
+        <!--   <button class="btn btn-primary" type="submit">Search</button> -->
+        <!-- </form> -->
+
+        <!-- Label and Limit Selector aligned horizontally -->
+        <form id="limitForm" action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET"
+          class="d-flex align-items-center ms-2">
+          <label for="limitSelect" class="form-label me-2 mb-0">Limit:</label>
+          <select class="form-select" id="limitSelect" name="limit">
+            <option value="5" {{if eq $limit 5}}selected{{end}}>5</option>
+            <option value="10" {{if eq $limit 10}}selected{{end}}>10</option>
+            <option value="20" {{if eq $limit 20}}selected{{end}}>20</option>
+            <option value="50" {{if eq $limit 50}}selected{{end}}>50</option>
+          </select>
+          <!-- <input type="hidden" name="query" value=""> -->
+        </form>
+      </div>
+    </div>
+
     <table class="table table-striped">
       <thead>
         <tr>
@@ -40,6 +71,7 @@
           </td>
           <td>{{humanDate .Created}}</td>
           <td>{{humanDate .Finished}}</td>
+          <!-- Tasks table actions -->
           <td class="task-table-actions">
             <div class="d-flex justify-content-between gap-0">
               <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
@@ -54,10 +86,24 @@
         {{end}}
       </tbody>
     </table>
+
+    <nav aria-label="Task pagination">
+      <ul class="pagination">
+        {{range $i := iterPages $totalPages}}
+        <li class="page-item {{if eq $i $currentPage}} active {{end}}">
+          <a class="page-link" href="?limit={{$limit}}&page={{$i}}">{{$i}}</a>
+        </li>
+        {{end}}
+      </ul>
+    </nav>
+
     {{else}}
-    <p>No tasks have been added...</p>
+    <div class="col-md-6 mx-auto mt-5 text-center">
+      <p class="text-muted">No tasks have been added...</p>
+    </div>
     {{end}}
   </div>
   <script src="/static/js/modal.js"></script>
+  <script src="/static/js/pagination.js"></script>
 </div>
 {{end}}

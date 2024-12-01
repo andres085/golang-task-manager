@@ -35,7 +35,7 @@ func TestWorkspacesGetAllMethod(t *testing.T) {
 
 	m := WorkspaceModel{db}
 
-	workspaces, err := m.GetAll(1)
+	workspaces, err := m.GetAll(1, "ADMIN")
 
 	assert.Equal(t, len(workspaces), 1)
 	assert.NilError(t, err)

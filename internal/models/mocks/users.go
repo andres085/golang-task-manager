@@ -50,6 +50,10 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	return 0, models.ErrInvalidCredentials
 }
 
+func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) {
+	return 1, nil
+}
+
 func (m *UserModel) Exists(id int) (bool, error) {
 	switch id {
 	case 1:
