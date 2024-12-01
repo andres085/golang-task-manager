@@ -364,6 +364,113 @@ func TestWorkspaceOwnership(t *testing.T) {
 	})
 }
 
+func TestWorkspaceAdmin(t *testing.T) {
+	t.Run("No session id", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("OK"))
+		})
+
+		app.checkWorkspaceAdmin(next).ServeHTTP(rr, req)
+
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+
+	t.Run("Invalid workspace id", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view/-1", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 1)
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Workspace View"))
+		})
+
+		app.checkWorkspaceAdmin(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
+	})
+
+	t.Run("Invalid owner", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view/2", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 3)
+
+		req.SetPathValue("id", "2")
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Workspace View"))
+		})
+
+		app.checkWorkspaceAdmin(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
+	})
+
+	t.Run("Valid owner", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/workspace/view/1", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 1)
+
+		req.SetPathValue("id", "1")
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Workspace View"))
+		})
+
+		app.checkWorkspaceAdmin(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+}
+
 func TestTaskOwnership(t *testing.T) {
 	t.Run("No session id", func(t *testing.T) {
 		app := newTestApplication(t)
@@ -440,6 +547,113 @@ func TestTaskOwnership(t *testing.T) {
 		})
 
 		app.checkTaskOwnership(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
+	})
+
+	t.Run("Valid owner", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/task/view/1", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 1)
+
+		req.SetPathValue("id", "1")
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Task View"))
+		})
+
+		app.checkTaskOwnership(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+}
+
+func TestTaskAdmin(t *testing.T) {
+	t.Run("No session id", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/task/view", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("OK"))
+		})
+
+		app.checkTaskAdmin(next).ServeHTTP(rr, req)
+
+		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
+	})
+
+	t.Run("Invalid task id", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/task/view/-1", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 1)
+
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Task View"))
+		})
+
+		app.checkTaskAdmin(next).ServeHTTP(rr, req)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
+	})
+
+	t.Run("Invalid owner", func(t *testing.T) {
+		app := newTestApplication(t)
+		rr := httptest.NewRecorder()
+
+		req, err := http.NewRequest(http.MethodGet, "/task/view/2", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ctx, err := app.sessionManager.Load(req.Context(), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		app.sessionManager.Put(ctx, "authenticatedUserID", 3)
+
+		req.SetPathValue("id", "2")
+		req = req.WithContext(ctx)
+
+		next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("Task View"))
+		})
+
+		app.checkTaskAdmin(next).ServeHTTP(rr, req)
 		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
 	})
 
