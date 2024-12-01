@@ -78,3 +78,14 @@ func TestValidateTaskOwnership(t *testing.T) {
 	assert.Equal(t, isOwner, true)
 	assert.NilError(t, err)
 }
+
+func TestValidateTaskAdmin(t *testing.T) {
+	db := newTestDB(t)
+
+	m := TaskModel{db}
+
+	isAdmin, err := m.ValidateAdmin(1, 1)
+
+	assert.Equal(t, isAdmin, true)
+	assert.NilError(t, err)
+}

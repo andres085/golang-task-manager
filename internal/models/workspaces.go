@@ -20,6 +20,7 @@ type WorkspaceModelInterface interface {
 	Update(id int, title, description string) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, workspaceId int) (bool, error)
+	ValidateAdmin(userId, workspaceId int) (bool, error)
 }
 
 type WorkspaceModel struct {
@@ -130,4 +131,13 @@ func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error
 
 	err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&exists)
 	return exists, err
+}
+
+func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) {
+	var isAdmin bool
+
+	stmt := "SELECT EXISTS(SELECT true FROM users_workspaces WHERE user_id = ? AND workspace_id = ? AND role = 'ADMIN')"
+
+	err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&isAdmin)
+	return isAdmin, err
 }

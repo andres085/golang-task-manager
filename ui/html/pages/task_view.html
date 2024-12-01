@@ -5,6 +5,7 @@
 {{template "modal" .}}
 
 {{$csrf := .CSRFToken}}
+{{$isAdmin := .IsAdmin}}
 
 {{with .Task}}
 <div class="container mt-5">
@@ -58,11 +59,13 @@
 
           <div class="d-grid gap-2">
             <a href="/task/update/{{.ID}}" class="btn btn-primary w-100">Edit Task</a>
+            {{if $isAdmin}}
             <form action="/workspace/{{.WorkspaceId}}/task/delete/{{.ID}}" method="POST" class="delete-task-form">
               <input type='hidden' name='csrf_token' value='{{ $csrf }}'>
               <button type="button" class="btn btn-danger w-100 delete-btn" data-bs-toggle="modal"
                 data-bs-target="#deleteModal" data-entity="Task">Delete Task</button>
             </form>
+            {{end}}
           </div>
         </div>
       </div>
