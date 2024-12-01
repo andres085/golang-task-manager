@@ -17,6 +17,7 @@ func (app *application) routes() http.Handler {
 	workspaceOwnership := protected.Append(app.checkWorkspaceMembership)
 	workspaceAdminPermission := protected.Append(app.checkWorkspaceAdmin)
 	taskOwnership := protected.Append(app.checkTaskOwnership)
+	taskAdminPermission := protected.Append(app.checkTaskAdmin)
 
 	mux.HandleFunc("GET /ping", app.ping)
 
@@ -27,7 +28,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /workspace/{id}/task/create", workspaceOwnership.ThenFunc(app.taskCreate))
 	mux.Handle("POST /task/create", protected.ThenFunc(app.taskCreatePost))
 	mux.Handle("POST /task/update/{id}", protected.ThenFunc(app.taskUpdatePost))
-	mux.Handle("POST /workspace/{workspaceId}/task/delete/{id}", taskOwnership.ThenFunc(app.taskDelete))
+	mux.Handle("POST /workspace/{workspaceId}/task/delete/{id}", taskAdminPermission.ThenFunc(app.taskDelete))
 
 	mux.Handle("GET /workspace/view", protected.ThenFunc(app.workspaceViewAll))
 	mux.Handle("GET /workspace/view/{id}", workspaceOwnership.ThenFunc(app.workspaceView))

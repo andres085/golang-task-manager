@@ -25,6 +25,7 @@ type TaskModelInterface interface {
 	Update(id int, title, content, priority string, userId int) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
+	ValidateAdmin(userId, taskId int) (bool, error)
 }
 
 type TaskModel struct {
@@ -142,4 +143,13 @@ func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) {
 
 	err := m.DB.QueryRow(stmt, taskId, userId).Scan(&exists)
 	return exists, err
+}
+
+func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) {
+	var isAdmin bool
+
+	stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ? AND uw.role = 'ADMIN')"
+
+	err := m.DB.QueryRow(stmt, taskId, userId).Scan(&isAdmin)
+	return isAdmin, err
 }

@@ -34,8 +34,15 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId := r.Context().Value(userIDContextKey).(int)
+	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, task.WorkspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+
 	data := app.newTemplateData(r)
 	data.Task = task
+	data.IsAdmin = userIsAdmin
 
 	app.render(w, r, http.StatusOK, "task_view.html", data)
 }
@@ -45,6 +52,12 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	if err != nil || workspaceId < 1 {
 		http.NotFound(w, r)
 		return
+	}
+
+	userId := r.Context().Value(userIDContextKey).(int)
+	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
 	}
 
 	limit, page, offset := getPaginationParams(r, 10)
@@ -69,6 +82,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	data.Limit = limit
 	data.CurrentPage = page
 	data.TotalPages = totalPages
+	data.IsAdmin = userIsAdmin
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }
@@ -316,7 +330,6 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
 
 func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
-	userId := r.Context().Value(userIDContextKey).(int)
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -332,6 +345,7 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId := r.Context().Value(userIDContextKey).(int)
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, id)
 	if err != nil {
 		app.serverError(w, r, err)
