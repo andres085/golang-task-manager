@@ -316,6 +316,7 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
 
 func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
+	userId := r.Context().Value(userIDContextKey).(int)
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -331,8 +332,21 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, id)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+
+	workspaceUsers, err := app.users.GetWorkspaceUsers(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	data := app.newTemplateData(r)
 	data.Workspace = workspace
+	data.IsAdmin = userIsAdmin
+	data.WorkspaceUsers = workspaceUsers
 
 	app.render(w, r, http.StatusOK, "workspace_view.html", data)
 }

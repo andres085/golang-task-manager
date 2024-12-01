@@ -29,6 +29,7 @@ type templateData struct {
 	CurrentPage       int
 	TotalPages        int
 	WorkspaceLimit    bool
+	IsAdmin           bool
 }
 
 func humanDate(t time.Time) string {

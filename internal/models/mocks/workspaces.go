@@ -50,7 +50,7 @@ func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error
 	return false, nil
 }
 
-func (m *WorkspaceModel) ValidateMembership(userId, workspaceId int, membership string) (bool, error) {
+func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) {
 	if userId == 1 && workspaceId == 1 {
 		return true, nil
 	}

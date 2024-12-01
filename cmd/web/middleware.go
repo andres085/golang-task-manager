@@ -143,7 +143,7 @@ func (app *application) checkWorkspaceAdmin(next http.Handler) http.Handler {
 			return
 		}
 
-		isOwner, err := app.workspaces.ValidateMembership(userId, workspaceId, "ADMIN")
+		isOwner, err := app.workspaces.ValidateAdmin(userId, workspaceId)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
