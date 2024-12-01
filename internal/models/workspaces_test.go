@@ -77,3 +77,14 @@ func TestValidateOwnership(t *testing.T) {
 	assert.Equal(t, isOwner, true)
 	assert.NilError(t, err)
 }
+
+func TestValidateAdmin(t *testing.T) {
+	db := newTestDB(t)
+
+	m := WorkspaceModel{db}
+
+	isAdmin, err := m.ValidateAdmin(1, 1)
+
+	assert.Equal(t, isAdmin, true)
+	assert.NilError(t, err)
+}
