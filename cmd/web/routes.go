@@ -14,7 +14,8 @@ func (app *application) routes() http.Handler {
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 	protected := dynamic.Append(app.requireAuthentication)
-	workspaceOwnership := protected.Append(app.checkWorkspaceOwnership)
+	workspaceOwnership := protected.Append(app.checkWorkspaceMembership)
+	workspaceAdminPermission := protected.Append(app.checkWorkspaceAdmin)
 	taskOwnership := protected.Append(app.checkTaskOwnership)
 
 	mux.HandleFunc("GET /ping", app.ping)
@@ -36,7 +37,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUser))
 	mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
 	mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
-	mux.Handle("POST /workspace/delete/{id}", workspaceOwnership.ThenFunc(app.workspaceDelete))
+	mux.Handle("POST /workspace/delete/{id}", workspaceAdminPermission.ThenFunc(app.workspaceDelete))
 	mux.Handle("POST /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUserPost))
 	mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceOwnership.ThenFunc(app.workspaceRemoveUserPost))
 

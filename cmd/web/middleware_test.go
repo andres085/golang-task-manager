@@ -278,7 +278,7 @@ func TestWorkspaceOwnership(t *testing.T) {
 			w.Write([]byte("OK"))
 		})
 
-		app.checkWorkspaceOwnership(next).ServeHTTP(rr, req)
+		app.checkWorkspaceMembership(next).ServeHTTP(rr, req)
 
 		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
 	})
@@ -305,7 +305,7 @@ func TestWorkspaceOwnership(t *testing.T) {
 			w.Write([]byte("Workspace View"))
 		})
 
-		app.checkWorkspaceOwnership(next).ServeHTTP(rr, req)
+		app.checkWorkspaceMembership(next).ServeHTTP(rr, req)
 		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
 	})
 
@@ -332,7 +332,7 @@ func TestWorkspaceOwnership(t *testing.T) {
 			w.Write([]byte("Workspace View"))
 		})
 
-		app.checkWorkspaceOwnership(next).ServeHTTP(rr, req)
+		app.checkWorkspaceMembership(next).ServeHTTP(rr, req)
 		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
 	})
 
@@ -359,7 +359,7 @@ func TestWorkspaceOwnership(t *testing.T) {
 			w.Write([]byte("Workspace View"))
 		})
 
-		app.checkWorkspaceOwnership(next).ServeHTTP(rr, req)
+		app.checkWorkspaceMembership(next).ServeHTTP(rr, req)
 		assert.Equal(t, rr.Result().StatusCode, http.StatusOK)
 	})
 }
