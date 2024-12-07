@@ -92,6 +92,7 @@ type taskCreateForm struct {
 	Title               string                `form:"title"`
 	Content             string                `form:"content"`
 	Priority            string                `form:"priority"`
+	Status              string                `form:"status"`
 	WorkspaceID         int                   `form:"workspace_id"`
 	UserID              int                   `form:"user_id"`
 	DefaultUser         models.UserWithRole   `form:"-"`
@@ -207,6 +208,7 @@ func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) {
 		Priority:       task.Priority,
 		DefaultUser:    assignedUser,
 		WorkspaceUsers: otherUsers,
+		Status:         task.Status,
 	}
 
 	app.render(w, r, http.StatusOK, "task_update.html", data)
@@ -239,7 +241,7 @@ func (app *application) taskUpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.tasks.Update(id, form.Title, form.Content, form.Priority, form.UserID)
+	err = app.tasks.Update(id, form.Title, form.Content, form.Priority, form.UserID, form.Status)
 	if err != nil {
 		app.serverError(w, r, err)
 		return

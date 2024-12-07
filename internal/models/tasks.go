@@ -23,7 +23,7 @@ type TaskModelInterface interface {
 	Get(id int) (Task, error)
 	GetAll(workspaceId, limit, offset int) ([]Task, error)
 	GetTotalTasks(workspaceId int) (int, error)
-	Update(id int, title, content, priority string, userId int) error
+	Update(id int, title, content, priority string, userId int, status string) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
 	ValidateAdmin(userId, taskId int) (bool, error)
@@ -109,10 +109,10 @@ func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
 	return totalTasks, nil
 }
 
-func (m *TaskModel) Update(id int, title, content, priority string, userId int) error {
-	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ? where id = ?`
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error {
+	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ?, status = ? where id = ?`
 
-	_, err := m.DB.Exec(stmt, title, content, priority, userId, id)
+	_, err := m.DB.Exec(stmt, title, content, priority, userId, status, id)
 	if err != nil {
 		return err
 	}
