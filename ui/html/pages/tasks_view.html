@@ -50,6 +50,7 @@
         <tr>
           <th scope="col">Task Name</th>
           <th scope="col" class="task-table-description">Description</th>
+          <th scope="col">Priority</th>
           <th scope="col">Status</th>
           <th scope="col">Created Date</th>
           <th scope="col">Due Date</th>
@@ -70,6 +71,7 @@
             <span class="badge bg-danger">High</span>
             {{end}}
           </td>
+          <td>{{.Status}}</td>
           <td>{{humanDate .Created}}</td>
           <td>{{humanDate .Finished}}</td>
           <!-- Tasks table actions -->

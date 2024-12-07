@@ -54,7 +54,6 @@ INSERT INTO workspaces (title, description, created) VALUES (
     UTC_TIMESTAMP()
 );
 
-
 CREATE TABLE tasks (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL UNIQUE,
@@ -64,6 +63,7 @@ CREATE TABLE tasks (
     finished DATETIME NOT NULL,
     workspace_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'To Do',
     FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

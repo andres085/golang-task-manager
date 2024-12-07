@@ -15,6 +15,7 @@ type Task struct {
 	Finished    time.Time
 	WorkspaceId int
 	UserId      int
+	Status      string
 }
 
 type TaskModelInterface interface {
@@ -53,7 +54,7 @@ func (m *TaskModel) Get(id int) (Task, error) {
 
 	var t Task
 
-	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId)
+	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId, &t.Status)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Task{}, ErrNoRecord
@@ -81,7 +82,7 @@ func (m *TaskModel) GetAll(workspaceId, limit, offset int) ([]Task, error) {
 	for rows.Next() {
 		var t Task
 
-		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId)
+		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId, &t.Status)
 		if err != nil {
 			return nil, err
 		}
