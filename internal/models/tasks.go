@@ -110,9 +110,18 @@ func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
 }
 
 func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error {
-	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ?, status = ? where id = ?`
+	var finished *time.Time
 
-	_, err := m.DB.Exec(stmt, title, content, priority, userId, status, id)
+	if status == "Completed" {
+		now := time.Now()
+		finished = &now
+	} else {
+		finished = nil
+	}
+
+	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ?, status = ?, finished = ? where id = ?`
+
+	_, err := m.DB.Exec(stmt, title, content, priority, userId, status, finished, id)
 	if err != nil {
 		return err
 	}
