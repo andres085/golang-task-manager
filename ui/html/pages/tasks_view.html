@@ -81,7 +81,7 @@
             {{end}}
           </td>
           <td>{{humanDate .Created}}</td>
-          <td>{{humanDate .Finished}}</td>
+          <td>{{ if .Finished }}{{ humanDate .Finished }}{{ else }}Not Finished{{ end }}</td>
           <!-- Tasks table actions -->
           <td class="task-table-actions">
             <div class="d-flex justify-content-between gap-3">

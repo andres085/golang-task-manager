@@ -55,7 +55,9 @@
           <p class="card-text">{{humanDate .Created}}</p>
 
           <h5 class="card-title">Finished</h5>
-          <p class="card-text">{{humanDate .Finished}}</p>
+          <p class="card-text">
+            <td>{{ if .Finished }}{{ humanDate .Finished }}{{ else }}Not Finished{{ end }}</td>
+          </p>
 
           <div class="d-grid gap-2">
             <a href="/task/update/{{.ID}}" class="btn btn-primary w-100">Edit Task</a>
