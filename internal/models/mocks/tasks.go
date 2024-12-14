@@ -13,6 +13,7 @@ var firstMockTask = models.Task{
 	Priority: "LOW",
 	Created:  time.Now(),
 	Finished: time.Now(),
+	Status:   "To Do",
 }
 
 var secondMockTask = models.Task{
@@ -22,6 +23,7 @@ var secondMockTask = models.Task{
 	Priority: "MEDIUM",
 	Created:  time.Now(),
 	Finished: time.Now(),
+	Status:   "To Do",
 }
 
 type TaskModel struct{}
@@ -47,7 +49,7 @@ func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
 	return 0, nil
 }
 
-func (m *TaskModel) Update(id int, title, content, priority string, userId int) error {
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error {
 	return nil
 }
 

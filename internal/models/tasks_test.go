@@ -48,7 +48,7 @@ func TestUpdateMethod(t *testing.T) {
 	m := TaskModel{db}
 
 	newTitle := "Updated Title"
-	err := m.Update(1, newTitle, "Test Task Body", "HIGH", 1)
+	err := m.Update(1, newTitle, "Test Task Body", "HIGH", 1, "Completed")
 
 	assert.NilError(t, err)
 

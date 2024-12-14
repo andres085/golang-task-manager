@@ -1,6 +1,10 @@
 .table td,
 .table th {
     vertical-align: middle;
+    text-align: left;
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .text-truncate {
@@ -10,13 +14,28 @@
     text-overflow: ellipsis;
 }
 
+.title-truncate {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.title-truncate a {
+    text-decoration: none;
+    color: #0d6efd;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.title-truncate a:hover {
+    color: #6610f2;
+    text-shadow: 0px 0px 5px rgba(102, 1h, 242, 0.5);
+}
+
+
 .table-responsive {
     max-height: 500px;
     overflow-y: auto;
-}
-
-tr {
-    height: 60px;
 }
 
 .btn-group .btn {
@@ -28,15 +47,14 @@ tr {
 }
 
 .task-table-actions {
-    text-align: center;
     width: 150px;
 }
 
 .task-row {
     height: 60px;
+    display: table-row;
 }
 
 .tooltip-div {
   display: inline-block;
-  position: relative;
-}
+  position:

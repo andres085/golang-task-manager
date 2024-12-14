@@ -15,6 +15,7 @@ type Task struct {
 	Finished    time.Time
 	WorkspaceId int
 	UserId      int
+	Status      string
 }
 
 type TaskModelInterface interface {
@@ -22,7 +23,7 @@ type TaskModelInterface interface {
 	Get(id int) (Task, error)
 	GetAll(workspaceId, limit, offset int) ([]Task, error)
 	GetTotalTasks(workspaceId int) (int, error)
-	Update(id int, title, content, priority string, userId int) error
+	Update(id int, title, content, priority string, userId int, status string) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
 	ValidateAdmin(userId, taskId int) (bool, error)
@@ -53,7 +54,7 @@ func (m *TaskModel) Get(id int) (Task, error) {
 
 	var t Task
 
-	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId)
+	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId, &t.Status)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Task{}, ErrNoRecord
@@ -81,7 +82,7 @@ func (m *TaskModel) GetAll(workspaceId, limit, offset int) ([]Task, error) {
 	for rows.Next() {
 		var t Task
 
-		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId)
+		err = rows.Scan(&t.ID, &t.Title, &t.Content, &t.Priority, &t.Created, &t.Finished, &t.WorkspaceId, &t.UserId, &t.Status)
 		if err != nil {
 			return nil, err
 		}
@@ -108,10 +109,10 @@ func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
 	return totalTasks, nil
 }
 
-func (m *TaskModel) Update(id int, title, content, priority string, userId int) error {
-	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ? where id = ?`
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error {
+	stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ?, status = ? where id = ?`
 
-	_, err := m.DB.Exec(stmt, title, content, priority, userId, id)
+	_, err := m.DB.Exec(stmt, title, content, priority, userId, status, id)
 	if err != nil {
 		return err
 	}

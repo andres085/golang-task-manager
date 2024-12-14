@@ -50,6 +50,7 @@
         <tr>
           <th scope="col">Task Name</th>
           <th scope="col" class="task-table-description">Description</th>
+          <th scope="col">Priority</th>
           <th scope="col">Status</th>
           <th scope="col">Created Date</th>
           <th scope="col">Due Date</th>
@@ -59,7 +60,7 @@
       <tbody>
         {{range .Tasks}}
         <tr class="task-row">
-          <td><a href="/task/view/{{.ID}}">{{.Title}}</a></td>
+          <td class="title-truncate"><a href="/task/view/{{.ID}}">{{.Title}}</a></td>
           <td class="text-truncate">{{.Content}}</td>
           <td>
             {{if eq .Priority "LOW"}}
@@ -70,11 +71,20 @@
             <span class="badge bg-danger">High</span>
             {{end}}
           </td>
+          <td>
+            {{if eq .Status "To Do"}}
+            <span class="badge bg-secondary">To Do</span>
+            {{else if eq .Status "In Progress"}}
+            <span class="badge bg-info text-dark">In Progress</span>
+            {{else if eq .Status "Completed"}}
+            <span class="badge bg-success">Completed</span>
+            {{end}}
+          </td>
           <td>{{humanDate .Created}}</td>
           <td>{{humanDate .Finished}}</td>
           <!-- Tasks table actions -->
           <td class="task-table-actions">
-            <div class="d-flex justify-content-between gap-0">
+            <div class="d-flex justify-content-between gap-3">
               <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
               {{if $isAdmin}}
               <form action="/workspace/{{.WorkspaceId}}/task/delete/{{.ID}}" method="POST" class="delete-task-form">
