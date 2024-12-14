@@ -109,20 +109,10 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 
 	data := app.newTemplateData(r)
 
-	workspaceUsers, err := app.users.GetWorkspaceUsers(workspaceId)
+	adminUser, regularUsers, err := app.getFormsDefaultUser(workspaceId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
-	}
-
-	var adminUser models.UserWithRole
-	regularUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
-
-	for i, user := range workspaceUsers {
-		if user.Role == "ADMIN" {
-			adminUser = user
-			regularUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
-		}
 	}
 
 	data.Form = taskCreateForm{
@@ -150,7 +140,17 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() {
 		data := app.newTemplateData(r)
+
+		adminUser, regularUsers, err := app.getFormsDefaultUser(form.WorkspaceID)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		form.DefaultUser = adminUser
+		form.WorkspaceUsers = regularUsers
 		data.Form = form
+
 		app.render(w, r, http.StatusUnprocessableEntity, "task_create.html", data)
 		return
 	}

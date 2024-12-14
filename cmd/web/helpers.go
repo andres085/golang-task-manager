@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/andres085/task_manager/internal/models"
 	"github.com/go-playground/form/v4"
 	"github.com/justinas/nosurf"
 )
@@ -83,4 +84,23 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 	}
 
 	return nil
+}
+
+func (app *application) getFormsDefaultUser(workspaceId int) (models.UserWithRole, []models.UserWithRole, error) {
+	workspaceUsers, err := app.users.GetWorkspaceUsers(workspaceId)
+	if err != nil {
+		return models.UserWithRole{}, nil, err
+	}
+
+	var adminUser models.UserWithRole
+	regularUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
+
+	for i, user := range workspaceUsers {
+		if user.Role == "ADMIN" {
+			adminUser = user
+			regularUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
+		}
+	}
+
+	return adminUser, regularUsers, nil
 }
