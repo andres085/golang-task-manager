@@ -12,7 +12,7 @@ var firstMockTask = models.Task{
 	Content:  "First Test Task Content",
 	Priority: "LOW",
 	Created:  time.Now(),
-	Finished: time.Now(),
+	Finished: nil,
 	Status:   "To Do",
 }
 
@@ -22,7 +22,7 @@ var secondMockTask = models.Task{
 	Content:  "Second Test Task Content",
 	Priority: "MEDIUM",
 	Created:  time.Now(),
-	Finished: time.Now(),
+	Finished: nil,
 	Status:   "To Do",
 }
 

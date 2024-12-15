@@ -60,7 +60,7 @@ CREATE TABLE tasks (
     content TEXT NOT NULL,
     priority TEXT NOT NULL,
     created DATETIME NOT NULL,
-    finished DATETIME NOT NULL,
+    finished DATETIME DEFAULT NULL,
     workspace_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'To Do',
