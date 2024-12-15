@@ -90,6 +90,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	data.CurrentPage = page
 	data.TotalPages = totalPages
 	data.IsAdmin = userIsAdmin
+	data.Filter = title
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }

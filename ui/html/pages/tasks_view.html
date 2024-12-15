@@ -5,6 +5,7 @@
 {{template "modal" .}}
 {{$csrf := .CSRFToken}}
 {{$limit := .Limit}}
+{{$query := .Filter}}
 {{ $currentPage := .CurrentPage }}
 {{ $totalPages := .TotalPages }}
 {{ $isAdmin := .IsAdmin }}
@@ -25,7 +26,7 @@
       <div class="col-md-8 d-flex align-items-center">
         <!-- Search Input -->
         <form action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET" class="d-flex flex-grow-1 me-3">
-          <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value=""
+          <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value="{{$query}}"
             aria-label="Search tasks">
           <button class="btn btn-primary" type="submit">Search</button>
         </form>
@@ -103,7 +104,7 @@
       <ul class="pagination">
         {{range $i := iterPages $totalPages}}
         <li class="page-item {{if eq $i $currentPage}} active {{end}}">
-          <a class="page-link" href="?limit={{$limit}}&page={{$i}}">{{$i}}</a>
+          <a class="page-link" href="?limit={{$limit}}&page={{$i}}&query={{$query}}">{{$i}}</a>
         </li>
         {{end}}
       </ul>
