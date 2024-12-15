@@ -79,6 +79,10 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 
 	totalPages := int(math.Ceil(float64(totalTasks) / float64(limit)))
 
+	if title != "" && limit > len(tasks) {
+		totalPages = int(math.Ceil(float64(len(tasks)) / float64(limit)))
+	}
+
 	data := app.newTemplateData(r)
 	data.Tasks = tasks
 	data.Workspace.ID = workspaceId
