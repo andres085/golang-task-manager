@@ -55,6 +55,11 @@ func TestUpdateMethod(t *testing.T) {
 	updatedTask, err := m.Get(1)
 
 	assert.Equal(t, updatedTask.Title, newTitle)
+
+	d := updatedTask.Finished
+	if d == nil {
+		t.Errorf("got: nil; expected: %v", d)
+	}
 }
 
 func TestDeleteMethod(t *testing.T) {
