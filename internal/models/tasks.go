@@ -21,7 +21,7 @@ type Task struct {
 type TaskModelInterface interface {
 	Insert(title, content, priority string, workspaceId, userId int) (int, error)
 	Get(id int) (Task, error)
-	GetAll(workspaceId, limit, offset int) ([]Task, error)
+	GetAll(workspaceId, limit, offset int, query string) ([]Task, error)
 	GetTotalTasks(workspaceId int) (int, error)
 	Update(id int, title, content, priority string, userId int, status string) error
 	Delete(id int) (int, error)
@@ -66,11 +66,20 @@ func (m *TaskModel) Get(id int) (Task, error) {
 	return t, nil
 }
 
-func (m *TaskModel) GetAll(workspaceId, limit, offset int) ([]Task, error) {
+func (m *TaskModel) GetAll(workspaceId, limit, offset int, query string) ([]Task, error) {
 
-	stmt := `SELECT * FROM tasks where workspace_id = ? LIMIT ? OFFSET ?`
+	stmt := `SELECT * FROM tasks where workspace_id = ? `
+	args := []interface{}{workspaceId}
 
-	rows, err := m.DB.Query(stmt, workspaceId, limit, offset)
+	if query != "" {
+		stmt += "AND title LIKE ? "
+		args = append(args, "%"+query+"%")
+	}
+
+	stmt += " LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+
+	rows, err := m.DB.Query(stmt, args...)
 	if err != nil {
 		return nil, err
 	}

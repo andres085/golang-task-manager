@@ -54,6 +54,9 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	queryParams := r.URL.Query()
+	title := queryParams.Get("query")
+
 	userId := r.Context().Value(userIDContextKey).(int)
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
 	if err != nil {
@@ -62,7 +65,7 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 
 	limit, page, offset := getPaginationParams(r, 10)
 
-	tasks, err := app.tasks.GetAll(workspaceId, limit, offset)
+	tasks, err := app.tasks.GetAll(workspaceId, limit, offset, title)
 	if err != nil {
 		app.serverError(w, r, err)
 		return

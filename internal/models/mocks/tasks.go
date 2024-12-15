@@ -41,7 +41,7 @@ func (t *TaskModel) Get(id int) (models.Task, error) {
 	}
 }
 
-func (m *TaskModel) GetAll(id, limit, offset int) ([]models.Task, error) {
+func (m *TaskModel) GetAll(id, limit, offset int, query string) ([]models.Task, error) {
 	return []models.Task{firstMockTask, secondMockTask}, nil
 }
 

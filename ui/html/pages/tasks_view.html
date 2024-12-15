@@ -24,11 +24,11 @@
       <!-- Search Input and Tasks per Page Selector -->
       <div class="col-md-8 d-flex align-items-center">
         <!-- Search Input -->
-        <!-- <form action="/tasks_view" method="GET" class="d-flex flex-grow-1 me-3"> -->
-        <!--   <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value="" -->
-        <!--     aria-label="Search tasks"> -->
-        <!--   <button class="btn btn-primary" type="submit">Search</button> -->
-        <!-- </form> -->
+        <form action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET" class="d-flex flex-grow-1 me-3">
+          <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value=""
+            aria-label="Search tasks">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </form>
 
         <!-- Label and Limit Selector aligned horizontally -->
         <form id="limitForm" action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET"
@@ -40,7 +40,6 @@
             <option value="20" {{if eq $limit 20}}selected{{end}}>20</option>
             <option value="50" {{if eq $limit 50}}selected{{end}}>50</option>
           </select>
-          <!-- <input type="hidden" name="query" value=""> -->
         </form>
       </div>
     </div>
