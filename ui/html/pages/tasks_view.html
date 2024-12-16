@@ -5,7 +5,9 @@
 {{template "modal" .}}
 {{$csrf := .CSRFToken}}
 {{$limit := .Limit}}
-{{$query := .Filter}}
+{{$title := .Filter}}
+{{$priority := .PriorityFilter}}
+{{$status := .StatusFilter}}
 {{ $currentPage := .CurrentPage }}
 {{ $totalPages := .TotalPages }}
 {{ $isAdmin := .IsAdmin }}
@@ -21,28 +23,31 @@
     <!-- Tasks table -->
     {{if .Tasks}}
 
-    <div class="row mb-3 align-items-center">
-      <!-- Search Input and Tasks per Page Selector -->
-      <div class="col-md-8 d-flex align-items-center">
-        <!-- Search Input -->
-        <form action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET" class="d-flex flex-grow-1 me-3">
-          <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value="{{$query}}"
-            aria-label="Search tasks">
-          <button class="btn btn-primary" type="submit">Search</button>
-        </form>
+    <div class="col-md-6">
+      <form id="filterForm" method="GET" action="/workspace/view/{{.Workspace.ID}}/tasks" class="d-flex gap-2">
+        <!-- Smaller search input -->
+        <input class="form-control form-control-sm w-50" type="search" name="title" placeholder="Inser task title"
+          value="{{$title}}">
 
-        <!-- Label and Limit Selector aligned horizontally -->
-        <form id="limitForm" action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET"
-          class="d-flex align-items-center ms-2">
-          <label for="limitSelect" class="form-label me-2 mb-0">Limit:</label>
-          <select class="form-select" id="limitSelect" name="limit">
-            <option value="5" {{if eq $limit 5}}selected{{end}}>5</option>
-            <option value="10" {{if eq $limit 10}}selected{{end}}>10</option>
-            <option value="20" {{if eq $limit 20}}selected{{end}}>20</option>
-            <option value="50" {{if eq $limit 50}}selected{{end}}>50</option>
-          </select>
-        </form>
-      </div>
+        <!-- Priority dropdown -->
+        <select class="form-select form-select-sm w-auto" name="priority">
+          <option value="">Priority</option>
+          <option value="LOW" {{if eq $priority "LOW" }}selected{{end}}>Low</option>
+          <option value="MEDIUM" {{if eq $priority "MEDIUM" }}selected{{end}}>Medium</option>
+          <option value="HIGH" {{if eq $priority "HIGH" }}selected{{end}}>High</option>
+        </select>
+
+        <!-- Status dropdown -->
+        <select class="form-select form-select-sm w-auto" name="status">
+          <option value="">Status</option>
+          <option value="To Do" {{if eq $status "To Do" }}selected{{end}}>To Do</option>
+          <option value="In Progress" {{if eq $status "In Progress" }}selected{{end}}>In Progress</option>
+          <option value="Completed" {{if eq $status "Completed" }}selected{{end}}>Completed</option>
+        </select>
+
+        <!-- Search button -->
+        <button class="btn btn-sm btn-primary" type="submit">Search</button>
+      </form>
     </div>
 
     <table class="table table-striped">
@@ -52,7 +57,15 @@
           <th scope="col" class="task-table-description">Description</th>
           <th scope="col">Priority</th>
           <th scope="col">Status</th>
-          <th scope="col">Created Date</th>
+          <th scope="col">
+            <a href="?sort=asc" class="text-decoration-none">
+              Created Date ↑
+            </a>
+            |
+            <a href="?sort=desc" class="text-decoration-none">
+              ↓
+            </a>
+          </th>
           <th scope="col">Due Date</th>
           <th scope="col" class="task-table-actions">Actions</th>
         </tr>
@@ -104,7 +117,8 @@
       <ul class="pagination">
         {{range $i := iterPages $totalPages}}
         <li class="page-item {{if eq $i $currentPage}} active {{end}}">
-          <a class="page-link" href="?limit={{$limit}}&page={{$i}}&query={{$query}}">{{$i}}</a>
+          <a class="page-link"
+            href="?limit={{$limit}}&page={{$i}}&title={{$title}}&priority{{$priority}}&status={{$status}}">{{$i}}</a>
         </li>
         {{end}}
       </ul>

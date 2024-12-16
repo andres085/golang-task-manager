@@ -21,8 +21,8 @@ type Task struct {
 type TaskModelInterface interface {
 	Insert(title, content, priority string, workspaceId, userId int) (int, error)
 	Get(id int) (Task, error)
-	GetAll(workspaceId, limit, offset int, query string) ([]Task, error)
-	GetTotalTasks(workspaceId int, query string) (int, error)
+	GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error)
+	GetTotalTasks(workspaceId int, title, priority, status string) (int, error)
 	Update(id int, title, content, priority string, userId int, status string) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
@@ -66,17 +66,28 @@ func (m *TaskModel) Get(id int) (Task, error) {
 	return t, nil
 }
 
-func (m *TaskModel) GetAll(workspaceId, limit, offset int, query string) ([]Task, error) {
+func (m *TaskModel) GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error) {
 
-	stmt := `SELECT * FROM tasks where workspace_id = ? `
+	stmt := `SELECT * FROM tasks where workspace_id = ?`
 	args := []interface{}{workspaceId}
 
-	if query != "" {
+	if title != "" {
 		stmt += "AND title LIKE ? "
-		args = append(args, "%"+query+"%")
+		args = append(args, "%"+title+"%")
+	}
+	if priority != "" {
+		stmt += "AND priority = ? "
+		args = append(args, priority)
+	}
+	if status != "" {
+		stmt += "AND status = ? "
+		args = append(args, status)
+	}
+	if sort != "asc" && sort != "desc" {
+		sort = "asc"
 	}
 
-	stmt += " LIMIT ? OFFSET ?"
+	stmt += " ORDER BY created " + sort + " LIMIT ? OFFSET ?"
 	args = append(args, limit, offset)
 
 	rows, err := m.DB.Query(stmt, args...)
@@ -106,16 +117,24 @@ func (m *TaskModel) GetAll(workspaceId, limit, offset int, query string) ([]Task
 	return tasks, nil
 }
 
-func (m *TaskModel) GetTotalTasks(workspaceId int, query string) (int, error) {
+func (m *TaskModel) GetTotalTasks(workspaceId int, title, priority, status string) (int, error) {
 	var totalTasks int
 
 	countStmt := `SELECT COUNT(*) FROM tasks WHERE workspace_id = ? `
 
 	args := []interface{}{workspaceId}
 
-	if query != "" {
+	if title != "" {
 		countStmt += "AND title LIKE ? "
-		args = append(args, "%"+query+"%")
+		args = append(args, "%"+title+"%")
+	}
+	if priority != "" {
+		countStmt += "AND priority = ? "
+		args = append(args, priority)
+	}
+	if status != "" {
+		countStmt += "AND status = ? "
+		args = append(args, status)
 	}
 
 	err := m.DB.QueryRow(countStmt, args...).Scan(&totalTasks)
@@ -179,4 +198,14 @@ func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) {
 
 	err := m.DB.QueryRow(stmt, taskId, userId).Scan(&isAdmin)
 	return isAdmin, err
+}
+
+func prepareQueryArgs(args ...interface{}) []interface{} {
+	var preparedArgs []interface{}
+	for _, arg := range args {
+		if arg != nil {
+			preparedArgs = append(preparedArgs, arg)
+		}
+	}
+	return preparedArgs
 }

@@ -55,7 +55,10 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queryParams := r.URL.Query()
-	title := queryParams.Get("query")
+	title := queryParams.Get("title")
+	priority := queryParams.Get("priority")
+	status := queryParams.Get("status")
+	sort := queryParams.Get("sort")
 
 	userId := r.Context().Value(userIDContextKey).(int)
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
@@ -65,13 +68,13 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 
 	limit, page, offset := getPaginationParams(r, 10)
 
-	tasks, err := app.tasks.GetAll(workspaceId, limit, offset, title)
+	tasks, err := app.tasks.GetAll(workspaceId, limit, offset, title, priority, status, sort)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	totalTasks, err := app.tasks.GetTotalTasks(workspaceId, title)
+	totalTasks, err := app.tasks.GetTotalTasks(workspaceId, title, priority, status)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -87,6 +90,8 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	data.TotalPages = totalPages
 	data.IsAdmin = userIsAdmin
 	data.Filter = title
+	data.PriorityFilter = priority
+	data.StatusFilter = status
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }
