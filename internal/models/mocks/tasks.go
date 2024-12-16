@@ -45,7 +45,7 @@ func (m *TaskModel) GetAll(id, limit, offset int, query string) ([]models.Task, 
 	return []models.Task{firstMockTask, secondMockTask}, nil
 }
 
-func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
+func (m *TaskModel) GetTotalTasks(workspaceId int, query string) (int, error) {
 	return 0, nil
 }
 

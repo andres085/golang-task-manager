@@ -22,7 +22,7 @@ type TaskModelInterface interface {
 	Insert(title, content, priority string, workspaceId, userId int) (int, error)
 	Get(id int) (Task, error)
 	GetAll(workspaceId, limit, offset int, query string) ([]Task, error)
-	GetTotalTasks(workspaceId int) (int, error)
+	GetTotalTasks(workspaceId int, query string) (int, error)
 	Update(id int, title, content, priority string, userId int, status string) error
 	Delete(id int) (int, error)
 	ValidateOwnership(userId, taskId int) (bool, error)
@@ -106,11 +106,19 @@ func (m *TaskModel) GetAll(workspaceId, limit, offset int, query string) ([]Task
 	return tasks, nil
 }
 
-func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
+func (m *TaskModel) GetTotalTasks(workspaceId int, query string) (int, error) {
 	var totalTasks int
 
-	countStmt := `SELECT COUNT(*) FROM tasks WHERE workspace_id = ?`
-	err := m.DB.QueryRow(countStmt, workspaceId).Scan(&totalTasks)
+	countStmt := `SELECT COUNT(*) FROM tasks WHERE workspace_id = ? `
+
+	args := []interface{}{workspaceId}
+
+	if query != "" {
+		countStmt += "AND title LIKE ? "
+		args = append(args, "%"+query+"%")
+	}
+
+	err := m.DB.QueryRow(countStmt, args...).Scan(&totalTasks)
 	if err != nil {
 		return 0, err
 	}
