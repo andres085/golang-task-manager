@@ -58,3 +58,27 @@
 .tooltip-div {
   display: inline-block;
   position:
+}
+
+
+form#filterForm .form-control,
+form#filterForm .form-select,
+form#filterForm .btn {
+    margin: 0;
+}
+
+.form-select-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    line-height: 1.5;
+}
+
+.form-select-sm.w-auto {
+    min-width: 120px;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}

@@ -41,11 +41,11 @@ func (t *TaskModel) Get(id int) (models.Task, error) {
 	}
 }
 
-func (m *TaskModel) GetAll(id, limit, offset int) ([]models.Task, error) {
+func (m *TaskModel) GetAll(id, limit, offset int, title, priority, status, sort string) ([]models.Task, error) {
 	return []models.Task{firstMockTask, secondMockTask}, nil
 }
 
-func (m *TaskModel) GetTotalTasks(workspaceId int) (int, error) {
+func (m *TaskModel) GetTotalTasks(workspaceId int, title, priority, status string) (int, error) {
 	return 0, nil
 }
 

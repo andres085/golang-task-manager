@@ -54,6 +54,12 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	queryParams := r.URL.Query()
+	title := queryParams.Get("title")
+	priority := queryParams.Get("priority")
+	status := queryParams.Get("status")
+	sort := queryParams.Get("sort")
+
 	userId := r.Context().Value(userIDContextKey).(int)
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
 	if err != nil {
@@ -62,13 +68,13 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 
 	limit, page, offset := getPaginationParams(r, 10)
 
-	tasks, err := app.tasks.GetAll(workspaceId, limit, offset)
+	tasks, err := app.tasks.GetAll(workspaceId, limit, offset, title, priority, status, sort)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	totalTasks, err := app.tasks.GetTotalTasks(workspaceId)
+	totalTasks, err := app.tasks.GetTotalTasks(workspaceId, title, priority, status)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -83,6 +89,9 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	data.CurrentPage = page
 	data.TotalPages = totalPages
 	data.IsAdmin = userIsAdmin
+	data.Filter = title
+	data.PriorityFilter = priority
+	data.StatusFilter = status
 
 	app.render(w, r, http.StatusOK, "tasks_view.html", data)
 }
@@ -496,9 +505,9 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 	if email != "" {
 		foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
 		totalWorkspaces, err := app.users.GetWorkspacesAsMemberCount(email)
-		canCreateWorkspaces := totalWorkspaces > 6
+		canBeInvitedToWorkspaces := totalWorkspaces < 6
 
-		if !canCreateWorkspaces {
+		if !canBeInvitedToWorkspaces {
 			app.sessionManager.Put(r.Context(), "flash", "User exceeds workspace limit")
 			http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
 		}

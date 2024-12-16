@@ -5,10 +5,14 @@
 {{template "modal" .}}
 {{$csrf := .CSRFToken}}
 {{$limit := .Limit}}
+{{$title := .Filter}}
+{{$priority := .PriorityFilter}}
+{{$status := .StatusFilter}}
 {{ $currentPage := .CurrentPage }}
 {{ $totalPages := .TotalPages }}
 {{ $isAdmin := .IsAdmin }}
 <div class="container mt-5 flex-grow-1">
+  <!-- Header and search form -->
   <div class="row mb-3 align-items-center">
     <div class="col-md-8">
       <h2>Tasks View</h2>
@@ -16,106 +20,125 @@
     <div class="col-md-4 text-end">
       <a href="/workspace/{{.Workspace.ID}}/task/create" class="btn btn-primary">Create Task</a>
     </div>
+  </div>
 
-    <!-- Tasks table -->
-    {{if .Tasks}}
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <form id="filterForm" method="GET" action="/workspace/view/{{.Workspace.ID}}/tasks" class="d-flex gap-2">
+        <!-- Smaller search input -->
+        <input class="form-control form-control-sm w-50" type="search" name="title" placeholder="Insert task title"
+          value="{{$title}}">
 
-    <div class="row mb-3 align-items-center">
-      <!-- Search Input and Tasks per Page Selector -->
-      <div class="col-md-8 d-flex align-items-center">
-        <!-- Search Input -->
-        <!-- <form action="/tasks_view" method="GET" class="d-flex flex-grow-1 me-3"> -->
-        <!--   <input class="form-control me-2" type="search" name="query" placeholder="Search tasks" value="" -->
-        <!--     aria-label="Search tasks"> -->
-        <!--   <button class="btn btn-primary" type="submit">Search</button> -->
-        <!-- </form> -->
+        <!-- Priority dropdown -->
+        <select class="form-select form-select-sm w-auto" name="priority">
+          <option value="">Priority</option>
+          <option value="LOW" {{if eq $priority "LOW" }}selected{{end}}>Low</option>
+          <option value="MEDIUM" {{if eq $priority "MEDIUM" }}selected{{end}}>Medium</option>
+          <option value="HIGH" {{if eq $priority "HIGH" }}selected{{end}}>High</option>
+        </select>
 
-        <!-- Label and Limit Selector aligned horizontally -->
-        <form id="limitForm" action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET"
-          class="d-flex align-items-center ms-2">
-          <label for="limitSelect" class="form-label me-2 mb-0">Limit:</label>
-          <select class="form-select" id="limitSelect" name="limit">
-            <option value="5" {{if eq $limit 5}}selected{{end}}>5</option>
-            <option value="10" {{if eq $limit 10}}selected{{end}}>10</option>
-            <option value="20" {{if eq $limit 20}}selected{{end}}>20</option>
-            <option value="50" {{if eq $limit 50}}selected{{end}}>50</option>
-          </select>
-          <!-- <input type="hidden" name="query" value=""> -->
-        </form>
-      </div>
+        <!-- Status dropdown -->
+        <select class="form-select form-select-sm w-auto" name="status">
+          <option value="">Status</option>
+          <option value="To Do" {{if eq $status "To Do" }}selected{{end}}>To Do</option>
+          <option value="In Progress" {{if eq $status "In Progress" }}selected{{end}}>In Progress</option>
+          <option value="Completed" {{if eq $status "Completed" }}selected{{end}}>Completed</option>
+        </select>
+
+        <!-- Search button -->
+        <button class="btn btn-sm btn-primary" type="submit">Search</button>
+      </form>
     </div>
+  </div>
 
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th scope="col">Task Name</th>
-          <th scope="col" class="task-table-description">Description</th>
-          <th scope="col">Priority</th>
-          <th scope="col">Status</th>
-          <th scope="col">Created Date</th>
-          <th scope="col">Due Date</th>
-          <th scope="col" class="task-table-actions">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{range .Tasks}}
-        <tr class="task-row">
-          <td class="title-truncate"><a href="/task/view/{{.ID}}">{{.Title}}</a></td>
-          <td class="text-truncate">{{.Content}}</td>
-          <td>
-            {{if eq .Priority "LOW"}}
-            <span class="badge bg-success">Low</span>
-            {{else if eq .Priority "MEDIUM"}}
-            <span class="badge bg-warning text-dark">Medium</span>
-            {{else}}
-            <span class="badge bg-danger">High</span>
-            {{end}}
-          </td>
-          <td>
-            {{if eq .Status "To Do"}}
-            <span class="badge bg-secondary">To Do</span>
-            {{else if eq .Status "In Progress"}}
-            <span class="badge bg-info text-dark">In Progress</span>
-            {{else if eq .Status "Completed"}}
-            <span class="badge bg-success">Completed</span>
-            {{end}}
-          </td>
-          <td>{{humanDate .Created}}</td>
-          <td>{{ if .Finished }}{{ humanDate .Finished }}{{ else }}Not Finished{{ end }}</td>
-          <!-- Tasks table actions -->
-          <td class="task-table-actions">
-            <div class="d-flex justify-content-between gap-3">
-              <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
-              {{if $isAdmin}}
-              <form action="/workspace/{{.WorkspaceId}}/task/delete/{{.ID}}" method="POST" class="delete-task-form">
-                <input type='hidden' name='csrf_token' value='{{ $csrf }}'>
-                <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal"
-                  data-bs-target="#deleteModal" data-entity="Task">Delete</button>
-              </form>
+  <!-- Tasks table -->
+  {{if .Tasks}}
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Task Name</th>
+            <th scope="col" class="task-table-description">Description</th>
+            <th scope="col">Priority</th>
+            <th scope="col">Status</th>
+            <th scope="col">
+              <a href="?limit={{$limit}}&title={{$title}}&priority={{$priority}}&status={{$status}}&sort=asc"
+                class="text-decoration-none">
+                Created Date ↑
+              </a>
+              |
+              <a href="?limit={{$limit}}&title={{$title}}&priority={{$priority}}&status={{$status}}&sort=desc"
+                class="text-decoration-none">
+                ↓
+              </a>
+            </th>
+            <th scope="col">Due Date</th>
+            <th scope="col" class="task-table-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Tasks}}
+          <tr class="task-row">
+            <td class="title-truncate"><a href="/task/view/{{.ID}}">{{.Title}}</a></td>
+            <td class="text-truncate">{{.Content}}</td>
+            <td>
+              {{if eq .Priority "LOW"}}
+              <span class="badge bg-success">Low</span>
+              {{else if eq .Priority "MEDIUM"}}
+              <span class="badge bg-warning text-dark">Medium</span>
+              {{else}}
+              <span class="badge bg-danger">High</span>
               {{end}}
-            </div>
-          </td>
-        </tr>
-        {{end}}
-      </tbody>
-    </table>
-
-    <nav aria-label="Task pagination">
-      <ul class="pagination">
-        {{range $i := iterPages $totalPages}}
-        <li class="page-item {{if eq $i $currentPage}} active {{end}}">
-          <a class="page-link" href="?limit={{$limit}}&page={{$i}}">{{$i}}</a>
-        </li>
-        {{end}}
-      </ul>
-    </nav>
-
-    {{else}}
-    <div class="col-md-6 mx-auto mt-5 text-center">
+            </td>
+            <td>
+              {{if eq .Status "To Do"}}
+              <span class="badge bg-secondary">To Do</span>
+              {{else if eq .Status "In Progress"}}
+              <span class="badge bg-info text-dark">In Progress</span>
+              {{else if eq .Status "Completed"}}
+              <span class="badge bg-success">Completed</span>
+              {{end}}
+            </td>
+            <td>{{humanDate .Created}}</td>
+            <td>{{ if .Finished }}{{ humanDate .Finished }}{{ else }}Not Finished{{ end }}</td>
+            <td class="task-table-actions">
+              <div class="d-flex justify-content-between gap-3">
+                <a href="/task/update/{{.ID}}" class="btn btn-sm btn-warning">Edit</a>
+                {{if $isAdmin}}
+                <form action="/workspace/{{.WorkspaceId}}/task/delete/{{.ID}}" method="POST" class="delete-task-form">
+                  <input type='hidden' name='csrf_token' value='{{ $csrf }}'>
+                  <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal"
+                    data-bs-target="#deleteModal" data-entity="Task">Delete</button>
+                </form>
+                {{end}}
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+      <nav aria-label="Task pagination">
+        <ul class="pagination">
+          {{range $i := iterPages $totalPages}}
+          <li class="page-item {{if eq $i $currentPage}} active {{end}}">
+            <a class="page-link"
+              href="?limit={{$limit}}&page={{$i}}&title={{$title}}&priority={{$priority}}&status={{$status}}">{{$i}}</a>
+          </li>
+          {{end}}
+        </ul>
+      </nav>
+    </div>
+  </div>
+  {{else}}
+  <!-- No tasks message -->
+  <div class="row mt-5">
+    <div class="col-md-6 mx-auto text-center">
       <p class="text-muted">No tasks have been added...</p>
     </div>
-    {{end}}
   </div>
+  {{end}}
+
   <script src="/static/js/modal.js"></script>
   <script src="/static/js/pagination.js"></script>
 </div>

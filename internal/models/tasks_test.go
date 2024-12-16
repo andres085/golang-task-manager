@@ -36,7 +36,7 @@ func TestGetAllMethod(t *testing.T) {
 	m := TaskModel{db}
 	id := 1
 
-	tasks, err := m.GetAll(id, 10, 0)
+	tasks, err := m.GetAll(id, 10, 0, "", "", "", "")
 
 	assert.Equal(t, len(tasks), 3)
 	assert.NilError(t, err)
