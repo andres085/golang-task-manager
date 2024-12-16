@@ -63,11 +63,13 @@
             <th scope="col">Priority</th>
             <th scope="col">Status</th>
             <th scope="col">
-              <a href="?sort=asc" class="text-decoration-none">
+              <a href="?limit={{$limit}}&title={{$title}}&priority={{$priority}}&status={{$status}}&sort=asc"
+                class="text-decoration-none">
                 Created Date ↑
               </a>
               |
-              <a href="?sort=desc" class="text-decoration-none">
+              <a href="?limit={{$limit}}&title={{$title}}&priority={{$priority}}&status={{$status}}&sort=desc"
+                class="text-decoration-none">
                 ↓
               </a>
             </th>
@@ -116,6 +118,16 @@
           {{end}}
         </tbody>
       </table>
+      <nav aria-label="Task pagination">
+        <ul class="pagination">
+          {{range $i := iterPages $totalPages}}
+          <li class="page-item {{if eq $i $currentPage}} active {{end}}">
+            <a class="page-link"
+              href="?limit={{$limit}}&page={{$i}}&title={{$title}}&priority={{$priority}}&status={{$status}}">{{$i}}</a>
+          </li>
+          {{end}}
+        </ul>
+      </nav>
     </div>
   </div>
   {{else}}
