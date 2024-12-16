@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
@@ -132,6 +133,24 @@ func TestTaskView(t *testing.T) {
 				assert.StringContains(t, body, tt.wantContent)
 			}
 		})
+	}
+}
+
+func TestTaskViewNotFoundError(t *testing.T) {
+	app := newTestApplication(t)
+
+	req, err := http.NewRequest("GET", "/task/view/-1", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(app.taskView)
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusNotFound {
+		t.Errorf("got %d, want %d", rr.Code, http.StatusNotFound)
 	}
 }
 
