@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -69,28 +70,22 @@ func (m *TaskModel) Get(id int) (Task, error) {
 func (m *TaskModel) GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error) {
 
 	stmt := `SELECT * FROM tasks where workspace_id = ?`
-	args := []interface{}{workspaceId}
 
-	if title != "" {
-		stmt += "AND title LIKE ? "
-		args = append(args, "%"+title+"%")
-	}
-	if priority != "" {
-		stmt += "AND priority = ? "
-		args = append(args, priority)
-	}
-	if status != "" {
-		stmt += "AND status = ? "
-		args = append(args, status)
-	}
-	if sort != "asc" && sort != "desc" {
-		sort = "asc"
+	conditions := map[string]interface{}{
+		"workspaceId": workspaceId,
+		"title":       title,
+		"priority":    priority,
+		"status":      status,
+		"sort":        sort,
+		"limit":       limit,
+		"offset":      offset,
 	}
 
-	stmt += " ORDER BY created " + sort + " LIMIT ? OFFSET ?"
-	args = append(args, limit, offset)
+	preparedStmt, args := prepareStmt(stmt, conditions)
 
-	rows, err := m.DB.Query(stmt, args...)
+	fmt.Println("preparedStmt", preparedStmt)
+	fmt.Println("args", args)
+	rows, err := m.DB.Query(preparedStmt, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -200,12 +195,33 @@ func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) {
 	return isAdmin, err
 }
 
-func prepareQueryArgs(args ...interface{}) []interface{} {
-	var preparedArgs []interface{}
-	for _, arg := range args {
-		if arg != nil {
-			preparedArgs = append(preparedArgs, arg)
+func prepareStmt(baseStmt string, conditions map[string]interface{}) (string, []interface{}) {
+	workspaceId := conditions["workspaceId"]
+	args := []interface{}{workspaceId}
+
+	for column, value := range conditions {
+
+		if column == "title" && value != "" {
+			baseStmt += fmt.Sprintf(" AND %s LIKE ? ", column)
+			args = append(args, fmt.Sprintf(`%%%s%%`, value))
+		}
+		if column == "priority" && value != "" {
+			baseStmt += fmt.Sprintf(" AND %s = ? ", column)
+			args = append(args, value)
+		}
+		if column == "status" && value != "" {
+			baseStmt += fmt.Sprintf(" AND %s = ? ", column)
+			args = append(args, value)
 		}
 	}
-	return preparedArgs
+
+	sort := conditions["sort"].(string)
+	if sort != "asc" && sort != "desc" {
+		sort = "asc"
+	}
+
+	baseStmt += " ORDER BY created " + sort + " LIMIT ? OFFSET ?"
+	args = append(args, conditions["limit"], conditions["offset"])
+
+	return baseStmt, args
 }
