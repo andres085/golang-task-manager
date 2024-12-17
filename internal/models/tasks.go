@@ -83,8 +83,6 @@ func (m *TaskModel) GetAll(workspaceId, limit, offset int, title, priority, stat
 
 	preparedStmt, args := prepareStmt(stmt, conditions)
 
-	fmt.Println("preparedStmt", preparedStmt)
-	fmt.Println("args", args)
 	rows, err := m.DB.Query(preparedStmt, args...)
 	if err != nil {
 		return nil, err

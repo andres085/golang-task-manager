@@ -23,7 +23,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 
-	mux.Handle("GET /task/view/{id}", taskOwnership.ThenFunc(app.taskView))
+	mux.Handle("GET /task/view/{id}", protected.ThenFunc(app.taskView))
 	mux.Handle("GET /task/update/{id}", taskOwnership.ThenFunc(app.taskUpdate))
 	mux.Handle("GET /workspace/{id}/task/create", workspaceOwnership.ThenFunc(app.taskCreate))
 	mux.Handle("POST /task/create", protected.ThenFunc(app.taskCreatePost))

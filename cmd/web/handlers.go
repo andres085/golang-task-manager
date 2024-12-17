@@ -40,6 +40,16 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 	}
 
+	isTaskOwner, err := app.tasks.ValidateOwnership(userId, task.ID)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+
+	if !isTaskOwner {
+		http.NotFound(w, r)
+		return
+	}
+
 	data := app.newTemplateData(r)
 	data.Task = task
 	data.IsAdmin = userIsAdmin

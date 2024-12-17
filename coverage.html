@@ -67,6 +67,24 @@
 				
 				<option value="file5">github.com/andres085/task_manager/cmd/web/templates.go (82.8%)</option>
 				
+				<option value="file6">github.com/andres085/task_manager/internal/assert/assert.go (66.7%)</option>
+				
+				<option value="file7">github.com/andres085/task_manager/internal/models/mocks/logger.go (66.7%)</option>
+				
+				<option value="file8">github.com/andres085/task_manager/internal/models/mocks/tasks.go (92.9%)</option>
+				
+				<option value="file9">github.com/andres085/task_manager/internal/models/mocks/users.go (57.1%)</option>
+				
+				<option value="file10">github.com/andres085/task_manager/internal/models/mocks/workspaces.go (84.6%)</option>
+				
+				<option value="file11">github.com/andres085/task_manager/internal/models/tasks.go (65.6%)</option>
+				
+				<option value="file12">github.com/andres085/task_manager/internal/models/users.go (19.2%)</option>
+				
+				<option value="file13">github.com/andres085/task_manager/internal/models/workspaces.go (78.9%)</option>
+				
+				<option value="file14">github.com/andres085/task_manager/internal/validator/validator.go (84.6%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -1417,6 +1435,899 @@ func getPaginationParams(r *http.Request, defaultLimit int) (int, int, int) <spa
 
         return limit, page, offset</span>
 }
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package assert
+
+import (
+        "strings"
+        "testing"
+)
+
+func Equal[T comparable](t *testing.T, actual, expected T) <span class="cov8" title="1">{
+        t.Helper()
+
+        if actual != expected </span><span class="cov0" title="0">{
+                t.Errorf("got: %v; want: %v", actual, expected)
+        }</span>
+}
+
+func StringContains(t *testing.T, actual, expectedSubstring string) <span class="cov8" title="1">{
+        t.Helper()
+
+        if !strings.Contains(actual, expectedSubstring) </span><span class="cov0" title="0">{
+                t.Errorf("got: %q; expected to contain: %q", actual, expectedSubstring)
+        }</span>
+}
+
+func NilError(t *testing.T, actual error) <span class="cov8" title="1">{
+        t.Helper()
+
+        if actual != nil </span><span class="cov0" title="0">{
+                t.Errorf("got: %v; expected: nil", actual)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package mocks
+
+import (
+        "context"
+        "log/slog"
+)
+
+type SpyLogger struct {
+        Called  bool
+        Entries []slog.Record
+}
+
+func (s *SpyLogger) Enabled(ctx context.Context, level slog.Level) bool <span class="cov8" title="1">{
+        return true
+}</span>
+
+func (s *SpyLogger) Handle(ctx context.Context, r slog.Record) error <span class="cov8" title="1">{
+        s.Called = true
+        s.Entries = append(s.Entries, r)
+        return nil
+}</span>
+
+func (s *SpyLogger) WithAttrs(attrs []slog.Attr) slog.Handler <span class="cov0" title="0">{
+        return s
+}</span>
+
+func (s *SpyLogger) WithGroup(name string) slog.Handler <span class="cov0" title="0">{
+        return s
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package mocks
+
+import (
+        "time"
+
+        "github.com/andres085/task_manager/internal/models"
+)
+
+var firstMockTask = models.Task{
+        ID:       1,
+        Title:    "First Test Task",
+        Content:  "First Test Task Content",
+        Priority: "LOW",
+        Created:  time.Now(),
+        Finished: nil,
+        Status:   "To Do",
+}
+
+var secondMockTask = models.Task{
+        ID:       2,
+        Title:    "Second Test Task",
+        Content:  "Second Test Task Content",
+        Priority: "MEDIUM",
+        Created:  time.Now(),
+        Finished: nil,
+        Status:   "To Do",
+}
+
+type TaskModel struct{}
+
+func (t *TaskModel) Insert(title, content, priority string, workspaceId, userId int) (int, error) <span class="cov8" title="1">{
+        return 2, nil
+}</span>
+
+func (t *TaskModel) Get(id int) (models.Task, error) <span class="cov8" title="1">{
+        switch id </span>{
+        case 1:<span class="cov8" title="1">
+                return firstMockTask, nil</span>
+        default:<span class="cov0" title="0">
+                return models.Task{}, models.ErrNoRecord</span>
+        }
+}
+
+func (m *TaskModel) GetAll(id, limit, offset int, title, priority, status, sort string) ([]models.Task, error) <span class="cov8" title="1">{
+        return []models.Task{firstMockTask, secondMockTask}, nil
+}</span>
+
+func (m *TaskModel) GetTotalTasks(workspaceId int, title, priority, status string) (int, error) <span class="cov8" title="1">{
+        return 0, nil
+}</span>
+
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error <span class="cov8" title="1">{
+        return nil
+}</span>
+
+func (m *TaskModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        return 1, nil
+}</span>
+
+func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; taskId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+
+func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; taskId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package mocks
+
+import "github.com/andres085/task_manager/internal/models"
+
+type UserModel struct{}
+type UserWithRole struct{}
+
+var firstMockUser = models.UserWithRole{
+        ID:        1,
+        FirstName: "Test",
+        LastName:  "McTester",
+        Email:     "testmctesterson@mail.com",
+        Role:      "ADMIN",
+}
+
+var secondMockUser = models.UserWithRole{
+        ID:        2,
+        FirstName: "Pete",
+        LastName:  "Peterson",
+        Email:     "pete@mail.com",
+        Role:      "MEMBER",
+}
+
+func (m *UserModel) Insert(firstName, lastName, email, password string) error <span class="cov8" title="1">{
+        switch email </span>{
+        case "dupe@example.com":<span class="cov0" title="0">
+                return models.ErrDuplicateEmail</span>
+        default:<span class="cov8" title="1">
+                return nil</span>
+        }
+}
+
+func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*models.User, error) <span class="cov0" title="0">{
+        return &amp;models.User{}, nil
+}</span>
+
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error <span class="cov0" title="0">{
+        return nil
+}</span>
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]models.UserWithRole, error) <span class="cov8" title="1">{
+        return []models.UserWithRole{firstMockUser, secondMockUser}, nil
+}</span>
+
+func (m *UserModel) Authenticate(email, password string) (int, error) <span class="cov8" title="1">{
+        if email == "alice@example.com" &amp;&amp; password == "pa$$word" </span><span class="cov8" title="1">{
+                return 1, nil
+        }</span>
+
+        <span class="cov0" title="0">return 0, models.ErrInvalidCredentials</span>
+}
+
+func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) <span class="cov0" title="0">{
+        return 1, nil
+}</span>
+
+func (m *UserModel) Exists(id int) (bool, error) <span class="cov8" title="1">{
+        switch id </span>{
+        case 1:<span class="cov8" title="1">
+                return true, nil</span>
+        default:<span class="cov8" title="1">
+                return false, nil</span>
+        }
+}
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) <span class="cov0" title="0">{
+        return 1, nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package mocks
+
+import (
+        "github.com/andres085/task_manager/internal/models"
+)
+
+var firstMockWorkspace = models.Workspace{
+        ID:          1,
+        Title:       "First Workspace",
+        Description: "First workspace Description",
+}
+
+var secondMockWorkspace = models.Workspace{
+        ID:          2,
+        Title:       "Second Workspace",
+        Description: "Second workspace Description",
+}
+
+type WorkspaceModel struct{}
+
+func (t *WorkspaceModel) Insert(title, description string, userId int) (int, error) <span class="cov0" title="0">{
+        return 2, nil
+}</span>
+
+func (t *WorkspaceModel) Get(id int) (models.Workspace, error) <span class="cov8" title="1">{
+        switch id </span>{
+        case 1:<span class="cov8" title="1">
+                return firstMockWorkspace, nil</span>
+        default:<span class="cov0" title="0">
+                return models.Workspace{}, models.ErrNoRecord</span>
+        }
+}
+
+func (m *WorkspaceModel) GetAll(userId int, role string) ([]models.Workspace, error) <span class="cov8" title="1">{
+        return []models.Workspace{firstMockWorkspace, secondMockWorkspace}, nil
+}</span>
+
+func (m *WorkspaceModel) Update(id int, title, description string) error <span class="cov8" title="1">{
+        return nil
+}</span>
+
+func (m *WorkspaceModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        return 1, nil
+}</span>
+
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; workspaceId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+
+func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; workspaceId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "fmt"
+        "time"
+)
+
+type Task struct {
+        ID          int
+        Title       string
+        Content     string
+        Priority    string
+        Created     time.Time
+        Finished    *time.Time
+        WorkspaceId int
+        UserId      int
+        Status      string
+}
+
+type TaskModelInterface interface {
+        Insert(title, content, priority string, workspaceId, userId int) (int, error)
+        Get(id int) (Task, error)
+        GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error)
+        GetTotalTasks(workspaceId int, title, priority, status string) (int, error)
+        Update(id int, title, content, priority string, userId int, status string) error
+        Delete(id int) (int, error)
+        ValidateOwnership(userId, taskId int) (bool, error)
+        ValidateAdmin(userId, taskId int) (bool, error)
+}
+
+type TaskModel struct {
+        DB *sql.DB
+}
+
+func (m *TaskModel) Insert(title, content, priority string, workspaceId, userId int) (int, error) <span class="cov8" title="1">{
+        stmt := `INSERT INTO tasks (title, content, priority, created, workspace_id, user_id)  VALUES (?, ?, ?, UTC_TIMESTAMP(), ?, ?)`
+
+        result, err := m.DB.Exec(stmt, title, content, priority, workspaceId, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">id, err := result.LastInsertId()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(id), nil</span>
+}
+
+func (m *TaskModel) Get(id int) (Task, error) <span class="cov8" title="1">{
+        stmt := `SELECT * FROM tasks WHERE id = ?`
+
+        var t Task
+
+        err := m.DB.QueryRow(stmt, id).Scan(&amp;t.ID, &amp;t.Title, &amp;t.Content, &amp;t.Priority, &amp;t.Created, &amp;t.Finished, &amp;t.WorkspaceId, &amp;t.UserId, &amp;t.Status)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return Task{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return Task{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return t, nil</span>
+}
+
+func (m *TaskModel) GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error) <span class="cov8" title="1">{
+
+        stmt := `SELECT * FROM tasks where workspace_id = ?`
+
+        conditions := map[string]interface{}{
+                "workspaceId": workspaceId,
+                "title":       title,
+                "priority":    priority,
+                "status":      status,
+                "sort":        sort,
+                "limit":       limit,
+                "offset":      offset,
+        }
+
+        preparedStmt, args := prepareStmt(stmt, conditions)
+
+        fmt.Println("preparedStmt", preparedStmt)
+        fmt.Println("args", args)
+        rows, err := m.DB.Query(preparedStmt, args...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">defer rows.Close()
+
+        var tasks []Task
+
+        for rows.Next() </span><span class="cov8" title="1">{
+                var t Task
+
+                err = rows.Scan(&amp;t.ID, &amp;t.Title, &amp;t.Content, &amp;t.Priority, &amp;t.Created, &amp;t.Finished, &amp;t.WorkspaceId, &amp;t.UserId, &amp;t.Status)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">tasks = append(tasks, t)</span>
+        }
+
+        <span class="cov8" title="1">if err = rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return tasks, nil</span>
+}
+
+func (m *TaskModel) GetTotalTasks(workspaceId int, title, priority, status string) (int, error) <span class="cov0" title="0">{
+        var totalTasks int
+
+        countStmt := `SELECT COUNT(*) FROM tasks WHERE workspace_id = ? `
+
+        args := []interface{}{workspaceId}
+
+        if title != "" </span><span class="cov0" title="0">{
+                countStmt += "AND title LIKE ? "
+                args = append(args, "%"+title+"%")
+        }</span>
+        <span class="cov0" title="0">if priority != "" </span><span class="cov0" title="0">{
+                countStmt += "AND priority = ? "
+                args = append(args, priority)
+        }</span>
+        <span class="cov0" title="0">if status != "" </span><span class="cov0" title="0">{
+                countStmt += "AND status = ? "
+                args = append(args, status)
+        }</span>
+
+        <span class="cov0" title="0">err := m.DB.QueryRow(countStmt, args...).Scan(&amp;totalTasks)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return totalTasks, nil</span>
+}
+
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error <span class="cov8" title="1">{
+        var finished *time.Time
+
+        if status == "Completed" </span><span class="cov8" title="1">{
+                now := time.Now()
+                finished = &amp;now
+        }</span> else<span class="cov8" title="1"> {
+                finished = nil
+        }</span>
+
+        <span class="cov8" title="1">stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ?, status = ?, finished = ? where id = ?`
+
+        _, err := m.DB.Exec(stmt, title, content, priority, userId, status, finished, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (m *TaskModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        stmt := `DELETE FROM tasks where id = ?`
+
+        result, err := m.DB.Exec(stmt, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">var r int64
+        r, err = result.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(r), nil</span>
+}
+
+func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        var exists bool
+
+        stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ?)"
+
+        err := m.DB.QueryRow(stmt, taskId, userId).Scan(&amp;exists)
+        return exists, err
+}</span>
+
+func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        var isAdmin bool
+
+        stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ? AND uw.role = 'ADMIN')"
+
+        err := m.DB.QueryRow(stmt, taskId, userId).Scan(&amp;isAdmin)
+        return isAdmin, err
+}</span>
+
+func prepareStmt(baseStmt string, conditions map[string]interface{}) (string, []interface{}) <span class="cov8" title="1">{
+        workspaceId := conditions["workspaceId"]
+        args := []interface{}{workspaceId}
+
+        for column, value := range conditions </span><span class="cov8" title="1">{
+
+                if column == "title" &amp;&amp; value != "" </span><span class="cov0" title="0">{
+                        baseStmt += fmt.Sprintf(" AND %s LIKE ? ", column)
+                        args = append(args, fmt.Sprintf(`%%%s%%`, value))
+                }</span>
+                <span class="cov8" title="1">if column == "priority" &amp;&amp; value != "" </span><span class="cov0" title="0">{
+                        baseStmt += fmt.Sprintf(" AND %s = ? ", column)
+                        args = append(args, value)
+                }</span>
+                <span class="cov8" title="1">if column == "status" &amp;&amp; value != "" </span><span class="cov0" title="0">{
+                        baseStmt += fmt.Sprintf(" AND %s = ? ", column)
+                        args = append(args, value)
+                }</span>
+        }
+
+        <span class="cov8" title="1">sort := conditions["sort"].(string)
+        if sort != "asc" &amp;&amp; sort != "desc" </span><span class="cov8" title="1">{
+                sort = "asc"
+        }</span>
+
+        <span class="cov8" title="1">baseStmt += " ORDER BY created " + sort + " LIMIT ? OFFSET ?"
+        args = append(args, conditions["limit"], conditions["offset"])
+
+        return baseStmt, args</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "strings"
+        "time"
+
+        "github.com/go-sql-driver/mysql"
+        "golang.org/x/crypto/bcrypt"
+)
+
+type User struct {
+        ID             int
+        FirstName      string
+        LastName       string
+        Email          string
+        HashedPassword string
+        Created        time.Time
+}
+
+type UserModelInterface interface {
+        Insert(firstName, lastName, email, password string) error
+        Authenticate(email, password string) (int, error)
+        Exists(id int) (bool, error)
+        GetUserToInvite(email string, workspaceId int) (*User, error)
+        AddUserToWorkspace(userId, workspaceId int) error
+        GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
+        GetWorkspacesAsMemberCount(email string) (int, error)
+        RemoveUserFromWorkspace(workspaceId, userId int) (int, error)
+}
+
+type UserModel struct {
+        DB *sql.DB
+}
+
+func (m *UserModel) Insert(firstName, lastName, email, password string) error <span class="cov8" title="1">{
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">stmt := `INSERT INTO users (firstName, lastName, email, hashed_password, created) VALUES (?, ?, ?, ?, UTC_TIMESTAMP())`
+
+        _, err = m.DB.Exec(stmt, firstName, lastName, email, string(hashedPassword))
+        if err != nil </span><span class="cov0" title="0">{
+                var mySQLError *mysql.MySQLError
+                if errors.As(err, &amp;mySQLError) </span><span class="cov0" title="0">{
+                        if mySQLError.Number == 1062 &amp;&amp; strings.Contains(mySQLError.Message, "users_uc_email") </span><span class="cov0" title="0">{
+                                return ErrDuplicateEmail
+                        }</span>
+                }
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*User, error) <span class="cov0" title="0">{
+        stmt := "SELECT u.* FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id AND uw.workspace_id = ? WHERE u.email = ? AND uw.workspace_id IS NULL"
+
+        var u User
+
+        err := m.DB.QueryRow(stmt, workspaceId, email).Scan(&amp;u.ID, &amp;u.FirstName, &amp;u.LastName, &amp;u.Email, &amp;u.HashedPassword, &amp;u.Created)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return &amp;User{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return &amp;User{}, err
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;u, nil</span>
+}
+
+func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) <span class="cov0" title="0">{
+        var totalWorkspaces int
+
+        countStmt := "SELECT COUNT(*) FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id WHERE u.email = ? AND uw.`role` = 'MEMBER';"
+
+        err := m.DB.QueryRow(countStmt, email).Scan(&amp;totalWorkspaces)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return totalWorkspaces, nil</span>
+}
+
+type UserWithRole struct {
+        ID        int
+        FirstName string
+        LastName  string
+        Email     string
+        Role      string
+}
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error) <span class="cov0" title="0">{
+        stmt := "SELECT u.id, u.firstName, u.lastName, u.email, uw.`role` FROM users u JOIN users_workspaces uw ON u.id = uw.user_id WHERE uw.workspace_id = ? ORDER BY role;"
+
+        rows, err := m.DB.Query(stmt, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">defer rows.Close()
+
+        var users []UserWithRole
+
+        for rows.Next() </span><span class="cov0" title="0">{
+                var u UserWithRole
+
+                err = rows.Scan(&amp;u.ID, &amp;u.FirstName, &amp;u.LastName, &amp;u.Email, &amp;u.Role)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">users = append(users, u)</span>
+        }
+
+        <span class="cov0" title="0">if err = rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return users, nil</span>
+
+}
+
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error <span class="cov0" title="0">{
+        stmt := `INSERT INTO users_workspaces (user_id, workspace_id, role, created) VALUES (?, ?, "MEMBER", UTC_TIMESTAMP())`
+
+        _, err := m.DB.Exec(stmt, userId, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (m *UserModel) Authenticate(email, password string) (int, error) <span class="cov8" title="1">{
+        var id int
+        var hashedPassword []byte
+
+        stmt := "SELECT id, hashed_password FROM users WHERE email = ?"
+
+        err := m.DB.QueryRow(stmt, email).Scan(&amp;id, &amp;hashedPassword)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return 0, ErrInvalidCredentials
+                }</span>
+                <span class="cov0" title="0">return 0, err</span>
+        }
+
+        <span class="cov8" title="1">err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) </span><span class="cov0" title="0">{
+                        return 0, ErrInvalidCredentials
+                }</span> else<span class="cov0" title="0"> {
+                        return 0, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return id, nil</span>
+}
+
+func (m *UserModel) Exists(id int) (bool, error) <span class="cov0" title="0">{
+        var exists bool
+
+        stmt := "SELECT EXISTS(SELECT true FROM users WHERE id = ?)"
+
+        err := m.DB.QueryRow(stmt, id).Scan(&amp;exists)
+        return exists, err
+}</span>
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) <span class="cov0" title="0">{
+
+        stmt := "DELETE FROM users_workspaces WHERE workspace_id = ? AND user_id = ? AND `role` != 'ADMIN';"
+
+        result, err := m.DB.Exec(stmt, workspaceId, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">var r int64
+        r, err = result.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return int(r), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "time"
+)
+
+type Workspace struct {
+        ID          int
+        Title       string
+        Description string
+        Created     time.Time
+}
+
+type WorkspaceModelInterface interface {
+        Insert(title, description string, userId int) (int, error)
+        Get(id int) (Workspace, error)
+        GetAll(userId int, role string) ([]Workspace, error)
+        Update(id int, title, description string) error
+        Delete(id int) (int, error)
+        ValidateOwnership(userId, workspaceId int) (bool, error)
+        ValidateAdmin(userId, workspaceId int) (bool, error)
+}
+
+type WorkspaceModel struct {
+        DB *sql.DB
+}
+
+func (m *WorkspaceModel) Insert(title, description string, userId int) (int, error) <span class="cov8" title="1">{
+        stmt := `INSERT INTO workspaces (title, description, created)  VALUES (?, ?, UTC_TIMESTAMP())`
+
+        result, err := m.DB.Exec(stmt, title, description)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">workspaceId, err := result.LastInsertId()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">stmt = `INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (?, ?, ?, UTC_TIMESTAMP)`
+        result, err = m.DB.Exec(stmt, userId, workspaceId, "ADMIN")
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(workspaceId), nil</span>
+}
+
+func (m *WorkspaceModel) Get(id int) (Workspace, error) <span class="cov8" title="1">{
+        stmt := `SELECT * FROM workspaces WHERE id = ?`
+
+        var w Workspace
+
+        err := m.DB.QueryRow(stmt, id).Scan(&amp;w.ID, &amp;w.Title, &amp;w.Description, &amp;w.Created)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return Workspace{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return Workspace{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return w, nil</span>
+}
+
+func (m *WorkspaceModel) GetAll(userId int, role string) ([]Workspace, error) <span class="cov8" title="1">{
+        stmt := `SELECT w.* FROM workspaces as w JOIN users_workspaces as uw ON w.id = uw.workspace_id WHERE uw.user_id = ? and uw.role = ?`
+
+        rows, err := m.DB.Query(stmt, userId, role)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">defer rows.Close()
+
+        var workspaces []Workspace
+
+        for rows.Next() </span><span class="cov8" title="1">{
+                var w Workspace
+
+                err = rows.Scan(&amp;w.ID, &amp;w.Title, &amp;w.Description, &amp;w.Created)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">workspaces = append(workspaces, w)</span>
+        }
+
+        <span class="cov8" title="1">if err = rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return workspaces, nil</span>
+}
+
+func (m *WorkspaceModel) Update(id int, title, description string) error <span class="cov8" title="1">{
+        stmt := `UPDATE workspaces SET title = ?, description = ? where id = ?`
+
+        _, err := m.DB.Exec(stmt, title, description, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (m *WorkspaceModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        stmt := `DELETE FROM workspaces where id = ?`
+
+        result, err := m.DB.Exec(stmt, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">var r int64
+        r, err = result.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(r), nil</span>
+}
+
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        var exists bool
+
+        stmt := "SELECT EXISTS(SELECT true FROM users_workspaces WHERE user_id = ? AND workspace_id = ?)"
+
+        err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&amp;exists)
+        return exists, err
+}</span>
+
+func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        var isAdmin bool
+
+        stmt := "SELECT EXISTS(SELECT true FROM users_workspaces WHERE user_id = ? AND workspace_id = ? AND role = 'ADMIN')"
+
+        err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&amp;isAdmin)
+        return isAdmin, err
+}</span>
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package validator
+
+import (
+        "regexp"
+        "slices"
+        "strings"
+        "unicode/utf8"
+)
+
+type Validator struct {
+        NonFieldErrors []string
+        FieldErrors    map[string]string
+}
+
+func (v *Validator) Valid() bool <span class="cov8" title="1">{
+        return len(v.FieldErrors) == 0 &amp;&amp; len(v.NonFieldErrors) == 0
+}</span>
+
+func (v *Validator) AddFieldError(key, message string) <span class="cov8" title="1">{
+        if v.FieldErrors == nil </span><span class="cov8" title="1">{
+                v.FieldErrors = make(map[string]string)
+        }</span>
+
+        <span class="cov8" title="1">if _, exists := v.FieldErrors[key]; !exists </span><span class="cov8" title="1">{
+                v.FieldErrors[key] = message
+        }</span>
+}
+
+func (v *Validator) CheckField(ok bool, key, message string) <span class="cov8" title="1">{
+        if !ok </span><span class="cov8" title="1">{
+                v.AddFieldError(key, message)
+        }</span>
+}
+
+func NotBlank(value string) bool <span class="cov8" title="1">{
+        return strings.TrimSpace(value) != ""
+}</span>
+
+func MaxChars(value string, n int) bool <span class="cov8" title="1">{
+        return utf8.RuneCountInString(value) &lt;= n
+}</span>
+
+func PermittedValue[T comparable](value T, permittedValues ...T) bool <span class="cov0" title="0">{
+        return slices.Contains(permittedValues, value)
+}</span>
+
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&amp;'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+func MinChars(value string, n int) bool <span class="cov8" title="1">{
+        return utf8.RuneCountInString(value) &gt;= n
+}</span>
+
+func Matches(value string, rx *regexp.Regexp) bool <span class="cov8" title="1">{
+        return rx.MatchString(value)
+}</span>
+
+func (v *Validator) AddNonFieldError(message string) <span class="cov0" title="0">{
+        v.NonFieldErrors = append(v.NonFieldErrors, message)
+}</span>
 </pre>
 		
 		</div>
