@@ -30,6 +30,10 @@ func (m *UserModel) Insert(firstName, lastName, email, password string) error {
 	}
 }
 
+func (m *UserModel) GetUser(userId int) (*models.User, error) {
+	return &models.User{}, nil
+}
+
 func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*models.User, error) {
 	return &models.User{}, nil
 }

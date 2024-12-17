@@ -50,9 +50,16 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	taskOwner, err := app.users.GetUser(userId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	data := app.newTemplateData(r)
 	data.Task = task
 	data.IsAdmin = userIsAdmin
+	data.TaskOwner = taskOwner
 
 	app.render(w, r, http.StatusOK, "task_view.html", data)
 }
@@ -145,6 +152,7 @@ func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) {
+
 	var form taskCreateForm
 
 	err := app.decodePostForm(r, &form)

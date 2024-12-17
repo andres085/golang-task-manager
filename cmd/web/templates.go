@@ -30,6 +30,7 @@ type templateData struct {
 	TotalPages        int
 	WorkspaceLimit    bool
 	IsAdmin           bool
+	TaskOwner         *models.User
 	Filter            string
 	PriorityFilter    string
 	StatusFilter      string
