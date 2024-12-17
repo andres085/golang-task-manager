@@ -321,6 +321,15 @@ func TestTaskUpdatePost(t *testing.T) {
 			wantCode:  http.StatusNotFound,
 			urlPath:   "/task/update/-1",
 		},
+		{
+			name:      "Invalid task owner",
+			title:     "Test Task",
+			content:   "Test Content",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusNotFound,
+			urlPath:   "/task/update/2",
+		},
 	}
 
 	for _, tt := range tests {
@@ -336,6 +345,25 @@ func TestTaskUpdatePost(t *testing.T) {
 			assert.Equal(t, code, tt.wantCode)
 		})
 	}
+}
+
+func TestTaskDelete(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	ts.loginUser(t)
+
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
+	form := url.Values{}
+	form.Add("csrf_token", validCSRFToken)
+
+	code, _, _ := ts.get(t, "/workspace/1/task/delete/1")
+
+	assert.Equal(t, code, http.StatusMethodNotAllowed)
 }
 
 func TestTaskDeletePost(t *testing.T) {

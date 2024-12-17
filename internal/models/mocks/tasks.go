@@ -15,7 +15,7 @@ var firstMockTask = models.Task{
 	Finished:    nil,
 	Status:      "To Do",
 	WorkspaceId: 1,
-	UserId:      1,
+	UserId:      2,
 }
 
 var secondMockTask = models.Task{
