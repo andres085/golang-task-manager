@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (56.2%)</option>
+				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (57.4%)</option>
 				
 				<option value="file1">github.com/andres085/task_manager/cmd/web/helpers.go (70.7%)</option>
 				
@@ -126,7 +126,6 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) <span c
         <span class="cov8" title="1">task, err := app.tasks.Get(id)
         if err != nil </span><span class="cov8" title="1">{
                 if errors.Is(err, models.ErrNoRecord) </span><span class="cov8" title="1">{
-                        fmt.Println("ACAAAAAAAAAAa")
                         http.NotFound(w, r)
                 }</span> else<span class="cov0" title="0"> {
                         app.serverError(w, r, err)
@@ -138,6 +137,7 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) <span c
         userIsAdmin, err := app.workspaces.ValidateAdmin(userId, task.WorkspaceId)
         if err != nil </span><span class="cov0" title="0">{
                 app.serverError(w, r, err)
+                return
         }</span>
 
         <span class="cov8" title="1">isTaskOwner, err := app.tasks.ValidateOwnership(userId, task.ID)
@@ -166,7 +166,19 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) <span c
 
 func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         workspaceId, err := strconv.Atoi(r.PathValue("id"))
+        userId := r.Context().Value(userIDContextKey).(int)
         if err != nil || workspaceId &lt; 1 </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if !isOwner </span><span class="cov8" title="1">{
                 http.NotFound(w, r)
                 return
         }</span>
@@ -177,7 +189,6 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) <spa
         status := queryParams.Get("status")
         sort := queryParams.Get("sort")
 
-        userId := r.Context().Value(userIDContextKey).(int)
         userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
         if err != nil </span><span class="cov0" title="0">{
                 app.serverError(w, r, err)
@@ -320,7 +331,7 @@ func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) <span
         otherUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
 
         for i, user := range workspaceUsers </span><span class="cov8" title="1">{
-                if user.ID == task.UserId </span><span class="cov0" title="0">{
+                if user.ID == task.UserId </span><span class="cov8" title="1">{
                         assignedUser = user
                         otherUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
                 }</span>
@@ -427,7 +438,7 @@ type workspaceCreateForm struct {
         validator.Validator `form:"-"`
 }
 
-func (app *application) workspaceCreate(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (app *application) workspaceCreate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         data := app.newTemplateData(r)
 
         data.Form = workspaceCreateForm{}
@@ -1303,7 +1314,7 @@ func (app *application) routes() http.Handler <span class="cov8" title="1">{
 
         mux.Handle("GET /workspace/view", protected.ThenFunc(app.workspaceViewAll))
         mux.Handle("GET /workspace/view/{id}", workspaceOwnership.ThenFunc(app.workspaceView))
-        mux.Handle("GET /workspace/view/{id}/tasks", workspaceOwnership.ThenFunc(app.taskViewAll))
+        mux.Handle("GET /workspace/view/{id}/tasks", protected.ThenFunc(app.taskViewAll))
         mux.Handle("GET /workspace/create", protected.ThenFunc(app.workspaceCreate))
         mux.Handle("GET /workspace/update/{id}", workspaceAdminPermission.ThenFunc(app.workspaceUpdate))
         mux.Handle("GET /workspace/{id}/user/add", workspaceAdminPermission.ThenFunc(app.workspaceAddUser))
@@ -1512,23 +1523,27 @@ import (
 )
 
 var firstMockTask = models.Task{
-        ID:       1,
-        Title:    "First Test Task",
-        Content:  "First Test Task Content",
-        Priority: "LOW",
-        Created:  time.Now(),
-        Finished: nil,
-        Status:   "To Do",
+        ID:          1,
+        Title:       "First Test Task",
+        Content:     "First Test Task Content",
+        Priority:    "LOW",
+        Created:     time.Now(),
+        Finished:    nil,
+        Status:      "To Do",
+        WorkspaceId: 1,
+        UserId:      1,
 }
 
 var secondMockTask = models.Task{
-        ID:       2,
-        Title:    "Second Test Task",
-        Content:  "Second Test Task Content",
-        Priority: "MEDIUM",
-        Created:  time.Now(),
-        Finished: nil,
-        Status:   "To Do",
+        ID:          2,
+        Title:       "Second Test Task",
+        Content:     "Second Test Task Content",
+        Priority:    "MEDIUM",
+        Created:     time.Now(),
+        Finished:    nil,
+        Status:      "To Do",
+        WorkspaceId: 1,
+        UserId:      1,
 }
 
 type TaskModel struct{}
