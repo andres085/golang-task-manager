@@ -157,34 +157,6 @@ func (app *application) checkWorkspaceAdmin(next http.Handler) http.Handler {
 	})
 }
 
-func (app *application) checkTaskOwnership(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
-		if userId == 0 {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		taskId, err := strconv.Atoi(r.PathValue("id"))
-		if err != nil || taskId < 1 {
-			http.NotFound(w, r)
-			return
-		}
-
-		isOwner, err := app.tasks.ValidateOwnership(userId, taskId)
-		if err != nil {
-			app.serverError(w, r, err)
-			return
-		}
-
-		if !isOwner {
-			http.NotFound(w, r)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
 func (app *application) checkTaskAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")

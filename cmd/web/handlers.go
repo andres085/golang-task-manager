@@ -240,6 +240,18 @@ func (app *application) taskUpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId := r.Context().Value(userIDContextKey).(int)
+	isTaskOwner, err := app.tasks.ValidateOwnership(userId, id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	if !isTaskOwner {
+		http.NotFound(w, r)
+		return
+	}
+
 	var form taskCreateForm
 
 	err = app.decodePostForm(r, &form)
