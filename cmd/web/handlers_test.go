@@ -422,6 +422,22 @@ func TestWorkspaceView(t *testing.T) {
 	}
 }
 
+func TestWorkspaceCreate(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	ts.loginUser(t)
+
+	code, _, body := ts.get(t, "/workspace/create")
+	titleInput := `<input type="text" class="form-control " id="title" name="title"
+        placeholder="Enter workspace title" value="">`
+
+	assert.Equal(t, code, http.StatusOK)
+	assert.StringContains(t, body, titleInput)
+}
+
 func TestWorkspaceUpdate(t *testing.T) {
 	app := newTestApplication(t)
 
