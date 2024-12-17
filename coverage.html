@@ -55,13 +55,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (57.4%)</option>
+				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (62.8%)</option>
 				
 				<option value="file1">github.com/andres085/task_manager/cmd/web/helpers.go (70.7%)</option>
 				
 				<option value="file2">github.com/andres085/task_manager/cmd/web/main.go (0.0%)</option>
 				
-				<option value="file3">github.com/andres085/task_manager/cmd/web/middleware.go (84.8%)</option>
+				<option value="file3">github.com/andres085/task_manager/cmd/web/middleware.go (83.0%)</option>
 				
 				<option value="file4">github.com/andres085/task_manager/cmd/web/routes.go (100.0%)</option>
 				
@@ -75,7 +75,7 @@
 				
 				<option value="file9">github.com/andres085/task_manager/internal/models/mocks/users.go (60.0%)</option>
 				
-				<option value="file10">github.com/andres085/task_manager/internal/models/mocks/workspaces.go (84.6%)</option>
+				<option value="file10">github.com/andres085/task_manager/internal/models/mocks/workspaces.go (92.3%)</option>
 				
 				<option value="file11">github.com/andres085/task_manager/internal/models/tasks.go (64.9%)</option>
 				
@@ -306,19 +306,19 @@ func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) <
 
 func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         id, err := strconv.Atoi(r.PathValue("id"))
-        if err != nil || id &lt; 1 </span><span class="cov0" title="0">{
+        if err != nil || id &lt; 1 </span><span class="cov8" title="1">{
                 http.NotFound(w, r)
                 return
         }</span>
 
         <span class="cov8" title="1">task, err := app.tasks.Get(id)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, models.ErrNoRecord) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, models.ErrNoRecord) </span><span class="cov8" title="1">{
                         http.NotFound(w, r)
                 }</span> else<span class="cov0" title="0"> {
                         app.serverError(w, r, err)
                 }</span>
-                <span class="cov0" title="0">return</span>
+                <span class="cov8" title="1">return</span>
         }
 
         <span class="cov8" title="1">workspaceUsers, err := app.users.GetWorkspaceUsers(task.WorkspaceId)
@@ -446,7 +446,7 @@ func (app *application) workspaceCreate(w http.ResponseWriter, r *http.Request) 
         app.render(w, r, http.StatusOK, "workspace_create.html", data)
 }</span>
 
-func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         var form workspaceCreateForm
 
         err := app.decodePostForm(r, &amp;form)
@@ -455,19 +455,19 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
                 return
         }</span>
 
-        <span class="cov0" title="0">form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
         form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
         form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
         form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
 
-        if !form.Valid() </span><span class="cov0" title="0">{
+        if !form.Valid() </span><span class="cov8" title="1">{
                 data := app.newTemplateData(r)
                 data.Form = form
                 app.render(w, r, http.StatusUnprocessableEntity, "workspace_create.html", data)
                 return
         }</span>
 
-        <span class="cov0" title="0">userId := r.Context().Value(userIDContextKey).(int)
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
 
         id, err := app.workspaces.Insert(form.Title, form.Description, userId)
         if err != nil </span><span class="cov0" title="0">{
@@ -475,7 +475,7 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
                 return
         }</span>
 
-        <span class="cov0" title="0">app.sessionManager.Put(r.Context(), "flash", "Workspace successfully created!")
+        <span class="cov8" title="1">app.sessionManager.Put(r.Context(), "flash", "Workspace successfully created!")
 
         http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)</span>
 }
@@ -632,13 +632,9 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 
         <span class="cov8" title="1">workspace, err := app.workspaces.Get(id)
         if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, models.ErrNoRecord) </span><span class="cov0" title="0">{
-                        http.NotFound(w, r)
-                }</span> else<span class="cov0" title="0"> {
-                        app.serverError(w, r, err)
-                }</span>
-                <span class="cov0" title="0">return</span>
-        }
+                app.serverError(w, r, err)
+                return
+        }</span>
 
         <span class="cov8" title="1">email := r.URL.Query().Get("email")
         var foundUser *models.User
@@ -1097,10 +1093,12 @@ func openDB(dsn string) (*sql.DB, error) <span class="cov0" title="0">{
 
 import (
         "context"
+        "errors"
         "fmt"
         "net/http"
         "strconv"
 
+        "github.com/andres085/task_manager/internal/models"
         "github.com/justinas/nosurf"
 )
 
@@ -1238,13 +1236,17 @@ func (app *application) checkWorkspaceAdmin(next http.Handler) http.Handler <spa
                         return
                 }</span>
 
-                <span class="cov8" title="1">isOwner, err := app.workspaces.ValidateAdmin(userId, workspaceId)
+                <span class="cov8" title="1">isAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
                 if err != nil </span><span class="cov0" title="0">{
-                        app.serverError(w, r, err)
-                        return
-                }</span>
+                        if errors.Is(err, models.ErrNoRecord) </span><span class="cov0" title="0">{
+                                http.NotFound(w, r)
+                        }</span> else<span class="cov0" title="0"> {
+                                app.serverError(w, r, err)
+                        }</span>
+                        <span class="cov0" title="0">return</span>
+                }
 
-                <span class="cov8" title="1">if !isOwner </span><span class="cov8" title="1">{
+                <span class="cov8" title="1">if !isAdmin </span><span class="cov8" title="1">{
                         http.NotFound(w, r)
                         return
                 }</span>
@@ -1297,7 +1299,7 @@ func (app *application) routes() http.Handler <span class="cov8" title="1">{
 
         dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
         protected := dynamic.Append(app.requireAuthentication)
-        workspaceOwnership := protected.Append(app.checkWorkspaceMembership)
+        workspaceMembership := protected.Append(app.checkWorkspaceMembership)
         workspaceAdminPermission := protected.Append(app.checkWorkspaceAdmin)
         taskAdminPermission := protected.Append(app.checkTaskAdmin)
 
@@ -1307,13 +1309,13 @@ func (app *application) routes() http.Handler <span class="cov8" title="1">{
 
         mux.Handle("GET /task/view/{id}", protected.ThenFunc(app.taskView))
         mux.Handle("GET /task/update/{id}", protected.ThenFunc(app.taskUpdate))
-        mux.Handle("GET /workspace/{id}/task/create", workspaceOwnership.ThenFunc(app.taskCreate))
+        mux.Handle("GET /workspace/{id}/task/create", workspaceMembership.ThenFunc(app.taskCreate))
         mux.Handle("POST /task/create", protected.ThenFunc(app.taskCreatePost))
         mux.Handle("POST /task/update/{id}", protected.ThenFunc(app.taskUpdatePost))
         mux.Handle("POST /workspace/{workspaceId}/task/delete/{id}", taskAdminPermission.ThenFunc(app.taskDelete))
 
         mux.Handle("GET /workspace/view", protected.ThenFunc(app.workspaceViewAll))
-        mux.Handle("GET /workspace/view/{id}", workspaceOwnership.ThenFunc(app.workspaceView))
+        mux.Handle("GET /workspace/view/{id}", workspaceMembership.ThenFunc(app.workspaceView))
         mux.Handle("GET /workspace/view/{id}/tasks", protected.ThenFunc(app.taskViewAll))
         mux.Handle("GET /workspace/create", protected.ThenFunc(app.workspaceCreate))
         mux.Handle("GET /workspace/update/{id}", workspaceAdminPermission.ThenFunc(app.workspaceUpdate))
@@ -1321,8 +1323,8 @@ func (app *application) routes() http.Handler <span class="cov8" title="1">{
         mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
         mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
         mux.Handle("POST /workspace/delete/{id}", workspaceAdminPermission.ThenFunc(app.workspaceDelete))
-        mux.Handle("POST /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUserPost))
-        mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceOwnership.ThenFunc(app.workspaceRemoveUserPost))
+        mux.Handle("POST /workspace/{id}/user/add", workspaceMembership.ThenFunc(app.workspaceAddUserPost))
+        mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceMembership.ThenFunc(app.workspaceRemoveUserPost))
 
         mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
         mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))
@@ -1686,7 +1688,7 @@ var secondMockWorkspace = models.Workspace{
 
 type WorkspaceModel struct{}
 
-func (t *WorkspaceModel) Insert(title, description string, userId int) (int, error) <span class="cov0" title="0">{
+func (t *WorkspaceModel) Insert(title, description string, userId int) (int, error) <span class="cov8" title="1">{
         return 2, nil
 }</span>
 

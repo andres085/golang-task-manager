@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/andres085/task_manager/internal/models"
 	"github.com/justinas/nosurf"
 )
 
@@ -143,13 +145,17 @@ func (app *application) checkWorkspaceAdmin(next http.Handler) http.Handler {
 			return
 		}
 
-		isOwner, err := app.workspaces.ValidateAdmin(userId, workspaceId)
+		isAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
 		if err != nil {
-			app.serverError(w, r, err)
+			if errors.Is(err, models.ErrNoRecord) {
+				http.NotFound(w, r)
+			} else {
+				app.serverError(w, r, err)
+			}
 			return
 		}
 
-		if !isOwner {
+		if !isAdmin {
 			http.NotFound(w, r)
 			return
 		}

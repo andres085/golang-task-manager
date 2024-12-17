@@ -239,6 +239,20 @@ func TestTaskUpdate(t *testing.T) {
 		assert.Equal(t, headers.Get("Location"), "/user/login")
 	})
 
+	t.Run("NotFound", func(t *testing.T) {
+		ts.loginUser(t)
+		code, _, _ := ts.get(t, "/task/update/99")
+
+		assert.Equal(t, code, http.StatusNotFound)
+	})
+
+	t.Run("NotFound negative id", func(t *testing.T) {
+		ts.loginUser(t)
+		code, _, _ := ts.get(t, "/task/update/-1")
+
+		assert.Equal(t, code, http.StatusNotFound)
+	})
+
 	t.Run("Authenticated", func(t *testing.T) {
 		ts.loginUser(t)
 
@@ -269,6 +283,7 @@ func TestTaskUpdatePost(t *testing.T) {
 		priority  string
 		csrfToken string
 		wantCode  int
+		urlPath   string
 	}{
 		{
 			name:      "Valid Submission",
@@ -277,6 +292,7 @@ func TestTaskUpdatePost(t *testing.T) {
 			priority:  "LOW",
 			csrfToken: validCSRFToken,
 			wantCode:  http.StatusSeeOther,
+			urlPath:   "/task/update/1",
 		},
 		{
 			name:      "Invalid Submission without Title",
@@ -285,6 +301,7 @@ func TestTaskUpdatePost(t *testing.T) {
 			priority:  "LOW",
 			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
+			urlPath:   "/task/update/1",
 		},
 		{
 			name:      "Invalid Submission without Content",
@@ -293,6 +310,16 @@ func TestTaskUpdatePost(t *testing.T) {
 			priority:  "LOW",
 			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
+			urlPath:   "/task/update/1",
+		},
+		{
+			name:      "Invalid Task Id",
+			title:     "Test Task",
+			content:   "Test Content",
+			priority:  "LOW",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusNotFound,
+			urlPath:   "/task/update/-1",
 		},
 	}
 
@@ -304,7 +331,7 @@ func TestTaskUpdatePost(t *testing.T) {
 			form.Add("priority", tt.priority)
 			form.Add("csrf_token", tt.csrfToken)
 
-			code, _, _ := ts.postForm(t, "/task/update/1", form)
+			code, _, _ := ts.postForm(t, tt.urlPath, form)
 
 			assert.Equal(t, code, tt.wantCode)
 		})
@@ -436,6 +463,61 @@ func TestWorkspaceCreate(t *testing.T) {
 
 	assert.Equal(t, code, http.StatusOK)
 	assert.StringContains(t, body, titleInput)
+}
+
+func TestWorkspaceCreatePost(t *testing.T) {
+	app := newTestApplication(t)
+
+	ts := newTestServer(t, app.routes())
+	defer ts.Close()
+
+	ts.loginUser(t)
+
+	_, _, body := ts.get(t, "/user/login")
+	validCSRFToken := extractCSRFToken(t, body)
+
+	tests := []struct {
+		name        string
+		title       string
+		description string
+		csrfToken   string
+		wantCode    int
+	}{
+		{
+			name:        "Valid Submission",
+			title:       "Test Workspace",
+			description: "Test workspace description",
+			csrfToken:   validCSRFToken,
+			wantCode:    http.StatusSeeOther,
+		},
+		{
+			name:        "Invalid Submission without Title",
+			title:       "",
+			description: "Test workspace description",
+			csrfToken:   validCSRFToken,
+			wantCode:    http.StatusUnprocessableEntity,
+		},
+		{
+			name:        "Invalid Submission without description",
+			title:       "Test Task",
+			description: "",
+			csrfToken:   validCSRFToken,
+			wantCode:    http.StatusUnprocessableEntity,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("title", tt.title)
+			form.Add("description", tt.description)
+			form.Add("csrf_token", tt.csrfToken)
+
+			code, _, _ := ts.postForm(t, "/workspace/create", form)
+
+			assert.Equal(t, code, tt.wantCode)
+		})
+	}
 }
 
 func TestWorkspaceUpdate(t *testing.T) {

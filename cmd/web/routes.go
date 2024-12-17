@@ -14,7 +14,7 @@ func (app *application) routes() http.Handler {
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 	protected := dynamic.Append(app.requireAuthentication)
-	workspaceOwnership := protected.Append(app.checkWorkspaceMembership)
+	workspaceMembership := protected.Append(app.checkWorkspaceMembership)
 	workspaceAdminPermission := protected.Append(app.checkWorkspaceAdmin)
 	taskAdminPermission := protected.Append(app.checkTaskAdmin)
 
@@ -24,13 +24,13 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /task/view/{id}", protected.ThenFunc(app.taskView))
 	mux.Handle("GET /task/update/{id}", protected.ThenFunc(app.taskUpdate))
-	mux.Handle("GET /workspace/{id}/task/create", workspaceOwnership.ThenFunc(app.taskCreate))
+	mux.Handle("GET /workspace/{id}/task/create", workspaceMembership.ThenFunc(app.taskCreate))
 	mux.Handle("POST /task/create", protected.ThenFunc(app.taskCreatePost))
 	mux.Handle("POST /task/update/{id}", protected.ThenFunc(app.taskUpdatePost))
 	mux.Handle("POST /workspace/{workspaceId}/task/delete/{id}", taskAdminPermission.ThenFunc(app.taskDelete))
 
 	mux.Handle("GET /workspace/view", protected.ThenFunc(app.workspaceViewAll))
-	mux.Handle("GET /workspace/view/{id}", workspaceOwnership.ThenFunc(app.workspaceView))
+	mux.Handle("GET /workspace/view/{id}", workspaceMembership.ThenFunc(app.workspaceView))
 	mux.Handle("GET /workspace/view/{id}/tasks", protected.ThenFunc(app.taskViewAll))
 	mux.Handle("GET /workspace/create", protected.ThenFunc(app.workspaceCreate))
 	mux.Handle("GET /workspace/update/{id}", workspaceAdminPermission.ThenFunc(app.workspaceUpdate))
@@ -38,8 +38,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
 	mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
 	mux.Handle("POST /workspace/delete/{id}", workspaceAdminPermission.ThenFunc(app.workspaceDelete))
-	mux.Handle("POST /workspace/{id}/user/add", workspaceOwnership.ThenFunc(app.workspaceAddUserPost))
-	mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceOwnership.ThenFunc(app.workspaceRemoveUserPost))
+	mux.Handle("POST /workspace/{id}/user/add", workspaceMembership.ThenFunc(app.workspaceAddUserPost))
+	mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceMembership.ThenFunc(app.workspaceRemoveUserPost))
 
 	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
 	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))

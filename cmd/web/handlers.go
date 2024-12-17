@@ -533,11 +533,7 @@ func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request)
 
 	workspace, err := app.workspaces.Get(id)
 	if err != nil {
-		if errors.Is(err, models.ErrNoRecord) {
-			http.NotFound(w, r)
-		} else {
-			app.serverError(w, r, err)
-		}
+		app.serverError(w, r, err)
 		return
 	}
 
