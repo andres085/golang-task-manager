@@ -31,7 +31,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /workspace/view", protected.ThenFunc(app.workspaceViewAll))
 	mux.Handle("GET /workspace/view/{id}", workspaceOwnership.ThenFunc(app.workspaceView))
-	mux.Handle("GET /workspace/view/{id}/tasks", workspaceOwnership.ThenFunc(app.taskViewAll))
+	mux.Handle("GET /workspace/view/{id}/tasks", protected.ThenFunc(app.taskViewAll))
 	mux.Handle("GET /workspace/create", protected.ThenFunc(app.workspaceCreate))
 	mux.Handle("GET /workspace/update/{id}", workspaceAdminPermission.ThenFunc(app.workspaceUpdate))
 	mux.Handle("GET /workspace/{id}/user/add", workspaceAdminPermission.ThenFunc(app.workspaceAddUser))

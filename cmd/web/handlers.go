@@ -38,6 +38,7 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, task.WorkspaceId)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	isTaskOwner, err := app.tasks.ValidateOwnership(userId, task.ID)
@@ -66,7 +67,19 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	workspaceId, err := strconv.Atoi(r.PathValue("id"))
+	userId := r.Context().Value(userIDContextKey).(int)
 	if err != nil || workspaceId < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	if !isOwner {
 		http.NotFound(w, r)
 		return
 	}
@@ -77,7 +90,6 @@ func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) {
 	status := queryParams.Get("status")
 	sort := queryParams.Get("sort")
 
-	userId := r.Context().Value(userIDContextKey).(int)
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
 	if err != nil {
 		app.serverError(w, r, err)

@@ -7,23 +7,27 @@ import (
 )
 
 var firstMockTask = models.Task{
-	ID:       1,
-	Title:    "First Test Task",
-	Content:  "First Test Task Content",
-	Priority: "LOW",
-	Created:  time.Now(),
-	Finished: nil,
-	Status:   "To Do",
+	ID:          1,
+	Title:       "First Test Task",
+	Content:     "First Test Task Content",
+	Priority:    "LOW",
+	Created:     time.Now(),
+	Finished:    nil,
+	Status:      "To Do",
+	WorkspaceId: 1,
+	UserId:      1,
 }
 
 var secondMockTask = models.Task{
-	ID:       2,
-	Title:    "Second Test Task",
-	Content:  "Second Test Task Content",
-	Priority: "MEDIUM",
-	Created:  time.Now(),
-	Finished: nil,
-	Status:   "To Do",
+	ID:          2,
+	Title:       "Second Test Task",
+	Content:     "Second Test Task Content",
+	Priority:    "MEDIUM",
+	Created:     time.Now(),
+	Finished:    nil,
+	Status:      "To Do",
+	WorkspaceId: 1,
+	UserId:      1,
 }
 
 type TaskModel struct{}

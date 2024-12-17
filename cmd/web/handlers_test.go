@@ -47,6 +47,13 @@ func TestTaskViewAll(t *testing.T) {
 		assert.Equal(t, headers.Get("Location"), "/user/login")
 	})
 
+	t.Run("NotFound", func(t *testing.T) {
+		ts.loginUser(t)
+		code, _, _ := ts.get(t, "/workspace/view/5/tasks")
+
+		assert.Equal(t, code, http.StatusNotFound)
+	})
+
 	t.Run("Authenticated", func(t *testing.T) {
 		ts.loginUser(t)
 
