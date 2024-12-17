@@ -179,7 +179,11 @@ func (app *application) checkTaskAdmin(next http.Handler) http.Handler {
 
 		isOwner, err := app.tasks.ValidateAdmin(userId, taskId)
 		if err != nil {
-			app.serverError(w, r, err)
+			if errors.Is(err, models.ErrNoRecord) {
+				http.NotFound(w, r)
+			} else {
+				app.serverError(w, r, err)
+			}
 			return
 		}
 

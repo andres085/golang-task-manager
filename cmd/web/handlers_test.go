@@ -361,9 +361,9 @@ func TestTaskDelete(t *testing.T) {
 	form := url.Values{}
 	form.Add("csrf_token", validCSRFToken)
 
-	code, _, _ := ts.get(t, "/workspace/1/task/delete/1")
+	code, _, _ := ts.postForm(t, "/workspace/-1/task/delete/1", form)
 
-	assert.Equal(t, code, http.StatusMethodNotAllowed)
+	assert.Equal(t, code, http.StatusNotFound)
 }
 
 func TestTaskDeletePost(t *testing.T) {

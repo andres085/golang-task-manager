@@ -302,26 +302,18 @@ func (app *application) taskUpdatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	workspaceId, err := strconv.Atoi(r.PathValue("workspaceId"))
 	if err != nil || workspaceId < 1 {
 		http.NotFound(w, r)
 		return
 	}
 
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
-		return
-	}
+	// Removed the error validation here because we do this validation in the checkTaskAdmin middleware
+	id, _ := strconv.Atoi(r.PathValue("id"))
 
-	row, err := app.tasks.Delete(id)
-	if err != nil || row < 1 {
-		http.NotFound(w, r)
+	_, err = app.tasks.Delete(id)
+	if err != nil {
+		app.serverError(w, r, err)
 		return
 	}
 
