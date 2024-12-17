@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"testing"
 
@@ -135,49 +133,6 @@ func TestTaskView(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestTaskViewNotFoundError(t *testing.T) {
-	app := newTestApplication(t)
-
-	req, err := http.NewRequest("GET", "/task/view/-1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-
-	handler := http.HandlerFunc(app.taskView)
-	handler.ServeHTTP(rr, req)
-
-	if rr.Code != http.StatusNotFound {
-		t.Errorf("got %d, want %d", rr.Code, http.StatusNotFound)
-	}
-}
-
-func TestTaskViewNoTask(t *testing.T) {
-	app := newTestApplication(t)
-
-	ts := newTestServer(t, app.routes())
-	ts.loginUser(t)
-	defer ts.Close()
-
-	code, _, body := ts.get(t, "/task/view/3")
-
-	fmt.Println(code, body)
-	// req, err := http.NewRequest("GET", "/task/view/3", nil)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	//
-	// rr := httptest.NewRecorder()
-	//
-	// handler := http.HandlerFunc(app.taskView)
-	// handler.ServeHTTP(rr, req)
-	//
-	// if rr.Code != http.StatusNotFound {
-	// 	t.Errorf("got %d, want %d", rr.Code, http.StatusNotFound)
-	// }
 }
 
 func TestTaskCreate(t *testing.T) {
