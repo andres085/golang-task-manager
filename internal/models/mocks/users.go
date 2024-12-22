@@ -1,6 +1,8 @@
 package mocks
 
-import "github.com/andres085/task_manager/internal/models"
+import (
+	"github.com/andres085/task_manager/internal/models"
+)
 
 type UserModel struct{}
 type UserWithRole struct{}
@@ -35,6 +37,9 @@ func (m *UserModel) GetUser(userId int) (*models.User, error) {
 }
 
 func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*models.User, error) {
+	if email != firstMockUser.Email {
+		return nil, models.ErrNoRecord
+	}
 	return &models.User{}, nil
 }
 
@@ -55,6 +60,9 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 }
 
 func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) {
+	if email == "testmctesterson@mail.com" {
+		return 6, nil
+	}
 	return 1, nil
 }
 

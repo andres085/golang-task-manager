@@ -706,6 +706,16 @@ func TestWorkspaceAddUserView(t *testing.T) {
 			urlPath:  "/workspace/user/add",
 			wantCode: http.StatusNotFound,
 		},
+		{
+			name:     "User Not Found",
+			urlPath:  "/workspace/1/user/add?email=invalid-user@mail.com",
+			wantCode: http.StatusSeeOther,
+		},
+		{
+			name:     "User exceeds workspace limit",
+			urlPath:  "/workspace/1/user/add?email=testmctesterson@mail.com",
+			wantCode: http.StatusSeeOther,
+		},
 	}
 
 	for _, tt := range tests {
@@ -719,6 +729,9 @@ func TestWorkspaceAddUserView(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestWorkspaceAddUserPost(t *testing.T) {
 }
 
 func TestUserRegisterHandler(t *testing.T) {
