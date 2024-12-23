@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (67.0%)</option>
+				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (70.0%)</option>
 				
 				<option value="file1">github.com/andres085/task_manager/cmd/web/helpers.go (70.7%)</option>
 				
@@ -73,7 +73,7 @@
 				
 				<option value="file8">github.com/andres085/task_manager/internal/models/mocks/tasks.go (92.9%)</option>
 				
-				<option value="file9">github.com/andres085/task_manager/internal/models/mocks/users.go (73.7%)</option>
+				<option value="file9">github.com/andres085/task_manager/internal/models/mocks/users.go (78.9%)</option>
 				
 				<option value="file10">github.com/andres085/task_manager/internal/models/mocks/workspaces.go (92.3%)</option>
 				
@@ -675,34 +675,30 @@ type addUserForm struct {
         UserID int `form:"userID"`
 }
 
-func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
-        workspaceId, err := strconv.Atoi(r.PathValue("id"))
-        if err != nil || workspaceId &lt; 1 </span><span class="cov0" title="0">{
-                http.NotFound(w, r)
-                return
-        }</span>
+func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        workspaceId, _ := strconv.Atoi(r.PathValue("id"))
 
-        <span class="cov0" title="0">var form addUserForm
+        var form addUserForm
 
-        err = app.decodePostForm(r, &amp;form)
+        err := app.decodePostForm(r, &amp;form)
         if err != nil </span><span class="cov0" title="0">{
                 app.clientError(w, http.StatusBadRequest)
                 return
         }</span>
 
-        <span class="cov0" title="0">userId := r.Context().Value(userIDContextKey).(int)
-        if userId == form.UserID </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
+        if userId == form.UserID </span><span class="cov8" title="1">{
                 http.Error(w, "Bad Request", http.StatusBadRequest)
                 return
         }</span>
 
-        <span class="cov0" title="0">err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
+        <span class="cov8" title="1">err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
         if err != nil </span><span class="cov0" title="0">{
                 app.serverError(w, r, err)
                 return
         }</span>
 
-        <span class="cov0" title="0">http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)</span>
+        <span class="cov8" title="1">http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)</span>
 }
 
 func (app *application) workspaceRemoveUserPost(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
@@ -1324,8 +1320,8 @@ func (app *application) routes() http.Handler <span class="cov8" title="1">{
         mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
         mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
         mux.Handle("POST /workspace/delete/{id}", workspaceAdminPermission.ThenFunc(app.workspaceDelete))
-        mux.Handle("POST /workspace/{id}/user/add", workspaceMembership.ThenFunc(app.workspaceAddUserPost))
-        mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceMembership.ThenFunc(app.workspaceRemoveUserPost))
+        mux.Handle("POST /workspace/{id}/user/add", workspaceAdminPermission.ThenFunc(app.workspaceAddUserPost))
+        mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceAdminPermission.ThenFunc(app.workspaceRemoveUserPost))
 
         mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
         mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))
@@ -1640,7 +1636,7 @@ func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*models.User
         <span class="cov8" title="1">return &amp;models.User{}, nil</span>
 }
 
-func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error <span class="cov0" title="0">{
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error <span class="cov8" title="1">{
         return nil
 }</span>
 

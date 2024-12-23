@@ -577,15 +577,11 @@ type addUserForm struct {
 }
 
 func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Request) {
-	workspaceId, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || workspaceId < 1 {
-		http.NotFound(w, r)
-		return
-	}
+	workspaceId, _ := strconv.Atoi(r.PathValue("id"))
 
 	var form addUserForm
 
-	err = app.decodePostForm(r, &form)
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return

@@ -732,6 +732,53 @@ func TestWorkspaceAddUserView(t *testing.T) {
 }
 
 func TestWorkspaceAddUserPost(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	ts.loginUser(t)
+	defer ts.Close()
+
+	_, _, body := ts.get(t, "/user/login")
+
+	validCSRFToken := extractCSRFToken(t, body)
+
+	tests := []struct {
+		name     string
+		urlPath  string
+		userId   string
+		wantCode int
+	}{
+		{
+			name:     "Valid Post",
+			urlPath:  "/workspace/1/user/add",
+			userId:   "2",
+			wantCode: http.StatusSeeOther,
+		},
+		{
+			name:     "Not owned workspace id",
+			urlPath:  "/workspace/2/user/add",
+			userId:   "2",
+			wantCode: http.StatusNotFound,
+		},
+		{
+			name:     "Same id as the admin",
+			urlPath:  "/workspace/1/user/add",
+			userId:   "1",
+			wantCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("userID", tt.userId)
+			form.Add("csrf_token", validCSRFToken)
+
+			code, _, _ := ts.postForm(t, tt.urlPath, form)
+
+			assert.Equal(t, code, tt.wantCode)
+
+		})
+	}
 }
 
 func TestUserRegisterHandler(t *testing.T) {

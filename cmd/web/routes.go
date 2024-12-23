@@ -38,8 +38,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
 	mux.Handle("POST /workspace/update/{id}", protected.ThenFunc(app.workspaceUpdatePost))
 	mux.Handle("POST /workspace/delete/{id}", workspaceAdminPermission.ThenFunc(app.workspaceDelete))
-	mux.Handle("POST /workspace/{id}/user/add", workspaceMembership.ThenFunc(app.workspaceAddUserPost))
-	mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceMembership.ThenFunc(app.workspaceRemoveUserPost))
+	mux.Handle("POST /workspace/{id}/user/add", workspaceAdminPermission.ThenFunc(app.workspaceAddUserPost))
+	mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceAdminPermission.ThenFunc(app.workspaceRemoveUserPost))
 
 	mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
 	mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))
