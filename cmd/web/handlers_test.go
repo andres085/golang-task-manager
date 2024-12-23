@@ -684,7 +684,7 @@ func TestWorkspaceAddUserView(t *testing.T) {
 		{
 			name:     "Non-existent ID",
 			urlPath:  "/workspace/5/user/add",
-			wantCode: http.StatusNotFound,
+			wantCode: http.StatusForbidden,
 		},
 		{
 			name:     "Negative ID",
@@ -757,7 +757,7 @@ func TestWorkspaceAddUserPost(t *testing.T) {
 			name:     "Not owned workspace id",
 			urlPath:  "/workspace/2/user/add",
 			userId:   "2",
-			wantCode: http.StatusNotFound,
+			wantCode: http.StatusForbidden,
 		},
 		{
 			name:     "Same id as the admin",
@@ -776,9 +776,39 @@ func TestWorkspaceAddUserPost(t *testing.T) {
 			code, _, _ := ts.postForm(t, tt.urlPath, form)
 
 			assert.Equal(t, code, tt.wantCode)
-
 		})
 	}
+}
+
+func TestWorkspaceRemoveUserPost(t *testing.T) {
+	app := newTestApplication(t)
+	ts := newTestServer(t, app.routes())
+	ts.loginUser(t)
+	defer ts.Close()
+
+	_, _, body := ts.get(t, "/user/login")
+
+	validCSRFToken := extractCSRFToken(t, body)
+
+	t.Run("Removed user and redirect", func(t *testing.T) {
+		form := url.Values{}
+		form.Add("userID", "1")
+		form.Add("csrf_token", validCSRFToken)
+
+		code, _, _ := ts.postForm(t, "/workspace/1/user/remove/1", form)
+
+		assert.Equal(t, code, http.StatusSeeOther)
+	})
+
+	t.Run("Not found user", func(t *testing.T) {
+		form := url.Values{}
+		form.Add("userID", "1")
+		form.Add("csrf_token", validCSRFToken)
+
+		code, _, _ := ts.postForm(t, "/workspace/1/user/remove/2", form)
+
+		assert.Equal(t, code, http.StatusNotFound)
+	})
 }
 
 func TestUserRegisterHandler(t *testing.T) {

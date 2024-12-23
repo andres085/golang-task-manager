@@ -440,7 +440,7 @@ func TestWorkspaceAdmin(t *testing.T) {
 		})
 
 		app.checkWorkspaceAdmin(next).ServeHTTP(rr, req)
-		assert.Equal(t, rr.Result().StatusCode, http.StatusNotFound)
+		assert.Equal(t, rr.Result().StatusCode, http.StatusForbidden)
 	})
 
 	t.Run("Valid owner", func(t *testing.T) {

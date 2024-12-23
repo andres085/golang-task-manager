@@ -156,7 +156,7 @@ func (app *application) checkWorkspaceAdmin(next http.Handler) http.Handler {
 		}
 
 		if !isAdmin {
-			http.NotFound(w, r)
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(w, r)

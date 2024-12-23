@@ -374,19 +374,11 @@ func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
-		return
-	}
+	id, _ := strconv.Atoi(r.PathValue("id"))
 
 	workspace, err := app.workspaces.Get(id)
 	if err != nil {
-		if errors.Is(err, models.ErrNoRecord) {
-			http.NotFound(w, r)
-		} else {
-			app.serverError(w, r, err)
-		}
+		app.serverError(w, r, err)
 		return
 	}
 
@@ -394,6 +386,7 @@ func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) {
 	userIsAdmin, err := app.workspaces.ValidateAdmin(userId, id)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	workspaceUsers, err := app.users.GetWorkspaceUsers(id)
@@ -435,19 +428,11 @@ func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) workspaceUpdate(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
-		return
-	}
+	id, _ := strconv.Atoi(r.PathValue("id"))
 
 	workspace, err := app.workspaces.Get(id)
 	if err != nil {
-		if errors.Is(err, models.ErrNoRecord) {
-			http.NotFound(w, r)
-		} else {
-			app.serverError(w, r, err)
-		}
+		app.serverError(w, r, err)
 		return
 	}
 
@@ -463,21 +448,11 @@ func (app *application) workspaceUpdate(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Request) {
-	userId, ok := r.Context().Value(userIDContextKey).(int)
-	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	workspaceId, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || workspaceId < 1 {
-		http.NotFound(w, r)
-		return
-	}
+	workspaceId, _ := strconv.Atoi(r.PathValue("id"))
 
 	var form workspaceCreateForm
 
-	err = app.decodePostForm(r, &form)
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
@@ -493,17 +468,6 @@ func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Reque
 		form.ID = &workspaceId
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "workspace_update.html", data)
-		return
-	}
-
-	isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	if !isOwner {
-		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -603,17 +567,8 @@ func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Requ
 }
 
 func (app *application) workspaceRemoveUserPost(w http.ResponseWriter, r *http.Request) {
-	workspaceId, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || workspaceId < 1 {
-		http.NotFound(w, r)
-		return
-	}
-
 	userId, err := strconv.Atoi(r.PathValue("userId"))
-	if err != nil || workspaceId < 1 {
-		http.NotFound(w, r)
-		return
-	}
+	workspaceId, _ := strconv.Atoi(r.PathValue("id"))
 
 	row, err := app.users.RemoveUserFromWorkspace(workspaceId, userId)
 	if err != nil || row < 1 {

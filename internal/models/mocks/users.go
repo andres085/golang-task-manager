@@ -76,5 +76,12 @@ func (m *UserModel) Exists(id int) (bool, error) {
 }
 
 func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) {
-	return 1, nil
+	switch userId {
+	case 1:
+		return 1, nil
+	case 2:
+		return 2, models.ErrNoRecord
+	default:
+		return 1, nil
+	}
 }
