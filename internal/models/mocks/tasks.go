@@ -1,6 +1,7 @@
 package mocks
 
 import (
+	"errors"
 	"time"
 
 	"github.com/andres085/task_manager/internal/models"
@@ -30,6 +31,18 @@ var secondMockTask = models.Task{
 	UserId:      1,
 }
 
+var wrongMockTask = models.Task{
+	ID:          4,
+	Title:       "Wrong Test Task",
+	Content:     "Wrong Test Task Content",
+	Priority:    "MEDIUM",
+	Created:     time.Now(),
+	Finished:    nil,
+	Status:      "To Do",
+	WorkspaceId: -1,
+	UserId:      1,
+}
+
 type TaskModel struct{}
 
 func (t *TaskModel) Insert(title, content, priority string, workspaceId, userId int) (int, error) {
@@ -40,6 +53,10 @@ func (t *TaskModel) Get(id int) (models.Task, error) {
 	switch id {
 	case 1:
 		return firstMockTask, nil
+	case 3:
+		return models.Task{}, errors.New("Internal Server Error")
+	case 4:
+		return wrongMockTask, nil
 	default:
 		return models.Task{}, models.ErrNoRecord
 	}
@@ -64,6 +81,9 @@ func (m *TaskModel) Delete(id int) (int, error) {
 func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) {
 	if userId == 1 && taskId == 1 {
 		return true, nil
+	}
+	if userId != 1 && taskId == 1 {
+		return false, errors.New("Internal server error")
 	}
 	return false, nil
 }

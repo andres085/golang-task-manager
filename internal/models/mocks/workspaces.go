@@ -1,6 +1,8 @@
 package mocks
 
 import (
+	"errors"
+
 	"github.com/andres085/task_manager/internal/models"
 )
 
@@ -47,12 +49,18 @@ func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error
 	if userId == 1 && workspaceId == 1 {
 		return true, nil
 	}
+	if userId == 1 && workspaceId == 0 {
+		return false, errors.New("Internal Server Error")
+	}
 	return false, nil
 }
 
 func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) {
 	if userId == 1 && workspaceId == 1 {
 		return true, nil
+	}
+	if userId == 1 && workspaceId == -1 {
+		return false, errors.New("Internal server error")
 	}
 	return false, nil
 }

@@ -123,6 +123,16 @@ func TestTaskView(t *testing.T) {
 			urlPath:  "/task/view/",
 			wantCode: http.StatusNotFound,
 		},
+		{
+			name:     "Internal Server Error",
+			urlPath:  "/task/view/3",
+			wantCode: http.StatusInternalServerError,
+		},
+		{
+			name:     "Internal Server Error 2",
+			urlPath:  "/task/view/4",
+			wantCode: http.StatusInternalServerError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1020,13 +1030,14 @@ func TestUserLoginPost(t *testing.T) {
 			assert.Equal(t, code, tt.wantCode)
 		})
 	}
-
 }
 
 func TestUserLogoutPost(t *testing.T) {
 	app := newTestApplication(t)
 
 	ts := newTestServer(t, app.routes())
+	ts.loginUser(t)
+
 	defer ts.Close()
 
 	_, _, body := ts.get(t, "/user/login")

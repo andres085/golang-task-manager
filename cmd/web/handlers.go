@@ -44,6 +44,7 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 	isTaskOwner, err := app.tasks.ValidateOwnership(userId, task.ID)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	if !isTaskOwner {
