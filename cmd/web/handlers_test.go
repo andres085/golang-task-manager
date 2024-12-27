@@ -999,6 +999,13 @@ func TestUserLoginPost(t *testing.T) {
 			csrfToken: validCSRFToken,
 			wantCode:  http.StatusUnprocessableEntity,
 		},
+		{
+			name:      "Invalid user",
+			email:     "test@mail.com",
+			password:  "p4$$word",
+			csrfToken: validCSRFToken,
+			wantCode:  http.StatusUnprocessableEntity,
+		},
 	}
 
 	for _, tt := range tests {

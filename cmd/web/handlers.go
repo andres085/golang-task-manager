@@ -692,6 +692,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 			data := app.newTemplateData(r)
 			data.Form = form
+
 			app.render(w, r, http.StatusUnprocessableEntity, "login.html", data)
 		} else {
 			app.serverError(w, r, err)
