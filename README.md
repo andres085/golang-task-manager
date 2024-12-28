@@ -86,14 +86,22 @@ go run ./cmd/web
 - **Update a task**: Modify task data, status, or reassign the task by clicking on "Edit" in the task view page or the table.
 - **Delete a task**: Delete a task by clicking on the "Delete" button on the table or in the task view.
 
-## Testing
-The project has a combination of unit tests and integration tests using a dockerized test database.
+## Testing and CI/CD Pipeline
+The project includes automated testing and validation tools to ensure code quality and stability:
+1. **GitHub Actions**:
+- A pipeline is configured to automatically run all tests before merging a pull request.
+- Tests are executed in a Dockerized environment to ensure consistency across different development setups.
 
-Run tests using:
+2. **Husky Pre-Commit Hook**:
+- Husky is configured to run tests locally before allowing a commit. This ensures that no code is committed unless it passes all tests.
+- If any of the tests fails, the commit is aborted.
+
+3. **Unit and Integration tests**:
+- Run tests using:
 ```bash
 go test ./...
 ```
-Coverage of handlers around 80%, open `coverage.html` file to check it out.
+- Coverage of handlers around 80%, open `coverage.html` file to check it out.
 
 ## Future Enhancements
 - Add the possibility to comment on tasks inside the task view.
