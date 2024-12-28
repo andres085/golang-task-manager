@@ -52,7 +52,7 @@ func (app *application) taskView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskOwner, err := app.users.GetUser(userId)
+	taskOwner, err := app.users.GetUser(task.UserId)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
