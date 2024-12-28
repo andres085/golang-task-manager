@@ -1,0 +1,2399 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>web: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/andres085/task_manager/cmd/web/handlers.go (78.3%)</option>
+				
+				<option value="file1">github.com/andres085/task_manager/cmd/web/helpers.go (70.7%)</option>
+				
+				<option value="file2">github.com/andres085/task_manager/cmd/web/main.go (0.0%)</option>
+				
+				<option value="file3">github.com/andres085/task_manager/cmd/web/middleware.go (81.2%)</option>
+				
+				<option value="file4">github.com/andres085/task_manager/cmd/web/routes.go (100.0%)</option>
+				
+				<option value="file5">github.com/andres085/task_manager/cmd/web/templates.go (82.8%)</option>
+				
+				<option value="file6">github.com/andres085/task_manager/internal/assert/assert.go (66.7%)</option>
+				
+				<option value="file7">github.com/andres085/task_manager/internal/models/mocks/logger.go (66.7%)</option>
+				
+				<option value="file8">github.com/andres085/task_manager/internal/models/mocks/tasks.go (88.9%)</option>
+				
+				<option value="file9">github.com/andres085/task_manager/internal/models/mocks/users.go (86.4%)</option>
+				
+				<option value="file10">github.com/andres085/task_manager/internal/models/mocks/workspaces.go (88.2%)</option>
+				
+				<option value="file11">github.com/andres085/task_manager/internal/models/tasks.go (64.9%)</option>
+				
+				<option value="file12">github.com/andres085/task_manager/internal/models/users.go (17.3%)</option>
+				
+				<option value="file13">github.com/andres085/task_manager/internal/models/workspaces.go (78.9%)</option>
+				
+				<option value="file14">github.com/andres085/task_manager/internal/validator/validator.go (92.3%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "errors"
+        "fmt"
+        "math"
+        "net/http"
+        "strconv"
+
+        "github.com/andres085/task_manager/internal/models"
+        "github.com/andres085/task_manager/internal/validator"
+)
+
+func (app *application) home(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        data := app.newTemplateData(r)
+
+        app.render(w, r, http.StatusOK, "home.html", data)
+}</span>
+
+func (app *application) taskView(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        id, err := strconv.Atoi(r.PathValue("id"))
+        if err != nil || id &lt; 1 </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">task, err := app.tasks.Get(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, models.ErrNoRecord) </span><span class="cov8" title="1">{
+                        http.NotFound(w, r)
+                }</span> else<span class="cov8" title="1"> {
+                        app.serverError(w, r, err)
+                }</span>
+                <span class="cov8" title="1">return</span>
+        }
+
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
+        userIsAdmin, err := app.workspaces.ValidateAdmin(userId, task.WorkspaceId)
+        if err != nil </span><span class="cov8" title="1">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">isTaskOwner, err := app.tasks.ValidateOwnership(userId, task.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if !isTaskOwner </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">taskOwner, err := app.users.GetUser(userId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+        data.Task = task
+        data.IsAdmin = userIsAdmin
+        data.TaskOwner = taskOwner
+
+        app.render(w, r, http.StatusOK, "task_view.html", data)</span>
+}
+
+func (app *application) taskViewAll(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        workspaceId, err := strconv.Atoi(r.PathValue("id"))
+        userId := r.Context().Value(userIDContextKey).(int)
+        if err != nil || workspaceId &lt; 1 </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if !isOwner </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">queryParams := r.URL.Query()
+        title := queryParams.Get("title")
+        priority := queryParams.Get("priority")
+        status := queryParams.Get("status")
+        sort := queryParams.Get("sort")
+
+        userIsAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+        }</span>
+
+        <span class="cov8" title="1">limit, page, offset := getPaginationParams(r, 10)
+
+        tasks, err := app.tasks.GetAll(workspaceId, limit, offset, title, priority, status, sort)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">totalTasks, err := app.tasks.GetTotalTasks(workspaceId, title, priority, status)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">totalPages := int(math.Ceil(float64(totalTasks) / float64(limit)))
+
+        data := app.newTemplateData(r)
+        data.Tasks = tasks
+        data.Workspace.ID = workspaceId
+        data.Limit = limit
+        data.CurrentPage = page
+        data.TotalPages = totalPages
+        data.IsAdmin = userIsAdmin
+        data.Filter = title
+        data.PriorityFilter = priority
+        data.StatusFilter = status
+
+        app.render(w, r, http.StatusOK, "tasks_view.html", data)</span>
+}
+
+type taskCreateForm struct {
+        ID                  *int
+        Title               string                `form:"title"`
+        Content             string                `form:"content"`
+        Priority            string                `form:"priority"`
+        Status              string                `form:"status"`
+        WorkspaceID         int                   `form:"workspace_id"`
+        UserID              int                   `form:"user_id"`
+        DefaultUser         models.UserWithRole   `form:"-"`
+        WorkspaceUsers      []models.UserWithRole `form:"-"`
+        validator.Validator `form:"-"`
+}
+
+func (app *application) taskCreate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        workspaceId, err := strconv.Atoi(r.PathValue("id"))
+        if err != nil || workspaceId &lt; 1 </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+
+        adminUser, regularUsers, err := app.getFormsDefaultUser(workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data.Form = taskCreateForm{
+                Priority:       "LOW",
+                WorkspaceID:    workspaceId,
+                DefaultUser:    adminUser,
+                WorkspaceUsers: regularUsers,
+        }
+
+        app.render(w, r, http.StatusOK, "task_create.html", data)</span>
+}
+
+func (app *application) taskCreatePost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+
+        var form taskCreateForm
+
+        err := app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+        form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
+
+        if !form.Valid() </span><span class="cov8" title="1">{
+                data := app.newTemplateData(r)
+
+                adminUser, regularUsers, err := app.getFormsDefaultUser(form.WorkspaceID)
+                if err != nil </span><span class="cov0" title="0">{
+                        app.serverError(w, r, err)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">form.DefaultUser = adminUser
+                form.WorkspaceUsers = regularUsers
+                data.Form = form
+
+                app.render(w, r, http.StatusUnprocessableEntity, "task_create.html", data)
+                return</span>
+        }
+
+        <span class="cov8" title="1">id, err := app.tasks.Insert(form.Title, form.Content, form.Priority, form.WorkspaceID, form.UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">app.sessionManager.Put(r.Context(), "flash", "Task successfully created!")
+
+        http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)</span>
+}
+
+func (app *application) taskUpdate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        id, err := strconv.Atoi(r.PathValue("id"))
+        if err != nil || id &lt; 1 </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">task, err := app.tasks.Get(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, models.ErrNoRecord) </span><span class="cov8" title="1">{
+                        http.NotFound(w, r)
+                }</span> else<span class="cov0" title="0"> {
+                        app.serverError(w, r, err)
+                }</span>
+                <span class="cov8" title="1">return</span>
+        }
+
+        <span class="cov8" title="1">workspaceUsers, err := app.users.GetWorkspaceUsers(task.WorkspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">var assignedUser models.UserWithRole
+        otherUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
+
+        for i, user := range workspaceUsers </span><span class="cov8" title="1">{
+                if user.ID == task.UserId </span><span class="cov8" title="1">{
+                        assignedUser = user
+                        otherUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
+                }</span>
+        }
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+
+        data.Form = taskCreateForm{
+                ID:             &amp;task.ID,
+                Title:          task.Title,
+                Content:        task.Content,
+                Priority:       task.Priority,
+                DefaultUser:    assignedUser,
+                WorkspaceUsers: otherUsers,
+                Status:         task.Status,
+        }
+
+        app.render(w, r, http.StatusOK, "task_update.html", data)</span>
+}
+
+func (app *application) taskUpdatePost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        id, err := strconv.Atoi(r.PathValue("id"))
+        if err != nil || id &lt; 1 </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
+        isTaskOwner, err := app.tasks.ValidateOwnership(userId, id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if !isTaskOwner </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">var form taskCreateForm
+
+        err = app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+        form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
+
+        if !form.Valid() </span><span class="cov8" title="1">{
+                data := app.newTemplateData(r)
+                form.ID = &amp;id
+                data.Form = form
+                app.render(w, r, http.StatusUnprocessableEntity, "task_update.html", data)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = app.tasks.Update(id, form.Title, form.Content, form.Priority, form.UserID, form.Status)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.Redirect(w, r, fmt.Sprintf("/task/view/%d", id), http.StatusSeeOther)</span>
+}
+
+func (app *application) taskDelete(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        workspaceId, err := strconv.Atoi(r.PathValue("workspaceId"))
+        if err != nil || workspaceId &lt; 1 </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        // Removed the error validation here because we do this validation in the checkTaskAdmin middleware
+        <span class="cov8" title="1">id, _ := strconv.Atoi(r.PathValue("id"))
+
+        _, err = app.tasks.Delete(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d/tasks", workspaceId), http.StatusSeeOther)</span>
+}
+
+func (app *application) ping(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        w.Write([]byte("OK"))
+}</span>
+
+type workspaceCreateForm struct {
+        ID                  *int
+        Title               string `form:"title"`
+        Description         string `form:"description"`
+        validator.Validator `form:"-"`
+}
+
+func (app *application) workspaceCreate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        data := app.newTemplateData(r)
+
+        data.Form = workspaceCreateForm{}
+
+        app.render(w, r, http.StatusOK, "workspace_create.html", data)
+}</span>
+
+func (app *application) workspaceCreatePost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var form workspaceCreateForm
+
+        err := app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+        form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
+
+        if !form.Valid() </span><span class="cov8" title="1">{
+                data := app.newTemplateData(r)
+                data.Form = form
+                app.render(w, r, http.StatusUnprocessableEntity, "workspace_create.html", data)
+                return
+        }</span>
+
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
+
+        id, err := app.workspaces.Insert(form.Title, form.Description, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">app.sessionManager.Put(r.Context(), "flash", "Workspace successfully created!")
+
+        http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", id), http.StatusSeeOther)</span>
+}
+
+func (app *application) workspaceView(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        id, _ := strconv.Atoi(r.PathValue("id"))
+
+        workspace, err := app.workspaces.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
+        userIsAdmin, err := app.workspaces.ValidateAdmin(userId, id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">workspaceUsers, err := app.users.GetWorkspaceUsers(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+        data.Workspace = workspace
+        data.IsAdmin = userIsAdmin
+        data.WorkspaceUsers = workspaceUsers
+
+        app.render(w, r, http.StatusOK, "workspace_view.html", data)</span>
+}
+
+func (app *application) workspaceViewAll(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        userId := r.Context().Value(userIDContextKey).(int)
+        ownWorkspaces, err := app.workspaces.GetAll(userId, "ADMIN")
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">canCreateWorkspaces := len(ownWorkspaces) &lt; 6
+
+        invitedWorkspaces, err := app.workspaces.GetAll(userId, "MEMBER")
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+        data.OwnedWorkspaces = ownWorkspaces
+        data.InvitedWorkspaces = invitedWorkspaces
+        data.WorkspaceLimit = canCreateWorkspaces
+
+        app.render(w, r, http.StatusOK, "workspaces_view.html", data)</span>
+}
+
+func (app *application) workspaceUpdate(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        id, _ := strconv.Atoi(r.PathValue("id"))
+
+        workspace, err := app.workspaces.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+
+        data.Form = workspaceCreateForm{
+                ID:          &amp;workspace.ID,
+                Title:       workspace.Title,
+                Description: workspace.Description,
+        }
+
+        app.render(w, r, http.StatusOK, "workspace_update.html", data)</span>
+}
+
+func (app *application) workspaceUpdatePost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        workspaceId, _ := strconv.Atoi(r.PathValue("id"))
+
+        var form workspaceCreateForm
+
+        err := app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+        form.CheckField(validator.NotBlank(form.Description), "description", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.Description, 255), "description", "This field cannot be more than 255 characters long")
+
+        if !form.Valid() </span><span class="cov8" title="1">{
+                data := app.newTemplateData(r)
+                form.ID = &amp;workspaceId
+                data.Form = form
+                app.render(w, r, http.StatusUnprocessableEntity, "workspace_update.html", data)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = app.workspaces.Update(workspaceId, form.Title, form.Description)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.Redirect(w, r, fmt.Sprintf("/workspace/view/%d", workspaceId), http.StatusSeeOther)</span>
+}
+
+func (app *application) workspaceAddUser(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        id, err := strconv.Atoi(r.PathValue("id"))
+        if err != nil || id &lt; 1 </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">workspace, err := app.workspaces.Get(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">email := r.URL.Query().Get("email")
+        var foundUser *models.User
+
+        if email != "" </span><span class="cov8" title="1">{
+                foundUser, err = app.users.GetUserToInvite(email, workspace.ID)
+                if err != nil </span><span class="cov8" title="1">{
+                        if errors.Is(err, models.ErrNoRecord) </span><span class="cov8" title="1">{
+                                app.sessionManager.Put(r.Context(), "flash", "User not found or already added")
+                                http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
+                        }</span> else<span class="cov0" title="0"> {
+                                app.serverError(w, r, err)
+                        }</span>
+                        <span class="cov8" title="1">return</span>
+                }
+
+                <span class="cov8" title="1">totalWorkspaces, err := app.users.GetWorkspacesAsMemberCount(email)
+                if err != nil </span><span class="cov0" title="0">{
+                        app.serverError(w, r, err)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">canBeInvitedToWorkspaces := totalWorkspaces &lt; 6
+
+                if !canBeInvitedToWorkspaces </span><span class="cov8" title="1">{
+                        app.sessionManager.Put(r.Context(), "flash", "User exceeds workspace limit")
+                        http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspace.ID), http.StatusSeeOther)
+                }</span>
+        }
+
+        <span class="cov8" title="1">workspaceUsers, err := app.users.GetWorkspaceUsers(id)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">data := app.newTemplateData(r)
+        data.Workspace = workspace
+        data.User = foundUser
+        data.WorkspaceUsers = workspaceUsers
+
+        app.render(w, r, http.StatusOK, "workspace_users.html", data)</span>
+}
+
+type addUserForm struct {
+        UserID int `form:"userID"`
+}
+
+func (app *application) workspaceAddUserPost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        workspaceId, _ := strconv.Atoi(r.PathValue("id"))
+
+        var form addUserForm
+
+        err := app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">userId := r.Context().Value(userIDContextKey).(int)
+        if userId == form.UserID </span><span class="cov8" title="1">{
+                http.Error(w, "Bad Request", http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = app.users.AddUserToWorkspace(form.UserID, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)</span>
+}
+
+func (app *application) workspaceRemoveUserPost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        userId, err := strconv.Atoi(r.PathValue("userId"))
+        workspaceId, _ := strconv.Atoi(r.PathValue("id"))
+
+        row, err := app.users.RemoveUserFromWorkspace(workspaceId, userId)
+        if err != nil || row &lt; 1 </span><span class="cov8" title="1">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.Redirect(w, r, fmt.Sprintf("/workspace/%d/user/add", workspaceId), http.StatusSeeOther)</span>
+}
+
+func (app *application) workspaceDelete(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if r.Method != http.MethodPost </span><span class="cov0" title="0">{
+                http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+                return
+        }</span>
+
+        <span class="cov8" title="1">workspaceId, err := strconv.Atoi(r.PathValue("id"))
+        if err != nil || workspaceId &lt; 1 </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">row, err := app.workspaces.Delete(workspaceId)
+        if err != nil || row &lt; 1 </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov8" title="1">http.Redirect(w, r, "/workspace/view", http.StatusSeeOther)</span>
+}
+
+type userCreateForm struct {
+        FirstName           string `form:"firstName"`
+        LastName            string `form:"lastName"`
+        Email               string `form:"email"`
+        Password            string `form:"password"`
+        validator.Validator `form:"-"`
+}
+
+func (app *application) userSignUp(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        data := app.newTemplateData(r)
+
+        data.Form = userCreateForm{}
+
+        app.render(w, r, http.StatusOK, "register.html", data)
+}</span>
+
+func (app *application) userSignUpPost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var form userCreateForm
+
+        err := app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.FirstName), "firstName", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.FirstName, 20), "firstName", "This field cannot be more than 20 characters long")
+        form.CheckField(validator.NotBlank(form.LastName), "lastName", "This field cannot be blank")
+        form.CheckField(validator.MaxChars(form.LastName, 20), "lastName", "This field cannot be more than 20 characters long")
+        form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+        form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
+        form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
+        form.CheckField(validator.MinChars(form.Password, 6), "password", "This field cannot be less than 6 characters long")
+
+        if !form.Valid() </span><span class="cov8" title="1">{
+                data := app.newTemplateData(r)
+                data.Form = form
+                app.render(w, r, http.StatusUnprocessableEntity, "register.html", data)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = app.users.Insert(form.FirstName, form.LastName, form.Email, form.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">app.sessionManager.Put(r.Context(), "flash", "User registered successfully!")
+
+        http.Redirect(w, r, "/user/login", http.StatusSeeOther)</span>
+}
+
+type userLoginForm struct {
+        Email               string `form:"email"`
+        Password            string `form:"password"`
+        validator.Validator `form:"-"`
+}
+
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        data := app.newTemplateData(r)
+        data.Form = userLoginForm{}
+
+        app.render(w, r, http.StatusOK, "login.html", data)
+}</span>
+
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var form userLoginForm
+
+        err := app.decodePostForm(r, &amp;form)
+        if err != nil </span><span class="cov0" title="0">{
+                app.clientError(w, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+        form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
+        form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
+
+        if !form.Valid() </span><span class="cov8" title="1">{
+                data := app.newTemplateData(r)
+                data.Form = form
+                app.render(w, r, http.StatusUnprocessableEntity, "login.html", data)
+                return
+        }</span>
+
+        <span class="cov8" title="1">id, err := app.users.Authenticate(form.Email, form.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, models.ErrInvalidCredentials) </span><span class="cov8" title="1">{
+                        form.AddNonFieldError("Email or password is incorrect")
+
+                        data := app.newTemplateData(r)
+                        data.Form = form
+
+                        app.render(w, r, http.StatusUnprocessableEntity, "login.html", data)
+                }</span> else<span class="cov0" title="0"> {
+                        app.serverError(w, r, err)
+                }</span>
+                <span class="cov8" title="1">return</span>
+        }
+
+        <span class="cov8" title="1">err = app.sessionManager.RenewToken(r.Context())
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
+
+        http.Redirect(w, r, "/workspace/view", http.StatusSeeOther)</span>
+}
+
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        err := app.sessionManager.RenewToken(r.Context())
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+
+        app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
+
+        http.Redirect(w, r, "/", http.StatusSeeOther)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "bytes"
+        "errors"
+        "fmt"
+        "net/http"
+        "runtime/debug"
+        "time"
+
+        "github.com/andres085/task_manager/internal/models"
+        "github.com/go-playground/form/v4"
+        "github.com/justinas/nosurf"
+)
+
+func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) <span class="cov8" title="1">{
+        var (
+                method = r.Method
+                uri    = r.URL.RequestURI()
+                trace  = string(debug.Stack())
+        )
+
+        app.logger.Error(err.Error(), "method", method, "uri", uri, "trace", trace)
+        http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+}</span>
+
+func (app *application) clientError(w http.ResponseWriter, status int) <span class="cov0" title="0">{
+        http.Error(w, http.StatusText(status), status)
+}</span>
+
+func (app *application) render(w http.ResponseWriter, r *http.Request, status int, page string, data templateData) <span class="cov8" title="1">{
+        ts, ok := app.templateCache[page]
+        if !ok </span><span class="cov0" title="0">{
+                err := fmt.Errorf("the template %s does not exist", page)
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">buf := new(bytes.Buffer)
+        err := ts.ExecuteTemplate(buf, "base", data)
+        if err != nil </span><span class="cov0" title="0">{
+                app.serverError(w, r, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">w.WriteHeader(status)
+
+        buf.WriteTo(w)</span>
+}
+
+func (app *application) isAuthenticated(r *http.Request) bool <span class="cov8" title="1">{
+        isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+        if !ok </span><span class="cov8" title="1">{
+                return false
+        }</span>
+
+        <span class="cov8" title="1">return isAuthenticated</span>
+}
+
+func (app *application) newTemplateData(r *http.Request) templateData <span class="cov8" title="1">{
+        return templateData{
+                CurrentYear:     time.Now().Year(),
+                Flash:           app.sessionManager.PopString(r.Context(), "flash"),
+                IsAuthenticated: app.isAuthenticated(r),
+                CSRFToken:       nosurf.Token(r),
+        }
+}</span>
+
+func (app *application) decodePostForm(r *http.Request, dst any) error <span class="cov8" title="1">{
+        err := r.ParseForm()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = app.formDecoder.Decode(dst, r.PostForm)
+        if err != nil </span><span class="cov0" title="0">{
+                var invalidDecoderError *form.InvalidDecoderError
+
+                if errors.As(err, &amp;invalidDecoderError) </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                <span class="cov0" title="0">return err</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (app *application) getFormsDefaultUser(workspaceId int) (models.UserWithRole, []models.UserWithRole, error) <span class="cov8" title="1">{
+        workspaceUsers, err := app.users.GetWorkspaceUsers(workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                return models.UserWithRole{}, nil, err
+        }</span>
+
+        <span class="cov8" title="1">var adminUser models.UserWithRole
+        regularUsers := make([]models.UserWithRole, len(workspaceUsers)-1)
+
+        for i, user := range workspaceUsers </span><span class="cov8" title="1">{
+                if user.Role == "ADMIN" </span><span class="cov8" title="1">{
+                        adminUser = user
+                        regularUsers = append(workspaceUsers[:i], workspaceUsers[i+1:]...)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return adminUser, regularUsers, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "crypto/tls"
+        "database/sql"
+        "flag"
+        "html/template"
+        "log/slog"
+        "net/http"
+        "os"
+        "time"
+
+        "github.com/alexedwards/scs/mysqlstore"
+        "github.com/alexedwards/scs/v2"
+        "github.com/andres085/task_manager/internal/models"
+        "github.com/go-playground/form/v4"
+        _ "github.com/go-sql-driver/mysql"
+)
+
+type application struct {
+        logger         *slog.Logger
+        tasks          models.TaskModelInterface
+        workspaces     models.WorkspaceModelInterface
+        users          models.UserModelInterface
+        templateCache  map[string]*template.Template
+        formDecoder    *form.Decoder
+        sessionManager *scs.SessionManager
+}
+
+func main() <span class="cov0" title="0">{
+
+        addr := flag.String("addr", ":4000", "HTTP network address")
+        dsn := flag.String("dsn", "myuser:mypassword@/task_manager?parseTime=true", "MySQL data source name")
+        flag.Parse()
+
+        logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+        db, err := openDB(*dsn)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error(err.Error())
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">defer db.Close()
+
+        templateCache, err := newTemplateCache()
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error(err.Error())
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">formDecoder := form.NewDecoder()
+
+        sessionManager := scs.New()
+        sessionManager.Store = mysqlstore.New(db)
+        sessionManager.Lifetime = 12 * time.Hour
+        sessionManager.Cookie.Secure = true
+
+        app := &amp;application{
+                logger:         logger,
+                tasks:          &amp;models.TaskModel{DB: db},
+                workspaces:     &amp;models.WorkspaceModel{DB: db},
+                users:          &amp;models.UserModel{DB: db},
+                templateCache:  templateCache,
+                formDecoder:    formDecoder,
+                sessionManager: sessionManager,
+        }
+
+        tlsConfig := &amp;tls.Config{
+                CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+        }
+
+        srv := &amp;http.Server{
+                Addr:         *addr,
+                Handler:      app.routes(),
+                ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+                TLSConfig:    tlsConfig,
+                IdleTimeout:  time.Minute,
+                ReadTimeout:  5 * time.Second,
+                WriteTimeout: 10 * time.Second,
+        }
+
+        logger.Info("starting server", "addr", *addr)
+
+        err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+        logger.Error(err.Error())
+        os.Exit(1)</span>
+}
+
+func openDB(dsn string) (*sql.DB, error) <span class="cov0" title="0">{
+        db, err := sql.Open("mysql", dsn)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">err = db.Ping()
+        if err != nil </span><span class="cov0" title="0">{
+                db.Close()
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return db, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package main
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "net/http"
+        "strconv"
+
+        "github.com/andres085/task_manager/internal/models"
+        "github.com/justinas/nosurf"
+)
+
+func commonHeaders(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                w.Header().Set("Content-Security-Policy",
+                        "default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' blob: data:;")
+
+                w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
+                w.Header().Set("X-Content-Type-Options", "nosniff")
+                w.Header().Set("X-Frame-Options", "deny")
+                w.Header().Set("X-XSS-Protection", "0")
+
+                w.Header().Set("Server", "Go")
+
+                next.ServeHTTP(w, r)
+        }</span>)
+}
+
+func (app *application) logRequest(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                var (
+                        ip     = r.RemoteAddr
+                        proto  = r.Proto
+                        method = r.Method
+                        uri    = r.URL.RequestURI()
+                )
+
+                app.logger.Info("received request", "ip", ip, "proto", proto, "method", method, "uri", uri)
+
+                next.ServeHTTP(w, r)
+        }</span>)
+}
+
+func (app *application) recoverPanic(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                defer func() </span><span class="cov8" title="1">{
+                        if err := recover(); err != nil </span><span class="cov8" title="1">{
+                                w.Header().Set("Connection", "close")
+                                app.serverError(w, r, fmt.Errorf("%s", err))
+                        }</span>
+                }()
+
+                <span class="cov8" title="1">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func (app *application) requireAuthentication(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                if !app.isAuthenticated(r) </span><span class="cov8" title="1">{
+                        http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">w.Header().Add("Cache-Control", "no-store")
+
+                next.ServeHTTP(w, r)</span>
+        })
+}
+
+func noSurf(next http.Handler) http.Handler <span class="cov8" title="1">{
+        csrfHandler := nosurf.New(next)
+        csrfHandler.SetBaseCookie(http.Cookie{
+                HttpOnly: true,
+                Path:     "/",
+                Secure:   true,
+        })
+
+        return csrfHandler
+}</span>
+
+func (app *application) authenticate(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+                if id == 0 </span><span class="cov8" title="1">{
+                        next.ServeHTTP(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">exists, err := app.users.Exists(id)
+                if err != nil </span><span class="cov0" title="0">{
+                        app.serverError(w, r, err)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">if exists </span><span class="cov8" title="1">{
+                        ctx := context.WithValue(r.Context(), isAuthenticatedContextKey, true)
+                        ctx = context.WithValue(ctx, userIDContextKey, id)
+                        r = r.WithContext(ctx)
+                }</span>
+
+                <span class="cov8" title="1">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func (app *application) checkWorkspaceMembership(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+                if userId == 0 </span><span class="cov8" title="1">{
+                        next.ServeHTTP(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">workspaceId, err := strconv.Atoi(r.PathValue("id"))
+                if err != nil || workspaceId &lt; 1 </span><span class="cov8" title="1">{
+                        http.NotFound(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">isOwner, err := app.workspaces.ValidateOwnership(userId, workspaceId)
+                if err != nil </span><span class="cov0" title="0">{
+                        app.serverError(w, r, err)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">if !isOwner </span><span class="cov8" title="1">{
+                        http.NotFound(w, r)
+                        return
+                }</span>
+                <span class="cov8" title="1">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func (app *application) checkWorkspaceAdmin(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+                if userId == 0 </span><span class="cov8" title="1">{
+                        next.ServeHTTP(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">workspaceId, err := strconv.Atoi(r.PathValue("id"))
+                if err != nil || workspaceId &lt; 1 </span><span class="cov8" title="1">{
+                        http.NotFound(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">isAdmin, err := app.workspaces.ValidateAdmin(userId, workspaceId)
+                if err != nil </span><span class="cov0" title="0">{
+                        if errors.Is(err, models.ErrNoRecord) </span><span class="cov0" title="0">{
+                                http.NotFound(w, r)
+                        }</span> else<span class="cov0" title="0"> {
+                                app.serverError(w, r, err)
+                        }</span>
+                        <span class="cov0" title="0">return</span>
+                }
+
+                <span class="cov8" title="1">if !isAdmin </span><span class="cov8" title="1">{
+                        http.Error(w, "Forbidden", http.StatusForbidden)
+                        return
+                }</span>
+                <span class="cov8" title="1">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func (app *application) checkTaskAdmin(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                userId := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+                if userId == 0 </span><span class="cov0" title="0">{
+                        next.ServeHTTP(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">taskId, err := strconv.Atoi(r.PathValue("id"))
+                if err != nil || taskId &lt; 1 </span><span class="cov0" title="0">{
+                        http.NotFound(w, r)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">isOwner, err := app.tasks.ValidateAdmin(userId, taskId)
+                if err != nil </span><span class="cov0" title="0">{
+                        if errors.Is(err, models.ErrNoRecord) </span><span class="cov0" title="0">{
+                                http.NotFound(w, r)
+                        }</span> else<span class="cov0" title="0"> {
+                                app.serverError(w, r, err)
+                        }</span>
+                        <span class="cov0" title="0">return</span>
+                }
+
+                <span class="cov8" title="1">if !isOwner </span><span class="cov0" title="0">{
+                        http.NotFound(w, r)
+                        return
+                }</span>
+                <span class="cov8" title="1">next.ServeHTTP(w, r)</span>
+        })
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package main
+
+import (
+        "net/http"
+
+        "github.com/andres085/task_manager/ui"
+        "github.com/justinas/alice"
+)
+
+func (app *application) routes() http.Handler <span class="cov8" title="1">{
+        mux := http.NewServeMux()
+
+        mux.Handle("GET /static/", http.FileServerFS(ui.Files))
+
+        dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
+        protected := dynamic.Append(app.requireAuthentication)
+        workspaceMembership := protected.Append(app.checkWorkspaceMembership)
+        workspaceAdminPermission := protected.Append(app.checkWorkspaceAdmin)
+        taskAdminPermission := protected.Append(app.checkTaskAdmin)
+
+        mux.HandleFunc("GET /ping", app.ping)
+
+        mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+
+        mux.Handle("GET /task/view/{id}", protected.ThenFunc(app.taskView))
+        mux.Handle("GET /task/update/{id}", protected.ThenFunc(app.taskUpdate))
+        mux.Handle("GET /workspace/{id}/task/create", workspaceMembership.ThenFunc(app.taskCreate))
+        mux.Handle("POST /task/create", protected.ThenFunc(app.taskCreatePost))
+        mux.Handle("POST /task/update/{id}", protected.ThenFunc(app.taskUpdatePost))
+        mux.Handle("POST /workspace/{workspaceId}/task/delete/{id}", taskAdminPermission.ThenFunc(app.taskDelete))
+
+        mux.Handle("GET /workspace/view", protected.ThenFunc(app.workspaceViewAll))
+        mux.Handle("GET /workspace/view/{id}", workspaceMembership.ThenFunc(app.workspaceView))
+        mux.Handle("GET /workspace/view/{id}/tasks", protected.ThenFunc(app.taskViewAll))
+        mux.Handle("GET /workspace/create", protected.ThenFunc(app.workspaceCreate))
+        mux.Handle("GET /workspace/update/{id}", workspaceAdminPermission.ThenFunc(app.workspaceUpdate))
+        mux.Handle("GET /workspace/{id}/user/add", workspaceAdminPermission.ThenFunc(app.workspaceAddUser))
+        mux.Handle("POST /workspace/create", protected.ThenFunc(app.workspaceCreatePost))
+        mux.Handle("POST /workspace/update/{id}", workspaceAdminPermission.ThenFunc(app.workspaceUpdatePost))
+        mux.Handle("POST /workspace/delete/{id}", workspaceAdminPermission.ThenFunc(app.workspaceDelete))
+        mux.Handle("POST /workspace/{id}/user/add", workspaceAdminPermission.ThenFunc(app.workspaceAddUserPost))
+        mux.Handle("POST /workspace/{id}/user/remove/{userId}", workspaceAdminPermission.ThenFunc(app.workspaceRemoveUserPost))
+
+        mux.Handle("GET /user/register", dynamic.ThenFunc(app.userSignUp))
+        mux.Handle("POST /user/register", dynamic.ThenFunc(app.userSignUpPost))
+        mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
+        mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
+        mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPost))
+
+        standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
+
+        return standard.Then(mux)
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package main
+
+import (
+        "html/template"
+        "io/fs"
+        "net/http"
+        "path/filepath"
+        "strconv"
+        "time"
+
+        "github.com/andres085/task_manager/internal/models"
+        "github.com/andres085/task_manager/ui"
+)
+
+type templateData struct {
+        CurrentYear       int
+        Task              models.Task
+        Tasks             []models.Task
+        Workspace         models.Workspace
+        OwnedWorkspaces   []models.Workspace
+        InvitedWorkspaces []models.Workspace
+        User              *models.User
+        WorkspaceUsers    []models.UserWithRole
+        Form              any
+        Flash             string
+        IsAuthenticated   bool
+        CSRFToken         string
+        Limit             int
+        CurrentPage       int
+        TotalPages        int
+        WorkspaceLimit    bool
+        IsAdmin           bool
+        TaskOwner         *models.User
+        Filter            string
+        PriorityFilter    string
+        StatusFilter      string
+}
+
+func humanDate(t time.Time) string <span class="cov8" title="1">{
+        if t.IsZero() </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+
+        <span class="cov8" title="1">return t.UTC().Format("02 Jan 2006 at 15:04")</span>
+}
+
+func iterPages(total int) []int <span class="cov8" title="1">{
+        var pages []int
+        for i := 1; i &lt;= total; i++ </span><span class="cov0" title="0">{
+                pages = append(pages, i)
+        }</span>
+        <span class="cov8" title="1">return pages</span>
+}
+
+func add(a, b int) int <span class="cov0" title="0">{
+        return a + b
+}</span>
+
+func sub(a, b int) int <span class="cov0" title="0">{
+        return a - b
+}</span>
+
+var functions = template.FuncMap{
+        "humanDate": humanDate,
+        "iterPages": iterPages,
+        "add":       add,
+        "sub":       sub,
+}
+
+func newTemplateCache() (map[string]*template.Template, error) <span class="cov8" title="1">{
+        cache := map[string]*template.Template{}
+
+        pages, err := fs.Glob(ui.Files, "html/pages/*.html")
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for _, page := range pages </span><span class="cov8" title="1">{
+                name := filepath.Base(page)
+
+                patterns := []string{
+                        "html/base.html",
+                        "html/partials/nav.html",
+                        "html/partials/confirmation_modal.html",
+                        page,
+                }
+
+                ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, patterns...)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">cache[name] = ts</span>
+        }
+
+        <span class="cov8" title="1">return cache, nil</span>
+}
+
+func getPaginationParams(r *http.Request, defaultLimit int) (int, int, int) <span class="cov8" title="1">{
+        limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+        if err != nil || limit &lt;= 0 </span><span class="cov8" title="1">{
+                limit = defaultLimit
+        }</span>
+
+        <span class="cov8" title="1">page, err := strconv.Atoi(r.URL.Query().Get("page"))
+        if err != nil || page &lt; 1 </span><span class="cov8" title="1">{
+                page = 1
+        }</span>
+
+        <span class="cov8" title="1">offset := (page - 1) * limit
+
+        return limit, page, offset</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package assert
+
+import (
+        "strings"
+        "testing"
+)
+
+func Equal[T comparable](t *testing.T, actual, expected T) <span class="cov8" title="1">{
+        t.Helper()
+
+        if actual != expected </span><span class="cov0" title="0">{
+                t.Errorf("got: %v; want: %v", actual, expected)
+        }</span>
+}
+
+func StringContains(t *testing.T, actual, expectedSubstring string) <span class="cov8" title="1">{
+        t.Helper()
+
+        if !strings.Contains(actual, expectedSubstring) </span><span class="cov0" title="0">{
+                t.Errorf("got: %q; expected to contain: %q", actual, expectedSubstring)
+        }</span>
+}
+
+func NilError(t *testing.T, actual error) <span class="cov8" title="1">{
+        t.Helper()
+
+        if actual != nil </span><span class="cov0" title="0">{
+                t.Errorf("got: %v; expected: nil", actual)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package mocks
+
+import (
+        "context"
+        "log/slog"
+)
+
+type SpyLogger struct {
+        Called  bool
+        Entries []slog.Record
+}
+
+func (s *SpyLogger) Enabled(ctx context.Context, level slog.Level) bool <span class="cov8" title="1">{
+        return true
+}</span>
+
+func (s *SpyLogger) Handle(ctx context.Context, r slog.Record) error <span class="cov8" title="1">{
+        s.Called = true
+        s.Entries = append(s.Entries, r)
+        return nil
+}</span>
+
+func (s *SpyLogger) WithAttrs(attrs []slog.Attr) slog.Handler <span class="cov0" title="0">{
+        return s
+}</span>
+
+func (s *SpyLogger) WithGroup(name string) slog.Handler <span class="cov0" title="0">{
+        return s
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package mocks
+
+import (
+        "errors"
+        "time"
+
+        "github.com/andres085/task_manager/internal/models"
+)
+
+var firstMockTask = models.Task{
+        ID:          1,
+        Title:       "First Test Task",
+        Content:     "First Test Task Content",
+        Priority:    "LOW",
+        Created:     time.Now(),
+        Finished:    nil,
+        Status:      "To Do",
+        WorkspaceId: 1,
+        UserId:      2,
+}
+
+var secondMockTask = models.Task{
+        ID:          2,
+        Title:       "Second Test Task",
+        Content:     "Second Test Task Content",
+        Priority:    "MEDIUM",
+        Created:     time.Now(),
+        Finished:    nil,
+        Status:      "To Do",
+        WorkspaceId: 1,
+        UserId:      1,
+}
+
+var wrongMockTask = models.Task{
+        ID:          4,
+        Title:       "Wrong Test Task",
+        Content:     "Wrong Test Task Content",
+        Priority:    "MEDIUM",
+        Created:     time.Now(),
+        Finished:    nil,
+        Status:      "To Do",
+        WorkspaceId: -1,
+        UserId:      1,
+}
+
+type TaskModel struct{}
+
+func (t *TaskModel) Insert(title, content, priority string, workspaceId, userId int) (int, error) <span class="cov8" title="1">{
+        return 2, nil
+}</span>
+
+func (t *TaskModel) Get(id int) (models.Task, error) <span class="cov8" title="1">{
+        switch id </span>{
+        case 1:<span class="cov8" title="1">
+                return firstMockTask, nil</span>
+        case 3:<span class="cov8" title="1">
+                return models.Task{}, errors.New("Internal Server Error")</span>
+        case 4:<span class="cov8" title="1">
+                return wrongMockTask, nil</span>
+        default:<span class="cov8" title="1">
+                return models.Task{}, models.ErrNoRecord</span>
+        }
+}
+
+func (m *TaskModel) GetAll(id, limit, offset int, title, priority, status, sort string) ([]models.Task, error) <span class="cov8" title="1">{
+        return []models.Task{firstMockTask, secondMockTask}, nil
+}</span>
+
+func (m *TaskModel) GetTotalTasks(workspaceId int, title, priority, status string) (int, error) <span class="cov8" title="1">{
+        return 0, nil
+}</span>
+
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error <span class="cov8" title="1">{
+        return nil
+}</span>
+
+func (m *TaskModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        return 1, nil
+}</span>
+
+func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; taskId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">if userId != 1 &amp;&amp; taskId == 1 </span><span class="cov0" title="0">{
+                return false, errors.New("Internal server error")
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+
+func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; taskId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov0" title="0">return false, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package mocks
+
+import (
+        "github.com/andres085/task_manager/internal/models"
+)
+
+type UserModel struct{}
+type UserWithRole struct{}
+
+var firstMockUser = models.UserWithRole{
+        ID:        1,
+        FirstName: "Test",
+        LastName:  "McTester",
+        Email:     "testmctesterson@mail.com",
+        Role:      "ADMIN",
+}
+
+var secondMockUser = models.UserWithRole{
+        ID:        2,
+        FirstName: "Pete",
+        LastName:  "Peterson",
+        Email:     "pete@mail.com",
+        Role:      "MEMBER",
+}
+
+func (m *UserModel) Insert(firstName, lastName, email, password string) error <span class="cov8" title="1">{
+        switch email </span>{
+        case "dupe@example.com":<span class="cov0" title="0">
+                return models.ErrDuplicateEmail</span>
+        default:<span class="cov8" title="1">
+                return nil</span>
+        }
+}
+
+func (m *UserModel) GetUser(userId int) (*models.User, error) <span class="cov8" title="1">{
+        return &amp;models.User{}, nil
+}</span>
+
+func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*models.User, error) <span class="cov8" title="1">{
+        if email != firstMockUser.Email </span><span class="cov8" title="1">{
+                return nil, models.ErrNoRecord
+        }</span>
+        <span class="cov8" title="1">return &amp;models.User{}, nil</span>
+}
+
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error <span class="cov8" title="1">{
+        return nil
+}</span>
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]models.UserWithRole, error) <span class="cov8" title="1">{
+        return []models.UserWithRole{firstMockUser, secondMockUser}, nil
+}</span>
+
+func (m *UserModel) Authenticate(email, password string) (int, error) <span class="cov8" title="1">{
+        if email == "alice@example.com" &amp;&amp; password == "pa$$word" </span><span class="cov8" title="1">{
+                return 1, nil
+        }</span>
+
+        <span class="cov8" title="1">return 0, models.ErrInvalidCredentials</span>
+}
+
+func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) <span class="cov8" title="1">{
+        if email == "testmctesterson@mail.com" </span><span class="cov8" title="1">{
+                return 6, nil
+        }</span>
+        <span class="cov0" title="0">return 1, nil</span>
+}
+
+func (m *UserModel) Exists(id int) (bool, error) <span class="cov8" title="1">{
+        switch id </span>{
+        case 1:<span class="cov8" title="1">
+                return true, nil</span>
+        default:<span class="cov8" title="1">
+                return false, nil</span>
+        }
+}
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) <span class="cov8" title="1">{
+        switch userId </span>{
+        case 1:<span class="cov8" title="1">
+                return 1, nil</span>
+        case 2:<span class="cov8" title="1">
+                return 2, models.ErrNoRecord</span>
+        default:<span class="cov0" title="0">
+                return 1, nil</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package mocks
+
+import (
+        "errors"
+
+        "github.com/andres085/task_manager/internal/models"
+)
+
+var firstMockWorkspace = models.Workspace{
+        ID:          1,
+        Title:       "First Workspace",
+        Description: "First workspace Description",
+}
+
+var secondMockWorkspace = models.Workspace{
+        ID:          2,
+        Title:       "Second Workspace",
+        Description: "Second workspace Description",
+}
+
+type WorkspaceModel struct{}
+
+func (t *WorkspaceModel) Insert(title, description string, userId int) (int, error) <span class="cov8" title="1">{
+        return 2, nil
+}</span>
+
+func (t *WorkspaceModel) Get(id int) (models.Workspace, error) <span class="cov8" title="1">{
+        switch id </span>{
+        case 1:<span class="cov8" title="1">
+                return firstMockWorkspace, nil</span>
+        default:<span class="cov0" title="0">
+                return models.Workspace{}, models.ErrNoRecord</span>
+        }
+}
+
+func (m *WorkspaceModel) GetAll(userId int, role string) ([]models.Workspace, error) <span class="cov8" title="1">{
+        return []models.Workspace{firstMockWorkspace, secondMockWorkspace}, nil
+}</span>
+
+func (m *WorkspaceModel) Update(id int, title, description string) error <span class="cov8" title="1">{
+        return nil
+}</span>
+
+func (m *WorkspaceModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        return 1, nil
+}</span>
+
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; workspaceId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">if userId == 1 &amp;&amp; workspaceId == 0 </span><span class="cov0" title="0">{
+                return false, errors.New("Internal Server Error")
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+
+func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        if userId == 1 &amp;&amp; workspaceId == 1 </span><span class="cov8" title="1">{
+                return true, nil
+        }</span>
+        <span class="cov8" title="1">if userId == 1 &amp;&amp; workspaceId == -1 </span><span class="cov8" title="1">{
+                return false, errors.New("Internal server error")
+        }</span>
+        <span class="cov8" title="1">return false, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "fmt"
+        "time"
+)
+
+type Task struct {
+        ID          int
+        Title       string
+        Content     string
+        Priority    string
+        Created     time.Time
+        Finished    *time.Time
+        WorkspaceId int
+        UserId      int
+        Status      string
+}
+
+type TaskModelInterface interface {
+        Insert(title, content, priority string, workspaceId, userId int) (int, error)
+        Get(id int) (Task, error)
+        GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error)
+        GetTotalTasks(workspaceId int, title, priority, status string) (int, error)
+        Update(id int, title, content, priority string, userId int, status string) error
+        Delete(id int) (int, error)
+        ValidateOwnership(userId, taskId int) (bool, error)
+        ValidateAdmin(userId, taskId int) (bool, error)
+}
+
+type TaskModel struct {
+        DB *sql.DB
+}
+
+func (m *TaskModel) Insert(title, content, priority string, workspaceId, userId int) (int, error) <span class="cov8" title="1">{
+        stmt := `INSERT INTO tasks (title, content, priority, created, workspace_id, user_id)  VALUES (?, ?, ?, UTC_TIMESTAMP(), ?, ?)`
+
+        result, err := m.DB.Exec(stmt, title, content, priority, workspaceId, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">id, err := result.LastInsertId()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(id), nil</span>
+}
+
+func (m *TaskModel) Get(id int) (Task, error) <span class="cov8" title="1">{
+        stmt := `SELECT * FROM tasks WHERE id = ?`
+
+        var t Task
+
+        err := m.DB.QueryRow(stmt, id).Scan(&amp;t.ID, &amp;t.Title, &amp;t.Content, &amp;t.Priority, &amp;t.Created, &amp;t.Finished, &amp;t.WorkspaceId, &amp;t.UserId, &amp;t.Status)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return Task{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return Task{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return t, nil</span>
+}
+
+func (m *TaskModel) GetAll(workspaceId, limit, offset int, title, priority, status, sort string) ([]Task, error) <span class="cov8" title="1">{
+
+        stmt := `SELECT * FROM tasks where workspace_id = ?`
+
+        conditions := map[string]interface{}{
+                "workspaceId": workspaceId,
+                "title":       title,
+                "priority":    priority,
+                "status":      status,
+                "sort":        sort,
+                "limit":       limit,
+                "offset":      offset,
+        }
+
+        preparedStmt, args := prepareStmt(stmt, conditions)
+
+        rows, err := m.DB.Query(preparedStmt, args...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">defer rows.Close()
+
+        var tasks []Task
+
+        for rows.Next() </span><span class="cov8" title="1">{
+                var t Task
+
+                err = rows.Scan(&amp;t.ID, &amp;t.Title, &amp;t.Content, &amp;t.Priority, &amp;t.Created, &amp;t.Finished, &amp;t.WorkspaceId, &amp;t.UserId, &amp;t.Status)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">tasks = append(tasks, t)</span>
+        }
+
+        <span class="cov8" title="1">if err = rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return tasks, nil</span>
+}
+
+func (m *TaskModel) GetTotalTasks(workspaceId int, title, priority, status string) (int, error) <span class="cov0" title="0">{
+        var totalTasks int
+
+        countStmt := `SELECT COUNT(*) FROM tasks WHERE workspace_id = ? `
+
+        args := []interface{}{workspaceId}
+
+        if title != "" </span><span class="cov0" title="0">{
+                countStmt += "AND title LIKE ? "
+                args = append(args, "%"+title+"%")
+        }</span>
+        <span class="cov0" title="0">if priority != "" </span><span class="cov0" title="0">{
+                countStmt += "AND priority = ? "
+                args = append(args, priority)
+        }</span>
+        <span class="cov0" title="0">if status != "" </span><span class="cov0" title="0">{
+                countStmt += "AND status = ? "
+                args = append(args, status)
+        }</span>
+
+        <span class="cov0" title="0">err := m.DB.QueryRow(countStmt, args...).Scan(&amp;totalTasks)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return totalTasks, nil</span>
+}
+
+func (m *TaskModel) Update(id int, title, content, priority string, userId int, status string) error <span class="cov8" title="1">{
+        var finished *time.Time
+
+        if status == "Completed" </span><span class="cov8" title="1">{
+                now := time.Now()
+                finished = &amp;now
+        }</span> else<span class="cov8" title="1"> {
+                finished = nil
+        }</span>
+
+        <span class="cov8" title="1">stmt := `UPDATE tasks SET title = ?, content = ?, priority = ?, user_id = ?, status = ?, finished = ? where id = ?`
+
+        _, err := m.DB.Exec(stmt, title, content, priority, userId, status, finished, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (m *TaskModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        stmt := `DELETE FROM tasks where id = ?`
+
+        result, err := m.DB.Exec(stmt, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">var r int64
+        r, err = result.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(r), nil</span>
+}
+
+func (m *TaskModel) ValidateOwnership(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        var exists bool
+
+        stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ?)"
+
+        err := m.DB.QueryRow(stmt, taskId, userId).Scan(&amp;exists)
+        return exists, err
+}</span>
+
+func (m *TaskModel) ValidateAdmin(userId, taskId int) (bool, error) <span class="cov8" title="1">{
+        var isAdmin bool
+
+        stmt := "SELECT EXISTS (SELECT true FROM tasks JOIN users_workspaces uw ON tasks.workspace_id = uw.workspace_id WHERE tasks.id = ? AND uw.user_id = ? AND uw.role = 'ADMIN')"
+
+        err := m.DB.QueryRow(stmt, taskId, userId).Scan(&amp;isAdmin)
+        return isAdmin, err
+}</span>
+
+func prepareStmt(baseStmt string, conditions map[string]interface{}) (string, []interface{}) <span class="cov8" title="1">{
+        workspaceId := conditions["workspaceId"]
+        args := []interface{}{workspaceId}
+
+        for column, value := range conditions </span><span class="cov8" title="1">{
+
+                if column == "title" &amp;&amp; value != "" </span><span class="cov0" title="0">{
+                        baseStmt += fmt.Sprintf(" AND %s LIKE ? ", column)
+                        args = append(args, fmt.Sprintf(`%%%s%%`, value))
+                }</span>
+                <span class="cov8" title="1">if column == "priority" &amp;&amp; value != "" </span><span class="cov0" title="0">{
+                        baseStmt += fmt.Sprintf(" AND %s = ? ", column)
+                        args = append(args, value)
+                }</span>
+                <span class="cov8" title="1">if column == "status" &amp;&amp; value != "" </span><span class="cov0" title="0">{
+                        baseStmt += fmt.Sprintf(" AND %s = ? ", column)
+                        args = append(args, value)
+                }</span>
+        }
+
+        <span class="cov8" title="1">sort := conditions["sort"].(string)
+        if sort != "asc" &amp;&amp; sort != "desc" </span><span class="cov8" title="1">{
+                sort = "asc"
+        }</span>
+
+        <span class="cov8" title="1">baseStmt += " ORDER BY created " + sort + " LIMIT ? OFFSET ?"
+        args = append(args, conditions["limit"], conditions["offset"])
+
+        return baseStmt, args</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "strings"
+        "time"
+
+        "github.com/go-sql-driver/mysql"
+        "golang.org/x/crypto/bcrypt"
+)
+
+type User struct {
+        ID             int
+        FirstName      string
+        LastName       string
+        Email          string
+        HashedPassword string
+        Created        time.Time
+}
+
+type UserModelInterface interface {
+        Insert(firstName, lastName, email, password string) error
+        Authenticate(email, password string) (int, error)
+        Exists(id int) (bool, error)
+        GetUser(userId int) (*User, error)
+        GetUserToInvite(email string, workspaceId int) (*User, error)
+        AddUserToWorkspace(userId, workspaceId int) error
+        GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
+        GetWorkspacesAsMemberCount(email string) (int, error)
+        RemoveUserFromWorkspace(workspaceId, userId int) (int, error)
+}
+
+type UserModel struct {
+        DB *sql.DB
+}
+
+func (m *UserModel) Insert(firstName, lastName, email, password string) error <span class="cov8" title="1">{
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">stmt := `INSERT INTO users (firstName, lastName, email, hashed_password, created) VALUES (?, ?, ?, ?, UTC_TIMESTAMP())`
+
+        _, err = m.DB.Exec(stmt, firstName, lastName, email, string(hashedPassword))
+        if err != nil </span><span class="cov0" title="0">{
+                var mySQLError *mysql.MySQLError
+                if errors.As(err, &amp;mySQLError) </span><span class="cov0" title="0">{
+                        if mySQLError.Number == 1062 &amp;&amp; strings.Contains(mySQLError.Message, "users_uc_email") </span><span class="cov0" title="0">{
+                                return ErrDuplicateEmail
+                        }</span>
+                }
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (m *UserModel) GetUser(userId int) (*User, error) <span class="cov0" title="0">{
+        stmt := "SELECT firstName, lastName FROM users where id = ?"
+
+        var u User
+
+        err := m.DB.QueryRow(stmt, userId).Scan(&amp;u.FirstName, &amp;u.LastName)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return &amp;User{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return &amp;User{}, err
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;u, nil</span>
+}
+
+func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*User, error) <span class="cov0" title="0">{
+        stmt := "SELECT u.* FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id AND uw.workspace_id = ? WHERE u.email = ? AND uw.workspace_id IS NULL"
+
+        var u User
+
+        err := m.DB.QueryRow(stmt, workspaceId, email).Scan(&amp;u.ID, &amp;u.FirstName, &amp;u.LastName, &amp;u.Email, &amp;u.HashedPassword, &amp;u.Created)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return &amp;User{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return &amp;User{}, err
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;u, nil</span>
+}
+
+func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) <span class="cov0" title="0">{
+        var totalWorkspaces int
+
+        countStmt := "SELECT COUNT(*) FROM users u LEFT JOIN users_workspaces uw ON u.id = uw.user_id WHERE u.email = ? AND uw.`role` = 'MEMBER';"
+
+        err := m.DB.QueryRow(countStmt, email).Scan(&amp;totalWorkspaces)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return totalWorkspaces, nil</span>
+}
+
+type UserWithRole struct {
+        ID        int
+        FirstName string
+        LastName  string
+        Email     string
+        Role      string
+}
+
+func (m *UserModel) GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error) <span class="cov0" title="0">{
+        stmt := "SELECT u.id, u.firstName, u.lastName, u.email, uw.`role` FROM users u JOIN users_workspaces uw ON u.id = uw.user_id WHERE uw.workspace_id = ? ORDER BY role;"
+
+        rows, err := m.DB.Query(stmt, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">defer rows.Close()
+
+        var users []UserWithRole
+
+        for rows.Next() </span><span class="cov0" title="0">{
+                var u UserWithRole
+
+                err = rows.Scan(&amp;u.ID, &amp;u.FirstName, &amp;u.LastName, &amp;u.Email, &amp;u.Role)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">users = append(users, u)</span>
+        }
+
+        <span class="cov0" title="0">if err = rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return users, nil</span>
+
+}
+
+func (m *UserModel) AddUserToWorkspace(userId, workspaceId int) error <span class="cov0" title="0">{
+        stmt := `INSERT INTO users_workspaces (user_id, workspace_id, role, created) VALUES (?, ?, "MEMBER", UTC_TIMESTAMP())`
+
+        _, err := m.DB.Exec(stmt, userId, workspaceId)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (m *UserModel) Authenticate(email, password string) (int, error) <span class="cov8" title="1">{
+        var id int
+        var hashedPassword []byte
+
+        stmt := "SELECT id, hashed_password FROM users WHERE email = ?"
+
+        err := m.DB.QueryRow(stmt, email).Scan(&amp;id, &amp;hashedPassword)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return 0, ErrInvalidCredentials
+                }</span>
+                <span class="cov0" title="0">return 0, err</span>
+        }
+
+        <span class="cov8" title="1">err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) </span><span class="cov0" title="0">{
+                        return 0, ErrInvalidCredentials
+                }</span> else<span class="cov0" title="0"> {
+                        return 0, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return id, nil</span>
+}
+
+func (m *UserModel) Exists(id int) (bool, error) <span class="cov0" title="0">{
+        var exists bool
+
+        stmt := "SELECT EXISTS(SELECT true FROM users WHERE id = ?)"
+
+        err := m.DB.QueryRow(stmt, id).Scan(&amp;exists)
+        return exists, err
+}</span>
+
+func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) <span class="cov0" title="0">{
+
+        stmt := "DELETE FROM users_workspaces WHERE workspace_id = ? AND user_id = ? AND `role` != 'ADMIN';"
+
+        result, err := m.DB.Exec(stmt, workspaceId, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">var r int64
+        r, err = result.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return int(r), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "time"
+)
+
+type Workspace struct {
+        ID          int
+        Title       string
+        Description string
+        Created     time.Time
+}
+
+type WorkspaceModelInterface interface {
+        Insert(title, description string, userId int) (int, error)
+        Get(id int) (Workspace, error)
+        GetAll(userId int, role string) ([]Workspace, error)
+        Update(id int, title, description string) error
+        Delete(id int) (int, error)
+        ValidateOwnership(userId, workspaceId int) (bool, error)
+        ValidateAdmin(userId, workspaceId int) (bool, error)
+}
+
+type WorkspaceModel struct {
+        DB *sql.DB
+}
+
+func (m *WorkspaceModel) Insert(title, description string, userId int) (int, error) <span class="cov8" title="1">{
+        stmt := `INSERT INTO workspaces (title, description, created)  VALUES (?, ?, UTC_TIMESTAMP())`
+
+        result, err := m.DB.Exec(stmt, title, description)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">workspaceId, err := result.LastInsertId()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">stmt = `INSERT INTO users_workspaces(user_id, workspace_id, role, created) VALUES (?, ?, ?, UTC_TIMESTAMP)`
+        result, err = m.DB.Exec(stmt, userId, workspaceId, "ADMIN")
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(workspaceId), nil</span>
+}
+
+func (m *WorkspaceModel) Get(id int) (Workspace, error) <span class="cov8" title="1">{
+        stmt := `SELECT * FROM workspaces WHERE id = ?`
+
+        var w Workspace
+
+        err := m.DB.QueryRow(stmt, id).Scan(&amp;w.ID, &amp;w.Title, &amp;w.Description, &amp;w.Created)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov0" title="0">{
+                        return Workspace{}, ErrNoRecord
+                }</span> else<span class="cov0" title="0"> {
+                        return Workspace{}, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return w, nil</span>
+}
+
+func (m *WorkspaceModel) GetAll(userId int, role string) ([]Workspace, error) <span class="cov8" title="1">{
+        stmt := `SELECT w.* FROM workspaces as w JOIN users_workspaces as uw ON w.id = uw.workspace_id WHERE uw.user_id = ? and uw.role = ?`
+
+        rows, err := m.DB.Query(stmt, userId, role)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">defer rows.Close()
+
+        var workspaces []Workspace
+
+        for rows.Next() </span><span class="cov8" title="1">{
+                var w Workspace
+
+                err = rows.Scan(&amp;w.ID, &amp;w.Title, &amp;w.Description, &amp;w.Created)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">workspaces = append(workspaces, w)</span>
+        }
+
+        <span class="cov8" title="1">if err = rows.Err(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return workspaces, nil</span>
+}
+
+func (m *WorkspaceModel) Update(id int, title, description string) error <span class="cov8" title="1">{
+        stmt := `UPDATE workspaces SET title = ?, description = ? where id = ?`
+
+        _, err := m.DB.Exec(stmt, title, description, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (m *WorkspaceModel) Delete(id int) (int, error) <span class="cov8" title="1">{
+        stmt := `DELETE FROM workspaces where id = ?`
+
+        result, err := m.DB.Exec(stmt, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">var r int64
+        r, err = result.RowsAffected()
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return int(r), nil</span>
+}
+
+func (m *WorkspaceModel) ValidateOwnership(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        var exists bool
+
+        stmt := "SELECT EXISTS(SELECT true FROM users_workspaces WHERE user_id = ? AND workspace_id = ?)"
+
+        err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&amp;exists)
+        return exists, err
+}</span>
+
+func (m *WorkspaceModel) ValidateAdmin(userId, workspaceId int) (bool, error) <span class="cov8" title="1">{
+        var isAdmin bool
+
+        stmt := "SELECT EXISTS(SELECT true FROM users_workspaces WHERE user_id = ? AND workspace_id = ? AND role = 'ADMIN')"
+
+        err := m.DB.QueryRow(stmt, userId, workspaceId).Scan(&amp;isAdmin)
+        return isAdmin, err
+}</span>
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package validator
+
+import (
+        "regexp"
+        "slices"
+        "strings"
+        "unicode/utf8"
+)
+
+type Validator struct {
+        NonFieldErrors []string
+        FieldErrors    map[string]string
+}
+
+func (v *Validator) Valid() bool <span class="cov8" title="1">{
+        return len(v.FieldErrors) == 0 &amp;&amp; len(v.NonFieldErrors) == 0
+}</span>
+
+func (v *Validator) AddFieldError(key, message string) <span class="cov8" title="1">{
+        if v.FieldErrors == nil </span><span class="cov8" title="1">{
+                v.FieldErrors = make(map[string]string)
+        }</span>
+
+        <span class="cov8" title="1">if _, exists := v.FieldErrors[key]; !exists </span><span class="cov8" title="1">{
+                v.FieldErrors[key] = message
+        }</span>
+}
+
+func (v *Validator) CheckField(ok bool, key, message string) <span class="cov8" title="1">{
+        if !ok </span><span class="cov8" title="1">{
+                v.AddFieldError(key, message)
+        }</span>
+}
+
+func NotBlank(value string) bool <span class="cov8" title="1">{
+        return strings.TrimSpace(value) != ""
+}</span>
+
+func MaxChars(value string, n int) bool <span class="cov8" title="1">{
+        return utf8.RuneCountInString(value) &lt;= n
+}</span>
+
+func PermittedValue[T comparable](value T, permittedValues ...T) bool <span class="cov0" title="0">{
+        return slices.Contains(permittedValues, value)
+}</span>
+
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&amp;'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+func MinChars(value string, n int) bool <span class="cov8" title="1">{
+        return utf8.RuneCountInString(value) &gt;= n
+}</span>
+
+func Matches(value string, rx *regexp.Regexp) bool <span class="cov8" title="1">{
+        return rx.MatchString(value)
+}</span>
+
+func (v *Validator) AddNonFieldError(message string) <span class="cov8" title="1">{
+        v.NonFieldErrors = append(v.NonFieldErrors, message)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -22,10 +22,11 @@
     </div>
   </div>
 
-  <div class="row mb-4">
-    <div class="col-md-6">
+  <div class="row mb-4 align-items-center">
+    <!-- Filters Form -->
+    <div class="col-md-8">
       <form id="filterForm" method="GET" action="/workspace/view/{{.Workspace.ID}}/tasks" class="d-flex gap-2">
-        <!-- Smaller search input -->
+        <!-- Search input -->
         <input class="form-control form-control-sm w-50" type="search" name="title" placeholder="Insert task title"
           value="{{$title}}">
 
@@ -47,6 +48,20 @@
 
         <!-- Search button -->
         <button class="btn btn-sm btn-primary" type="submit">Search</button>
+      </form>
+    </div>
+
+    <!-- Limit Selection -->
+    <div class="col-md-4 text-end">
+      <form id="limitForm" action="/workspace/view/{{.Workspace.ID}}/tasks" method="GET"
+        class="d-flex align-items-center">
+        <label for="limitSelect" class="form-label me-2 mb-0">Limit:</label>
+        <select class="form-select form-select-sm w-auto" id="limitSelect" name="limit" onchange="this.form.submit()">
+          <option value="5" {{if eq $limit 5}}selected{{end}}>5</option>
+          <option value="10" {{if eq $limit 10}}selected{{end}}>10</option>
+          <option value="20" {{if eq $limit 20}}selected{{end}}>20</option>
+          <option value="50" {{if eq $limit 50}}selected{{end}}>50</option>
+        </select>
       </form>
     </div>
   </div>
@@ -73,7 +88,7 @@
                 ↓
               </a>
             </th>
-            <th scope="col">Due Date</th>
+            <th scope="col">Finished Date</th>
             <th scope="col" class="task-table-actions">Actions</th>
           </tr>
         </thead>

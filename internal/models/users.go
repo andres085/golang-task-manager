@@ -23,6 +23,7 @@ type UserModelInterface interface {
 	Insert(firstName, lastName, email, password string) error
 	Authenticate(email, password string) (int, error)
 	Exists(id int) (bool, error)
+	GetUser(userId int) (*User, error)
 	GetUserToInvite(email string, workspaceId int) (*User, error)
 	AddUserToWorkspace(userId, workspaceId int) error
 	GetWorkspaceUsers(workspaceId int) ([]UserWithRole, error)
@@ -53,6 +54,23 @@ func (m *UserModel) Insert(firstName, lastName, email, password string) error {
 		return err
 	}
 	return nil
+}
+
+func (m *UserModel) GetUser(userId int) (*User, error) {
+	stmt := "SELECT firstName, lastName FROM users where id = ?"
+
+	var u User
+
+	err := m.DB.QueryRow(stmt, userId).Scan(&u.FirstName, &u.LastName)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &User{}, ErrNoRecord
+		} else {
+			return &User{}, err
+		}
+	}
+
+	return &u, nil
 }
 
 func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*User, error) {

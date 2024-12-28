@@ -1,6 +1,8 @@
 package mocks
 
-import "github.com/andres085/task_manager/internal/models"
+import (
+	"github.com/andres085/task_manager/internal/models"
+)
 
 type UserModel struct{}
 type UserWithRole struct{}
@@ -30,7 +32,14 @@ func (m *UserModel) Insert(firstName, lastName, email, password string) error {
 	}
 }
 
+func (m *UserModel) GetUser(userId int) (*models.User, error) {
+	return &models.User{}, nil
+}
+
 func (m *UserModel) GetUserToInvite(email string, workspaceId int) (*models.User, error) {
+	if email != firstMockUser.Email {
+		return nil, models.ErrNoRecord
+	}
 	return &models.User{}, nil
 }
 
@@ -51,6 +60,9 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 }
 
 func (m *UserModel) GetWorkspacesAsMemberCount(email string) (int, error) {
+	if email == "testmctesterson@mail.com" {
+		return 6, nil
+	}
 	return 1, nil
 }
 
@@ -64,5 +76,12 @@ func (m *UserModel) Exists(id int) (bool, error) {
 }
 
 func (m *UserModel) RemoveUserFromWorkspace(workspaceId, userId int) (int, error) {
-	return 1, nil
+	switch userId {
+	case 1:
+		return 1, nil
+	case 2:
+		return 2, models.ErrNoRecord
+	default:
+		return 1, nil
+	}
 }

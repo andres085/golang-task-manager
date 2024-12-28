@@ -19,6 +19,7 @@ func newTestDB(t *testing.T) *sql.DB {
 		db.Close()
 		t.Fatal(err)
 	}
+
 	_, err = db.Exec(string(script))
 	if err != nil {
 		db.Close()
